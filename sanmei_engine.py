@@ -62,6 +62,9 @@ class SanmeiEngine:
         "天将": 12, "天堂": 8, "天胡": 4, "天極": 2, "天庫": 5, "天馳": 1
     }
 
+    # 異常干支 13種類
+    IJOU_KANSHI = [11, 12, 18, 19, 23, 24, 25, 30, 31, 35, 37, 42, 48]
+
     @staticmethod
     def get_relationship(gan1, gan2):
         w1 = Kanshi.WU_XING[gan1]
@@ -168,40 +171,43 @@ class SanmeiEngine:
         for name_pair, (g1, z1), (g2, z2) in pairs_to_check:
             current_pair_results = []
             
+            # 方位ラベルの決定
+            if name_pair == "年-月": pos = "東方"
+            elif name_pair == "月-日": pos = "中央"
+            else: pos = "西方"
+            
+            sorted_zhi_pair = tuple(sorted([z1, z2]))
+
             # 支合 (Shigo)
             shigo = {("丑", "子"), ("寅", "亥"), ("卯", "戌"), ("辰", "酉"), ("巳", "申"), ("午", "未")}
-            sorted_zhi_pair = tuple(sorted([z1, z2]))
             if sorted_zhi_pair in shigo:
-                current_pair_results.append(f"支合({z1}{z2})")
+                current_pair_results.append(f"{pos}支合({z1}{z2})")
 
             # 対冲 (Taichu)
             taichu = {("子", "午"), ("丑", "未"), ("寅", "申"), ("卯", "酉"), ("辰", "戌"), ("巳", "亥")}
             if sorted_zhi_pair in taichu:
-                current_pair_results.append(f"対冲({z1}{z2})")
+                current_pair_results.append(f"{pos}対冲({z1}{z2})")
 
-            # 半会・三合 (Hankai / San-go)
-            san_triplets = [("申", "子", "辰"), ("亥", "卯", "未"), ("寅", "午", "戌"), ("巳", "酉", "丑")]
-            is_daihankai = False
-            for t in san_triplets:
-                if z1 in t and z2 in t:
-                    # Check if it's a full San-go (three Zhis) - not implemented here as it's pair-wise
-                    # For two Zhis, it's Hankai or Daihankai
-                    if g1 == g2:
-                        current_pair_results.append(f"大半会({z1}{z2})")
-                        is_daihankai = True
-                    # Only add 半会 if 大半会 was not found for this pair
-                    if not is_daihankai:
-                        current_pair_results.append(f"半会({z1}{z2})")
+            # 半会・三合 (Hankai / San-go) - 異なる地支間のみ
+            if z1 != z2:
+                san_triplets = [("申", "子", "辰"), ("亥", "卯", "未"), ("寅", "午", "戌"), ("巳", "酉", "丑")]
+                is_daihankai = False
+                for t in san_triplets:
+                    if z1 in t and z2 in t:
+                        if g1 == g2:
+                            current_pair_results.append(f"{pos}大半会({z1}{z2})")
+                            is_daihankai = True
+                        if not is_daihankai:
+                            current_pair_results.append(f"{pos}半会({z1}{z2})")
             
             # 害 (Harm)
             harms = {("子", "未"), ("丑", "午"), ("寅", "巳"), ("卯", "辰"), ("申", "亥"), ("酉", "戌")}
             if sorted_zhi_pair in harms:
-                suffix = "中央害" if name_pair == "月-日" else "害" # Assuming 月-日 is "中央"
-                current_pair_results.append(f"{suffix}({z1}{z2})")
+                current_pair_results.append(f"{pos}害({z1}{z2})")
             
             results.extend(current_pair_results)
 
-        return list(set(results))
+        return sorted(list(set(results)))
 
     @staticmethod
     def calculate_suurihou_and_energy(kanshi_list):
@@ -215,6 +221,7 @@ class SanmeiEngine:
         zhi_list = [z for g, z in kanshi_list] # 年・月・日の地支
         
         energy_by_wx = {"木": 0, "火": 0, "土": 0, "金": 0, "水": 0}
+        energy_by_stem = {g: 0 for g in Kanshi.TIAN_GAN}
         total_energy = 0
         
         # 各干について、全地支(3つ)からのエネルギー合計値を算出
@@ -227,10 +234,47 @@ class SanmeiEngine:
                 stem_energy += score
             
             gan_wx = Kanshi.WU_XING[gan]
+            energy_by_stem[gan] += stem_energy
             energy_by_wx[gan_wx] += stem_energy
             total_energy += stem_energy
                 
-        return total_energy, energy_by_wx
+        return total_energy, energy_by_wx, energy_by_stem
+
+
+    @staticmethod
+    def get_ijou_kanshi(kanshi_list):
+        results = []
+        labels = ["年", "月", "日"]
+        for i, (g, z) in enumerate(kanshi_list):
+            k_id = Kanshi.get_kanshi_id(g, z)
+            if k_id in SanmeiEngine.IJOU_KANSHI:
+                results.append(f"{labels[i]}柱: {g}{z}")
+        return results
+
+    def get_shukumei_tenchusatsu(self):
+        results = []
+        # 日干支から導かれる天中殺 (身弱・身強の判定基準ではない)
+        nikkan_tenchu = self.get_tenchusatsu(self.nikkan, self.nishi)
+        # 年干支から導かれる天中殺
+        nenkan_tenchu = self.get_tenchusatsu(self.nenkan, self.neshi)
+
+        is_seinen = any(z in nikkan_tenchu for z in self.neshi)
+        is_seigetsu = any(z in nikkan_tenchu for z in self.geshi)
+        is_seijitsu = any(z in nenkan_tenchu for z in self.nishi)
+
+        if is_seinen: results.append("生年中殺")
+        if is_seigetsu: results.append("生月中殺")
+        if is_seijitsu: results.append("生日中殺")
+        
+        if is_seinen and is_seigetsu: results.append("宿命二中殺")
+        if is_seinen and is_seijitsu: results.append("互換中殺")
+        
+        # 日座中殺 (甲戌, 乙亥)
+        nikkan_id = Kanshi.get_kanshi_id(self.nikkan, self.nishi)
+        if nikkan_id in [11, 12]:
+            results.append("日座中殺")
+
+        return list(set(results))
 
     @staticmethod
     def get_hachimonhou_formatted(nikkan, energy_by_wx):
@@ -369,7 +413,7 @@ class SanmeiEngine:
         }
         
         # 数理法・八門法 (全蔵干を考慮)
-        total_energy, energy_by_wx = self.calculate_suurihou_and_energy(kanshi_list)
+        total_energy, energy_by_wx, energy_by_stem = self.calculate_suurihou_and_energy(kanshi_list)
         hachimon = self.get_hachimonhou_formatted(self.nikkan, energy_by_wx)
         
         # 蔵干の詳細 (資料の遷移表示用)
@@ -384,6 +428,8 @@ class SanmeiEngine:
         daiun = self.calculate_daiun(gender)
         uchu_ids = [Kanshi.get_kanshi_id(g, z) for g, z in kanshi_list]
         tenchusatsu = self.get_tenchusatsu(self.nikkan, self.nishi)
+        shukumei_tenchu = self.get_shukumei_tenchusatsu()
+        ijou_kanshi = self.get_ijou_kanshi(kanshi_list)
         isouhou = self.get_isouhou(kanshi_list)
         
         return {
@@ -394,10 +440,11 @@ class SanmeiEngine:
                 "蔵干": zokan_details
             },
             "陽占": {"十大主星": judai, "十二大従星": junidai},
-            "天中殺": tenchusatsu,
+            "天中殺": {"グループ": tenchusatsu, "宿命天中殺": shukumei_tenchu},
+            "異常干支": ijou_kanshi,
             "位相法": isouhou,
             "大運": daiun,
             "宇宙盤": {"干支番号": uchu_ids},
-            "数理法": {"総エネルギー": total_energy, "五行分布": energy_by_wx},
+            "数理法": {"総エネルギー": total_energy, "五行分布": energy_by_wx, "十干内訳": energy_by_stem},
             "八門法": hachimon
         }

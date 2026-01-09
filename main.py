@@ -26,7 +26,12 @@ def main():
     for k, v in report["陽占"]["十二大従星"].items():
         print(f"  {k}: {v}")
 
-    print(f"\n天中殺: {report['天中殺']}天中殺")
+    print(f"\n天中殺グループ: {report['天中殺']['グループ']}天中殺")
+    if report['天中殺']['宿命天中殺']:
+        print(f"宿命天中殺: {', '.join(report['天中殺']['宿命天中殺'])}")
+    
+    if report['異常干支']:
+        print(f"異常干支: {', '.join(report['異常干支'])}")
     
     print("\n位相法:", ", ".join(report["位相法"]) if report["位相法"] else "特になし")
 
@@ -40,6 +45,25 @@ def main():
 
     print("\n--- 数理法 ---")
     print(f"総エネルギー値: {report['数理法']['総エネルギー']}")
+    print("【十干別内訳】")
+    stem_order = [
+        ("木", [("甲", "+"), ("乙", "-")]),
+        ("火", [("丙", "+"), ("丁", "-")]),
+        ("土", [("戊", "+"), ("己", "-")]),
+        ("金", [("庚", "+"), ("辛", "-")]),
+        ("水", [("壬", "+"), ("癸", "-")]),
+    ]
+    for wx, stems in stem_order:
+        line = f"  {wx}: "
+        parts = []
+        for g, sign in stems:
+            val = report['数理法']['十干内訳'].get(g, 0)
+            parts.append(f"{g}({sign})={val}")
+        print(line + "  ".join(parts))
+    
+    print("【五行分布】")
+    for k, v in report['数理法']['五行分布'].items():
+        print(f"  {k}: {v}")
 
     print("\n--- 八門法 (五行エネルギー分布) ---")
     for k, v in report["八門法"].items():
