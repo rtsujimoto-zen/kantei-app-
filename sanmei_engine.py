@@ -65,6 +65,12 @@ class SanmeiEngine:
     # 異常干支 13種類
     IJOU_KANSHI = [11, 12, 18, 19, 23, 24, 25, 30, 31, 35, 37, 42, 48]
 
+    # 地支の五行判定用マップ (地支 -> 代表的な天干)
+    DI_ZHI_TO_GAN_MAP = {
+        "子": "癸", "丑": "己", "寅": "甲", "卯": "乙", "辰": "戊", "巳": "丙",
+        "午": "丁", "未": "己", "申": "庚", "酉": "辛", "戌": "戊", "亥": "壬"
+    }
+
     @staticmethod
     def get_relationship(gan1, gan2):
         w1 = Kanshi.WU_XING[gan1]
@@ -298,6 +304,9 @@ class SanmeiEngine:
         }
 
     def __init__(self, year, month, day, hour=0, minute=0):
+        self.year = year
+        self.month = month
+        self.day = day
         self.birth_dt = datetime.datetime(year, month, day, hour, minute)
         
         # --- Phase 1: 陰占 (命式) の算出 ---
@@ -342,42 +351,149 @@ class SanmeiEngine:
 
 
     def calculate_daiun(self, gender):
-        # 大運の算出
-        # 順行・逆行判定: 男子陽年・女子陰年=順行, 男子陰年・女子陽年=逆行
+        # 順行・逆行判定
         nen_yinyang = Kanshi.YIN_YANG[self.nenkan]
         is_shunko = (gender == "M" and nen_yinyang == "+") or (gender == "F" and nen_yinyang == "-")
         
-        # 精密な立運算出
-        # 順行は「誕生日から次の節入りまで」、逆行は「誕生日の前の節入りから誕生日まで」
+        # 立運算出
         y, m, d = self.birth_dt.year, self.birth_dt.month, self.birth_dt.day
         if is_shunko:
-            # 次の節入り
             next_m = m + 1
             next_y = y
             if next_m > 12: next_m = 1; next_y += 1
             setsu_day = self.get_setsuiri_day(next_y, next_m)
-            # 簡易的に日数の差を計算 (本来は時刻も考慮)
             days_diff = (datetime.date(next_y, next_m, setsu_day) - self.birth_dt.date()).days
         else:
-            # 前の節入り (今月の節入り)
             setsu_day = self.get_setsuiri_day(y, m)
             days_diff = (self.birth_dt.date() - datetime.date(y, m, setsu_day)).days
             
         ritsuen = int(days_diff / 3)
         rem = days_diff % 3
-        if rem == 2: ritsuen += 1 # 余り2なら切り上げ
+        if rem == 2: ritsuen += 1
         if ritsuen == 0: ritsuen = 1
         
         # サイクル生成
         gekkan_id = Kanshi.get_kanshi_id(self.gekkan, self.geshi)
         daiun_list = []
-        for i in range(1, 9): # 80年分
+        
+        # 宿命の干支（位相法・干合判定用）
+        natal_kanshi_list = [("東方", self.nenkan, self.neshi), ("中央", self.gekkan, self.geshi), ("西方", self.nikkan, self.nishi)]
+        
+        # 天中殺グループ（日干由来）
+        nikkan_tenchu = self.get_tenchusatsu(self.nikkan, self.nishi)
+        
+        for i in range(1, 11): # 100歳まで
             offset = i if is_shunko else -i
             k_id = (gekkan_id + offset - 1) % 60 + 1
             gan = Kanshi.TIAN_GAN[(k_id-1)%10]
             zhi = Kanshi.DI_ZHI[(k_id-1)%12]
+            
             age_start = ritsuen + (i-1)*10
-            daiun_list.append({"年齢": f"{age_start}歳〜", "干支": f"{gan}{zhi}"})
+            start_year = self.year + age_start
+            
+            # 星の算出
+            judai = SanmeiEngine.get_judai_shusei(self.nikkan, gan)
+            junidai = SanmeiEngine.get_junidai_jusei(self.nikkan, zhi)
+            
+            # 位相法 (方位別)
+            # 定義：各ペアをソート済みのタプルとして保持するセット
+            SHIGO_PAIRS = {tuple(sorted(p)) for p in [("丑", "子"), ("寅", "亥"), ("卯", "戌"), ("辰", "酉"), ("巳", "申"), ("午", "未")]}
+            TAICHU_PAIRS = {tuple(sorted(p)) for p in [("子", "午"), ("丑", "未"), ("寅", "申"), ("卯", "酉"), ("辰", "戌"), ("巳", "亥")]}
+            GAI_PAIRS = {tuple(sorted(p)) for p in [("子", "未"), ("丑", "午"), ("寅", "巳"), ("卯", "辰"), ("申", "亥"), ("酉", "戌")]}
+            
+            # 破 (Ha)
+            HA_PAIRS = {tuple(sorted(p)) for p in [("子", "酉"), ("丑", "辰"), ("寅", "亥"), ("卯", "午"), ("巳", "申"), ("未", "戌")]}
+            
+            # 刑 (Kei)
+            KEI_OUKI = {tuple(sorted(p)) for p in [("子", "卯")]}
+            KEI_SEIKI = {tuple(sorted(p)) for p in [("寅", "巳"), ("巳", "申"), ("申", "寅")]}
+            KEI_KOKI = {tuple(sorted(p)) for p in [("丑", "戌"), ("戌", "未"), ("未", "丑")]}
+            
+            # 干合 (Kangou)
+            KANGOU_PAIRS = {tuple(sorted(p)) for p in [("甲", "己"), ("乙", "庚"), ("丙", "辛"), ("丁", "壬"), ("戊", "癸")]}
+
+            HANKAI_TRIPLETS = [("申", "子", "辰"), ("亥", "卯", "未"), ("寅", "午", "戌"), ("巳", "酉", "丑")]
+
+            isouhou_details = []
+            for pos_name, n_gan, n_zhi in natal_kanshi_list:
+                z_pair = tuple(sorted([n_zhi, zhi]))
+                g_pair = tuple(sorted([n_gan, gan]))
+                
+                features = []
+                
+                # 天剋地冲 Check (天干が相剋かつ地支が対冲)
+                # 相剋: 木剋土, 土剋水, 水剋火, 火剋金, 金剋木. 
+                # 干の番号差が 4 or 6 (例: 甲(0) vs 戊(4) -> 木剋土, 甲(0) vs 庚(6) -> 金剋木)
+                n_g_idx = Kanshi.TIAN_GAN.index(n_gan)
+                d_g_idx = Kanshi.TIAN_GAN.index(gan)
+                g_diff = abs(n_g_idx - d_g_idx)
+                is_tenkoku = (g_diff == 4 or g_diff == 6)
+                if is_tenkoku and (z_pair in TAICHU_PAIRS):
+                    features.append("天剋地冲")
+                else:
+                    # 天剋地冲でなければ個別に判定
+                    
+                    # 干合
+                    if g_pair in KANGOU_PAIRS:
+                        features.append("干合")
+
+                    # 支合
+                    if z_pair in SHIGO_PAIRS:
+                        features.append("支合")
+                    
+                    # 対冲
+                    if z_pair in TAICHU_PAIRS:
+                        features.append("対冲")
+                    
+                    # 害
+                    if z_pair in GAI_PAIRS:
+                        features.append("害")
+                    
+                    # 破
+                    if z_pair in HA_PAIRS:
+                        features.append("破")
+                    
+                    # 刑
+                    if n_zhi == zhi and n_zhi in ["辰", "午", "酉", "亥"]:
+                        features.append("自刑")
+                    if z_pair in KEI_OUKI:
+                        features.append("旺気刑")
+                    if z_pair in KEI_SEIKI:
+                        features.append("生貴刑")
+                    if z_pair in KEI_KOKI:
+                        features.append("庫気刑")
+                    
+                    # 半会 (異地支)
+                    if n_zhi != zhi:
+                        for t in HANKAI_TRIPLETS:
+                            if n_zhi in t and zhi in t:
+                                features.append("半会")
+
+                    # 比和 (同じ五行)
+                    n_wx = Kanshi.WU_XING[SanmeiEngine.DI_ZHI_TO_GAN_MAP[n_zhi]]
+                    z_wx = Kanshi.WU_XING[SanmeiEngine.DI_ZHI_TO_GAN_MAP[zhi]]
+                    if n_wx == z_wx:
+                        # 他の強い条件(支合・対冲・害・刑・半会)がない場合のみ比和を表示するのが一般的だが
+                        # PDFでは自刑と併記されている。ただし「半会」などがある場合に比和を出すかは流派による。
+                        # SanmeiAppは「洩天地比」を出している。これは干合＋支合＋比和のような強い結合。
+                        # 今回はシンプルに「比和」を追加する。
+                        features.append("比和")
+                
+                if features:
+                    isouhou_details.append(f"{pos_name}{'＋'.join(features)}")
+
+            # 天中殺
+            tenchu_str = "天中殺" if zhi in nikkan_tenchu else ""
+            
+            daiun_list.append({
+                "年齢": age_start,
+                "西暦": start_year,
+                "干支": f"{gan}{zhi}",
+                "十大主星": judai,
+                "十二大従星": junidai,
+                "位相法": isouhou_details,
+                "天中殺": tenchu_str
+            })
             
         return {"立運": f"{ritsuen}歳運", "方向": "順行" if is_shunko else "逆行", "サイクル": daiun_list}
 

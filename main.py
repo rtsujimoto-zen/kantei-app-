@@ -37,8 +37,21 @@ def main():
 
     print("\n--- 大運 ---")
     print(f"立運: {report['大運']['立運']} ({report['大運']['方向']})")
-    for cycle in report["大運"]["サイクル"][:5]: # 最初の5つのみ表示
-        print(f"  {cycle['年齢']}: {cycle['干支']}")
+    
+    # Header
+    print(f"{'年齢':>3} {'(西暦)':>5} | {'干支':^4} | {'十大主星':^6} | {'十二大従星':^6} | {'位相法':<20} | {'天中殺':<6}")
+    print("-" * 75)
+    
+    for cycle in report["大運"]["サイクル"]:
+        age = cycle['年齢']
+        year = cycle['西暦']
+        kanshi = cycle['干支']
+        judai = cycle['十大主星']
+        junidai = cycle['十二大従星']
+        isouhou = ", ".join(cycle['位相法'])
+        tenchu = cycle['天中殺']
+        
+        print(f"{age:>3} ({year:>4}) | {kanshi:^4} | {judai:^6} | {junidai:^6} | {isouhou:<20} | {tenchu:<6}")
 
     print("\n--- 宇宙盤 ---")
     print(f"干支番号: {report['宇宙盤']['干支番号']}")
