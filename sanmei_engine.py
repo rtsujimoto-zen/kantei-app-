@@ -62,14 +62,84 @@ class SanmeiEngine:
         "天将": 12, "天堂": 8, "天胡": 4, "天極": 2, "天庫": 5, "天馳": 1
     }
 
-    # 異常干支 13種類
-    IJOU_KANSHI = [11, 12, 18, 19, 23, 24, 25, 30, 31, 35, 37, 42, 48]
+    # 十二大従星の言い換え（キーワード）
+    JUNIDAI_JUSEI_KEYWORDS = {
+        "天報": "(001 オンリーワン)", "天印": "(108 安心安全)", "天貴": "(919 マネ学ぶ力)",
+        "天恍": "(888 氣品)", "天南": "(012 情報)", "天禄": "(100 完璧)",
+        "天将": "(555 頭角)", "天堂": "(125 境界の力)", "天胡": "(789 化ける)",
+        "天極": "(024 トコトン)", "天庫": "(025 和を大切にする力)", "天馳": "(000 自由)"
+    }
+
+    # 異常干支 (13種)
+    # 通常異常干支: 甲戌(11), 乙亥(12), 戊戌(35), 庚子(37), 辛亥(48), 丁巳(54)
+    # 暗合異常干支: 辛巳(18), 壬午(19), 丙戌(23), 丁亥(24), 戊子(25), 癸巳(30), 己亥(36)
+    NORMAL_IJOU_KANSHI = [11, 12, 35, 37, 48, 54]
+    ANGO_IJOU_KANSHI = [18, 19, 23, 24, 25, 30, 36]
 
     # 地支の五行判定用マップ (地支 -> 代表的な天干)
     DI_ZHI_TO_GAN_MAP = {
         "子": "癸", "丑": "己", "寅": "甲", "卯": "乙", "辰": "戊", "巳": "丙",
         "午": "丁", "未": "己", "申": "庚", "酉": "辛", "戌": "戊", "亥": "壬"
     }
+
+    # 天中殺のタイミング定義 (グループ名 -> {時間, 月, 地支インデックス})
+    # 時間は偶数時区切り(0スタート)を採用
+    TENCHUSATSU_TIMING = {
+        "子丑": {"time": "00:00〜04:00", "month": "12月〜1月", "zhi_indices": [0, 1]},
+        "寅卯": {"time": "04:00〜08:00", "month": "2月〜3月", "zhi_indices": [2, 3]},
+        "辰巳": {"time": "08:00〜12:00", "month": "4月〜5月", "zhi_indices": [4, 5]},
+        "午未": {"time": "12:00〜16:00", "month": "6月〜7月", "zhi_indices": [6, 7]},
+        "申酉": {"time": "16:00〜20:00", "month": "8月〜9月", "zhi_indices": [8, 9]},
+        "戌亥": {"time": "20:00〜24:00", "month": "10月〜11月", "zhi_indices": [10, 11]}
+    }
+    
+    def get_tenchusatsu_timing_info(self):
+        # 自分の天中殺グループを取得
+        tn = self.get_tenchusatsu(self.nikkan, self.nishi)
+        group_name = "".join(tn) 
+        
+        timing = SanmeiEngine.TENCHUSATSU_TIMING.get(group_name)
+        if not timing:
+            return None 
+
+        # 年の算出 (現在年を基準に前後3つ)
+        current_year = datetime.datetime.now().year
+        # 1900年は子年(0)。(year - 1900) % 12 で地支インデックス
+        target_indices = timing["zhi_indices"]
+        curr_zhi_idx = (current_year - 1900) % 12
+        
+        # ターゲットの開始年までの距離
+        start_idx = target_indices[0]
+        diff = (start_idx - curr_zhi_idx) % 12
+        
+        # 基準となるスタート年 (Next Start Year)
+        next_start_year = current_year + diff
+        
+        # 3つの期間を生成 (前回(-1), 今回/次回(0), 次々回(1))
+        # ユーザー要望: 「前後も含めて」 -> Previous, Current/Next, Future
+        
+        # もし現在が天中殺期間中(2年目の場合含む)なら、それを「真ん中(0)」として扱いたい微調整
+        # 例: 申酉(8,9)で現在が酉(9)の場合、diff=(8-9)%12 = 11。next_start = curr + 11 (11年後)。
+        # これだと「次回」が11年後になり、今回の天中殺がリストに入らない(Prev扱いになる)。
+        # 天中殺の真っ只中にいる場合は、その期間を真ん中に表示したい。
+        
+        center_year = next_start_year
+        if diff == 11: # 現在が天中殺の2年目
+             center_year = current_year - 1
+        elif diff == 0: # 現在が天中殺の1年目
+             center_year = current_year
+
+        cycles = []
+        for i in [-1, 0, 1]:
+            sy = center_year + (i * 12)
+            ey = sy + 1
+            cycles.append(f"{sy}年〜{ey}年")
+
+        return {
+            "time": timing["time"],
+            "month": timing["month"],
+            "years": cycles
+        }
 
     @staticmethod
     def get_relationship(gan1, gan2):
@@ -253,8 +323,10 @@ class SanmeiEngine:
         labels = ["年", "月", "日"]
         for i, (g, z) in enumerate(kanshi_list):
             k_id = Kanshi.get_kanshi_id(g, z)
-            if k_id in SanmeiEngine.IJOU_KANSHI:
-                results.append(f"{labels[i]}柱: {g}{z}")
+            if k_id in SanmeiEngine.NORMAL_IJOU_KANSHI:
+                results.append(f"{labels[i]}柱: {g}{z} (通常異常干支)")
+            elif k_id in SanmeiEngine.ANGO_IJOU_KANSHI:
+                results.append(f"{labels[i]}柱: {g}{z} (暗合異常干支)")
         return results
 
     def get_shukumei_tenchusatsu(self):
@@ -279,6 +351,10 @@ class SanmeiEngine:
         nikkan_id = Kanshi.get_kanshi_id(self.nikkan, self.nishi)
         if nikkan_id in [11, 12]:
             results.append("日座中殺")
+        
+        # 日居中殺 (甲辰, 乙巳)
+        if nikkan_id in [41, 42]:
+            results.append("日居中殺")
 
         return list(set(results))
 
@@ -378,6 +454,132 @@ class SanmeiEngine:
         
         # 宿命の干支（位相法・干合判定用）
         natal_kanshi_list = [("東方", self.nenkan, self.neshi), ("中央", self.gekkan, self.geshi), ("西方", self.nikkan, self.nishi)]
+
+    def _get_kanshi_details(self, gan, zhi):
+        # 星の算出
+        judai = SanmeiEngine.get_judai_shusei(self.nikkan, gan)
+        junidai = SanmeiEngine.get_junidai_jusei(self.nikkan, zhi)
+        
+        # 位相法 (方位別)
+        # 定義：各ペアをソート済みのタプルとして保持するセット
+        SHIGO_PAIRS = {tuple(sorted(p)) for p in [("丑", "子"), ("寅", "亥"), ("卯", "戌"), ("辰", "酉"), ("巳", "申"), ("午", "未")]}
+        TAICHU_PAIRS = {tuple(sorted(p)) for p in [("子", "午"), ("丑", "未"), ("寅", "申"), ("卯", "酉"), ("辰", "戌"), ("巳", "亥")]}
+        GAI_PAIRS = {tuple(sorted(p)) for p in [("子", "未"), ("丑", "午"), ("寅", "巳"), ("卯", "辰"), ("申", "亥"), ("酉", "戌")]}
+        
+        # 破 (Ha)
+        HA_PAIRS = {tuple(sorted(p)) for p in [("子", "酉"), ("丑", "辰"), ("寅", "亥"), ("卯", "午"), ("巳", "申"), ("未", "戌")]}
+        
+        # 刑 (Kei)
+        KEI_OUKI = {tuple(sorted(p)) for p in [("子", "卯")]}
+        KEI_SEIKI = {tuple(sorted(p)) for p in [("寅", "巳"), ("巳", "申"), ("申", "寅")]}
+        KEI_KOKI = {tuple(sorted(p)) for p in [("丑", "戌"), ("戌", "未"), ("未", "丑")]}
+        
+        # 干合 (Kangou)
+        KANGOU_PAIRS = {tuple(sorted(p)) for p in [("甲", "己"), ("乙", "庚"), ("丙", "辛"), ("丁", "壬"), ("戊", "癸")]}
+
+        HANKAI_TRIPLETS = [("申", "子", "辰"), ("亥", "卯", "未"), ("寅", "午", "戌"), ("巳", "酉", "丑")]
+
+        isouhou_details = []
+        # 宿命の干支（位相法・干合判定用） - get this from self context again or pass logic?
+        # self is available here.
+        natal_kanshi_list = [("東方", self.nenkan, self.neshi), ("中央", self.gekkan, self.geshi), ("西方", self.nikkan, self.nishi)]
+        
+        for pos_name, n_gan, n_zhi in natal_kanshi_list:
+            z_pair = tuple(sorted([n_zhi, zhi]))
+            g_pair = tuple(sorted([n_gan, gan]))
+            
+            features = []
+            
+            # 天剋地冲 Check (天干が相剋かつ地支が対冲)
+            # 相剋: 木剋土, 土剋水, 水剋火, 火剋金, 金剋木. 
+            # 干の番号差が 4 or 6 (例: 甲(0) vs 戊(4) -> 木剋土, 甲(0) vs 庚(6) -> 金剋木)
+            n_g_idx = Kanshi.TIAN_GAN.index(n_gan)
+            d_g_idx = Kanshi.TIAN_GAN.index(gan)
+            g_diff = abs(n_g_idx - d_g_idx)
+            is_tenkoku = (g_diff == 4 or g_diff == 6)
+            if is_tenkoku and (z_pair in TAICHU_PAIRS):
+                features.append("天剋地冲")
+            else:
+                # 天剋地冲でなければ個別に判定
+                
+                # 干合
+                if g_pair in KANGOU_PAIRS:
+                    features.append("干合")
+
+                # 支合
+                if z_pair in SHIGO_PAIRS:
+                    features.append("支合")
+                
+                # 対冲
+                if z_pair in TAICHU_PAIRS:
+                    features.append("対冲")
+                
+                # 害
+                if z_pair in GAI_PAIRS:
+                    features.append("害")
+                
+                # 破
+                if z_pair in HA_PAIRS:
+                    features.append("破")
+                
+                # 刑
+                if n_zhi == zhi and n_zhi in ["辰", "午", "酉", "亥"]:
+                    features.append("自刑")
+                if z_pair in KEI_OUKI:
+                    features.append("旺気刑")
+                if z_pair in KEI_SEIKI:
+                    features.append("生貴刑")
+                if z_pair in KEI_KOKI:
+                    features.append("庫気刑")
+                
+                # 半会 (異地支)
+                if n_zhi != zhi:
+                    for t in HANKAI_TRIPLETS:
+                        if n_zhi in t and zhi in t:
+                            features.append("半会")
+
+                # 比和 (同じ五行)
+                n_wx = Kanshi.WU_XING[SanmeiEngine.DI_ZHI_TO_GAN_MAP[n_zhi]]
+                z_wx = Kanshi.WU_XING[SanmeiEngine.DI_ZHI_TO_GAN_MAP[zhi]]
+                if n_wx == z_wx:
+                    # 他の強い条件(支合・対冲・害・刑・半会)がない場合のみ比和を表示するのが一般的だが
+                    # PDFでは自刑と併記されている。ただし「半会」などがある場合に比和を出すかは流派による。
+                    # SanmeiAppは「洩天地比」を出している。これは干合＋支合＋比和のような強い結合。
+                    # 今回はシンプルに「比和」を追加する。
+                    features.append("比和")
+            
+            if features:
+                isouhou_details.append(f"{pos_name}{'＋'.join(features)}")
+        
+        return isouhou_details, judai, junidai
+        
+        return isouhou_details, judai, junidai
+
+    def calculate_daiun(self, gender):
+        # 順行・逆行判定
+        nen_yinyang = Kanshi.YIN_YANG[self.nenkan]
+        is_shunko = (gender == "M" and nen_yinyang == "+") or (gender == "F" and nen_yinyang == "-")
+        
+        # 立運算出
+        y, m, d = self.birth_dt.year, self.birth_dt.month, self.birth_dt.day
+        if is_shunko:
+            next_m = m + 1
+            next_y = y
+            if next_m > 12: next_m = 1; next_y += 1
+            setsu_day = self.get_setsuiri_day(next_y, next_m)
+            days_diff = (datetime.date(next_y, next_m, setsu_day) - self.birth_dt.date()).days
+        else:
+            setsu_day = self.get_setsuiri_day(y, m)
+            days_diff = (self.birth_dt.date() - datetime.date(y, m, setsu_day)).days
+            
+        ritsuen = int(days_diff / 3)
+        rem = days_diff % 3
+        if rem == 2: ritsuen += 1
+        if ritsuen == 0: ritsuen = 1
+        
+        # サイクル生成
+        gekkan_id = Kanshi.get_kanshi_id(self.gekkan, self.geshi)
+        daiun_list = []
         
         # 天中殺グループ（日干由来）
         nikkan_tenchu = self.get_tenchusatsu(self.nikkan, self.nishi)
@@ -391,96 +593,8 @@ class SanmeiEngine:
             age_start = ritsuen + (i-1)*10
             start_year = self.year + age_start
             
-            # 星の算出
-            judai = SanmeiEngine.get_judai_shusei(self.nikkan, gan)
-            junidai = SanmeiEngine.get_junidai_jusei(self.nikkan, zhi)
-            
-            # 位相法 (方位別)
-            # 定義：各ペアをソート済みのタプルとして保持するセット
-            SHIGO_PAIRS = {tuple(sorted(p)) for p in [("丑", "子"), ("寅", "亥"), ("卯", "戌"), ("辰", "酉"), ("巳", "申"), ("午", "未")]}
-            TAICHU_PAIRS = {tuple(sorted(p)) for p in [("子", "午"), ("丑", "未"), ("寅", "申"), ("卯", "酉"), ("辰", "戌"), ("巳", "亥")]}
-            GAI_PAIRS = {tuple(sorted(p)) for p in [("子", "未"), ("丑", "午"), ("寅", "巳"), ("卯", "辰"), ("申", "亥"), ("酉", "戌")]}
-            
-            # 破 (Ha)
-            HA_PAIRS = {tuple(sorted(p)) for p in [("子", "酉"), ("丑", "辰"), ("寅", "亥"), ("卯", "午"), ("巳", "申"), ("未", "戌")]}
-            
-            # 刑 (Kei)
-            KEI_OUKI = {tuple(sorted(p)) for p in [("子", "卯")]}
-            KEI_SEIKI = {tuple(sorted(p)) for p in [("寅", "巳"), ("巳", "申"), ("申", "寅")]}
-            KEI_KOKI = {tuple(sorted(p)) for p in [("丑", "戌"), ("戌", "未"), ("未", "丑")]}
-            
-            # 干合 (Kangou)
-            KANGOU_PAIRS = {tuple(sorted(p)) for p in [("甲", "己"), ("乙", "庚"), ("丙", "辛"), ("丁", "壬"), ("戊", "癸")]}
-
-            HANKAI_TRIPLETS = [("申", "子", "辰"), ("亥", "卯", "未"), ("寅", "午", "戌"), ("巳", "酉", "丑")]
-
-            isouhou_details = []
-            for pos_name, n_gan, n_zhi in natal_kanshi_list:
-                z_pair = tuple(sorted([n_zhi, zhi]))
-                g_pair = tuple(sorted([n_gan, gan]))
-                
-                features = []
-                
-                # 天剋地冲 Check (天干が相剋かつ地支が対冲)
-                # 相剋: 木剋土, 土剋水, 水剋火, 火剋金, 金剋木. 
-                # 干の番号差が 4 or 6 (例: 甲(0) vs 戊(4) -> 木剋土, 甲(0) vs 庚(6) -> 金剋木)
-                n_g_idx = Kanshi.TIAN_GAN.index(n_gan)
-                d_g_idx = Kanshi.TIAN_GAN.index(gan)
-                g_diff = abs(n_g_idx - d_g_idx)
-                is_tenkoku = (g_diff == 4 or g_diff == 6)
-                if is_tenkoku and (z_pair in TAICHU_PAIRS):
-                    features.append("天剋地冲")
-                else:
-                    # 天剋地冲でなければ個別に判定
-                    
-                    # 干合
-                    if g_pair in KANGOU_PAIRS:
-                        features.append("干合")
-
-                    # 支合
-                    if z_pair in SHIGO_PAIRS:
-                        features.append("支合")
-                    
-                    # 対冲
-                    if z_pair in TAICHU_PAIRS:
-                        features.append("対冲")
-                    
-                    # 害
-                    if z_pair in GAI_PAIRS:
-                        features.append("害")
-                    
-                    # 破
-                    if z_pair in HA_PAIRS:
-                        features.append("破")
-                    
-                    # 刑
-                    if n_zhi == zhi and n_zhi in ["辰", "午", "酉", "亥"]:
-                        features.append("自刑")
-                    if z_pair in KEI_OUKI:
-                        features.append("旺気刑")
-                    if z_pair in KEI_SEIKI:
-                        features.append("生貴刑")
-                    if z_pair in KEI_KOKI:
-                        features.append("庫気刑")
-                    
-                    # 半会 (異地支)
-                    if n_zhi != zhi:
-                        for t in HANKAI_TRIPLETS:
-                            if n_zhi in t and zhi in t:
-                                features.append("半会")
-
-                    # 比和 (同じ五行)
-                    n_wx = Kanshi.WU_XING[SanmeiEngine.DI_ZHI_TO_GAN_MAP[n_zhi]]
-                    z_wx = Kanshi.WU_XING[SanmeiEngine.DI_ZHI_TO_GAN_MAP[zhi]]
-                    if n_wx == z_wx:
-                        # 他の強い条件(支合・対冲・害・刑・半会)がない場合のみ比和を表示するのが一般的だが
-                        # PDFでは自刑と併記されている。ただし「半会」などがある場合に比和を出すかは流派による。
-                        # SanmeiAppは「洩天地比」を出している。これは干合＋支合＋比和のような強い結合。
-                        # 今回はシンプルに「比和」を追加する。
-                        features.append("比和")
-                
-                if features:
-                    isouhou_details.append(f"{pos_name}{'＋'.join(features)}")
+            # 詳細算出 (共通メソッド)
+            isouhou_details, judai, junidai = self._get_kanshi_details(gan, zhi)
 
             # 天中殺
             tenchu_str = "天中殺" if zhi in nikkan_tenchu else ""
@@ -488,14 +602,60 @@ class SanmeiEngine:
             daiun_list.append({
                 "年齢": age_start,
                 "西暦": start_year,
-                "干支": f"{gan}{zhi}",
+                "干支": gan + zhi,
                 "十大主星": judai,
                 "十二大従星": junidai,
                 "位相法": isouhou_details,
                 "天中殺": tenchu_str
             })
             
-        return {"立運": f"{ritsuen}歳運", "方向": "順行" if is_shunko else "逆行", "サイクル": daiun_list}
+        return {
+            "立運": ritsuen,
+            "方向": "順行" if is_shunko else "逆行",
+            "サイクル": daiun_list
+        }
+
+    def calculate_nenun(self, start_year, duration=100):
+        nenun_list = []
+        nikkan_tenchu = self.get_tenchusatsu(self.nikkan, self.nishi)
+        
+        # 節分(2/4頃)を基準に年が切り替わるが、単純な干支計算には (year-4)%60+1 を使用
+        # ただし算命学の年運は立春(2/4)で切り替わる。
+        # ここでは一覧として、指定された西暦に対応する干支を表示する。
+        # ユーザーが「西暦」で見る場合、通常はその年の立春以降の干支を指す。
+        
+        for i in range(duration):
+            target_year = start_year + i
+            age = target_year - self.year # 満年齢(簡単な計算) or 数え年？ 大運は満年齢ベースが多いが、年運は誕生日切り替えか立春切り替えか。
+                                        # 大運表の年齢に合わせるなら、その年に到達する年齢。
+            
+            # 年干支ID算出: 1984年が甲子(1)
+            # offset from 1984
+            diff = target_year - 1984
+            k_id = (0 + diff) % 60 + 1 # 1984 is 1 (0-based idx 0) + diff
+            if k_id <= 0: k_id += 60 # Handle negative diff correctly
+            
+            gan = Kanshi.TIAN_GAN[(k_id-1)%10]
+            zhi = Kanshi.DI_ZHI[(k_id-1)%12]
+            
+            # 詳細算出
+            isouhou_details, judai, junidai = self._get_kanshi_details(gan, zhi)
+            
+            tenchu_str = "天中殺" if zhi in nikkan_tenchu else ""
+            
+            nenun_list.append({
+                "西暦": target_year,
+                "年齢": age,
+                "干支": gan + zhi,
+                "十大主星": judai,
+                "十二大従星": junidai,
+                "位相法": isouhou_details,
+                "天中殺": tenchu_str
+            })
+            
+        return nenun_list
+
+
 
     def get_full_report(self, gender="M"):
         # 節入りからの日数 (Phase 1で算出済み)
@@ -542,6 +702,7 @@ class SanmeiEngine:
 
         # 運勢・その他
         daiun = self.calculate_daiun(gender)
+        nenun = self.calculate_nenun(self.year, 100) # Added nenun calculation
         uchu_ids = [Kanshi.get_kanshi_id(g, z) for g, z in kanshi_list]
         tenchusatsu = self.get_tenchusatsu(self.nikkan, self.nishi)
         shukumei_tenchu = self.get_shukumei_tenchusatsu()
@@ -560,7 +721,153 @@ class SanmeiEngine:
             "異常干支": ijou_kanshi,
             "位相法": isouhou,
             "大運": daiun,
+            "年運": nenun, # Added nenun to the returned dictionary
             "宇宙盤": {"干支番号": uchu_ids},
             "数理法": {"総エネルギー": total_energy, "五行分布": energy_by_wx, "十干内訳": energy_by_stem},
             "八門法": hachimon
         }
+
+    def format_as_text_report(self, report):
+        """
+        レポート辞書を受け取り、main.pyの出力形式と同じテキストを生成して返す。
+        """
+        lines = []
+        lines.append("=== 算命学 宿命鑑定ツール ===")
+        
+        # 陰占
+        lines.append("\n--- 陰占 (命式) ---")
+        for k, v in report["陰占"].items():
+            lines.append(f"{k}: {v}")
+
+        # 陽占
+        lines.append("\n--- 陽占 (人体星図) ---")
+        lines.append("【十大主星】")
+        for k, v in report["陽占"]["十大主星"].items():
+            lines.append(f"  {k}: {v}")
+        
+        lines.append("【十二大従星】")
+        junidai_order = ["晩年", "中年", "初年"]
+        junidai_data = report["陽占"]["十二大従星"]
+        for k in junidai_order:
+            v = junidai_data.get(k)
+            # API経由などの場合、vは "天極星 (024 トコトン)" のように既にalias込みの場合と、
+            # "天極星" だけの場合がある。main.pyロジックに合わせるため、alias付与済みかどうかチェック要だが、
+            # get_full_reportですでにaliasが付与されているわけではない(main.pyで付与している)。
+            # しかし今回の要件は output_text をAPIで返すこと。
+            # get_full_reportの戻り値には "十二大従星" はまだBaseName+星 のみ。
+            # aliasは main.py, api.py それぞれで付加している。
+            # ここではシンプルに Engineの定数を使って再付与する（重複しないように）。
+            
+            if v:
+                base_name = v.replace("星", "")
+                # 既にaliasが含まれているかチェック ("(" があるか)
+                if "(" not in v:
+                    alias = SanmeiEngine.JUNIDAI_JUSEI_KEYWORDS.get(base_name, "")
+                    lines.append(f"  {k}: {v} {alias}")
+                else:
+                    lines.append(f"  {k}: {v}")
+
+        lines.append(f"\n天中殺グループ: {report['天中殺']['グループ']}天中殺")
+        if report['天中殺']['宿命天中殺']:
+            lines.append(f"宿命天中殺: {', '.join(report['天中殺']['宿命天中殺'])}")
+
+        if "タイミング" in report['天中殺'] and report['天中殺']['タイミング']:
+             timing = report['天中殺']['タイミング']
+             lines.append("\n--- 天中殺のタイミング ---")
+             lines.append(f"時間: {timing['time']}")
+             lines.append(f"月  : {timing['month']}")
+             # yearsがリストか文字列か
+             y_str = timing['years']
+             if isinstance(y_str, list):
+                 y_str = ', '.join(y_str)
+             lines.append(f"年  : {y_str}")
+
+        if report['異常干支']:
+            lines.append(f"異常干支: {', '.join(report['異常干支'])}")
+        
+        isouhou_str = ", ".join(report["位相法"]) if report["位相法"] else "特になし"
+        lines.append(f"\n位相法: {isouhou_str}")
+
+        # 大運
+        lines.append("\n--- 大運 ---")
+        lines.append(f"立運: {report['大運']['立運']} ({report['大運']['方向']})")
+        lines.append(f"{'年齢':>3} {'(西暦)':>5} | {'干支':^4} | {'十大主星':^6} | {'十二大従星':^6} | {'位相法':<20} | {'天中殺':<6}")
+        lines.append("-" * 75)
+        
+        daiun_cycle = report["大運"].get("サイクル", [])
+        if not daiun_cycle and isinstance(report["大運"], list): # 旧形式対応
+             daiun_cycle = report["大運"]
+
+        for cycle in daiun_cycle:
+            age = cycle['年齢']
+            year = cycle['西暦']
+            kanshi = cycle['干支']
+            judai = cycle['十大主星']
+            junidai = cycle['十二大従星']
+            isouhou = ", ".join(cycle['位相法'])
+            tenchu = cycle['天中殺']
+            lines.append(f"{age:>3} ({year:>4}) | {kanshi:^4} | {judai:^6} | {junidai:^6} | {isouhou:<20} | {tenchu:<6}")
+
+        # 年運
+        if "年運" in report:
+            lines.append("\n--- 年運 (直近20年) ---")
+            lines.append(f" {'年齢':>3} {'(西暦)':>5} | {'干支':^4} | {'十大主星':^6} | {'十二大従星':^5} | {'位相法':<20} | {'天中殺':<5}")
+            lines.append("-" * 75)
+            
+            current_year = datetime.datetime.now().year
+            for data in report["年運"]:
+                if data["西暦"] >= current_year and data["西暦"] < current_year + 20:
+                     isou_str = ", ".join(data["位相法"])
+                     lines.append(f" {data['年齢']:>3} ({data['西暦']:>5}) | {data['干支']:^4} | {data['十大主星']:^6} | {data['十二大従星']:^6} | {isou_str:<20} | {data['天中殺']:<5}")
+
+        # 宇宙盤
+        lines.append("\n--- 宇宙盤 ---")
+        lines.append(f"干支番号: {report['宇宙盤']['干支番号']}")
+
+        # 数理法
+        lines.append("\n--- 数理法 ---")
+        lines.append(f"総エネルギー値: {report['数理法']['総エネルギー']}")
+        lines.append("【十干別内訳】")
+        stem_order = [
+            ("木", [("甲", "+"), ("乙", "-")]),
+            ("火", [("丙", "+"), ("丁", "-")]),
+            ("土", [("戊", "+"), ("己", "-")]),
+            ("金", [("庚", "+"), ("辛", "-")]),
+            ("水", [("壬", "+"), ("癸", "-")]),
+        ]
+        ten_kan_breakdown = report['数理法']['十干内訳']
+        for wx, stems in stem_order:
+            line = f"  {wx}: "
+            parts = []
+            for g, sign in stems:
+                val = ten_kan_breakdown.get(g, 0)
+                parts.append(f"{g}({sign})={val}")
+            lines.append(line + "  ".join(parts))
+        
+        lines.append("【五行分布】")
+        for k, v in report['数理法']['五行分布'].items():
+            lines.append(f"  {k}: {v}")
+
+        # 気図法
+        lines.append("\n--- 気図法 ---")
+        gogyo = report['数理法']['五行分布']
+        lines.append(f"      北方(水): {gogyo.get('水', 0)}")
+        lines.append(f"      {'|':^10}")
+        lines.append(f"東方(木): {gogyo.get('木', 0)} - 中央(土): {gogyo.get('土', 0)} - 西方(金): {gogyo.get('金', 0)}")
+        lines.append(f"      {'|':^10}")
+        lines.append(f"      南方(火): {gogyo.get('火', 0)}")
+
+        # 八門法
+        lines.append("\n--- 八門法 (五行エネルギー分布) ---")
+        hachi = report["八門法"]
+        def get_h_val(d):
+            for k, v in hachi.items():
+                if k.startswith(d): return v
+            return 0
+        lines.append(f"      北方(習得): {get_h_val('北方')}")
+        lines.append(f"      {'|':^10}")
+        lines.append(f"東方(蓄積): {get_h_val('東方')} - 中央(自分): {get_h_val('中央')} - 西方(名誉): {get_h_val('西方')}")
+        lines.append(f"      {'|':^10}")
+        lines.append(f"      南方(伝達): {get_h_val('南方')}")
+        
+        return "\n".join(lines)
