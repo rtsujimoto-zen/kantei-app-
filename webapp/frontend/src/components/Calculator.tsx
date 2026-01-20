@@ -51,7 +51,8 @@ export default function Calculator() {
         setError('');
         setCopySuccess('');
         try {
-            const res = await fetch('/api/calculate', {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://kantei-app.onrender.com';
+            const res = await fetch(`${apiUrl}/calculate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ birthday, gender }),
