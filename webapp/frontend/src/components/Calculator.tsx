@@ -35,6 +35,13 @@ export default function Calculator() {
     const [mounted, setMounted] = useState(false);
     const [copySuccess, setCopySuccess] = useState('');
 
+    // AI Strategist State
+    const [aiPersona, setAiPersona] = useState<'jiya' | 'master'>('jiya');
+    const [aiDepth, setAiDepth] = useState<'professional' | 'beginner'>('professional');
+    const [isAiLoading, setIsAiLoading] = useState(false);
+    const [aiResult, setAiResult] = useState<string | null>(null);
+
+
     useEffect(() => {
         setMounted(true);
     }, []);
@@ -71,6 +78,35 @@ export default function Calculator() {
                 console.error('Failed to copy!', err);
             }
         }
+    };
+
+    const handleAiConsultation = async () => {
+        if (!report) return;
+        setIsAiLoading(true);
+        setAiResult(null);
+
+        // Simulate API call for Mock
+        setTimeout(() => {
+            const personaName = aiPersona === 'jiya' ? '老執事 (Jiya)' : '厳格な師匠 (Master)';
+            const depthName = aiDepth === 'professional' ? '専門的' : '初学者向け';
+
+            const mockResponse =
+                `【MOCK MODE】
+これはモックアップ（試作）の応答です。
+本来はここで OpenAI API から生成された文章が表示されます。
+
+---
+**設定されたモード**:
+・軍師: ${personaName}
+・解説: ${depthName}
+
+**想定される出力（例: 老執事モード）**:
+「お待ちしておりました、王よ。
+あなた様の本質は『${report.陰占 && report.陰占.日 ? getKanshi(report.陰占.日).kan : '不明'}』、すなわち...（続きが生成されます）」`;
+
+            setAiResult(mockResponse);
+            setIsAiLoading(false);
+        }, 2000);
     };
 
     if (!mounted) return null; // Prevent hydration issues
@@ -177,10 +213,7 @@ export default function Calculator() {
                             <div className="grid grid-cols-3 gap-2 max-w-md mx-auto aspect-square text-sm">
                                 {/* Top Row */}
                                 <div className="bg-neutral-900 p-1 flex items-center justify-center text-center rounded border border-neutral-700">
-                                    <div>
-                                        <div className="text-[10px] text-neutral-500">晩年</div>
-                                        <div className="font-bold">{report.陽占.十二大従星詳細?.晩年?.full || report.陽占.十二大従星.晩年}</div>
-                                    </div>
+                                    {/* Empty */}
                                 </div>
                                 <div className="bg-neutral-900 p-1 flex items-center justify-center text-center rounded border border-neutral-700">
                                     <div>
@@ -217,7 +250,10 @@ export default function Calculator() {
 
                                 {/* Bottom Row */}
                                 <div className="bg-neutral-900 p-1 flex items-center justify-center text-center rounded border border-neutral-700">
-                                    {/* Empty */}
+                                    <div>
+                                        <div className="text-[10px] text-neutral-500">晩年</div>
+                                        <div className="font-bold">{report.陽占.十二大従星詳細?.晩年?.full || report.陽占.十二大従星.晩年}</div>
+                                    </div>
                                 </div>
                                 <div className="bg-neutral-900 p-1 flex items-center justify-center text-center rounded border border-neutral-700">
                                     <div>
@@ -328,9 +364,87 @@ export default function Calculator() {
                                 </div>
                                 <textarea
                                     readOnly
-                                    className="w-full h-48 bg-neutral-900 text-neutral-300 font-mono text-xs p-4 rounded border border-neutral-700 focus:outline-none"
+                                    className="w-full h-20 bg-neutral-900 text-neutral-500 font-mono text-xs p-4 rounded border border-neutral-700 focus:outline-none mb-6"
                                     value={report.output_text}
                                 />
+
+                                {/* AI Strategist Section */}
+                                <div className="border-t border-neutral-700 pt-6 mt-6">
+                                    <h3 className="text-lg font-bold text-amber-500 mb-4 flex items-center">
+                                        <span className="mr-2">🧠</span> AI軍師 (AI Strategist)
+                                    </h3>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                        {/* Persona Selection */}
+                                        <div className="bg-neutral-900 p-4 rounded-lg border border-neutral-700">
+                                            <label className="block text-xs text-neutral-400 mb-3">軍師のタイプ (Persona)</label>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => setAiPersona('jiya')}
+                                                    className={`flex-1 py-2 px-3 rounded text-sm transition-all ${aiPersona === 'jiya' ? 'bg-amber-900/60 text-amber-100 border border-amber-500' : 'bg-neutral-800 text-neutral-400 border border-neutral-700 hover:bg-neutral-700'}`}
+                                                >
+                                                    🏰 老執事 (Jiya)
+                                                </button>
+                                                <button
+                                                    onClick={() => setAiPersona('master')}
+                                                    className={`flex-1 py-2 px-3 rounded text-sm transition-all ${aiPersona === 'master' ? 'bg-amber-900/60 text-amber-100 border border-amber-500' : 'bg-neutral-800 text-neutral-400 border border-neutral-700 hover:bg-neutral-700'}`}
+                                                >
+                                                    ⚔️ 師匠 (Master)
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Depth Selection */}
+                                        <div className="bg-neutral-900 p-4 rounded-lg border border-neutral-700">
+                                            <label className="block text-xs text-neutral-400 mb-3">解説レベル (Depth)</label>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => setAiDepth('professional')}
+                                                    className={`flex-1 py-2 px-3 rounded text-sm transition-all ${aiDepth === 'professional' ? 'bg-amber-900/60 text-amber-100 border border-amber-500' : 'bg-neutral-800 text-neutral-400 border border-neutral-700 hover:bg-neutral-700'}`}
+                                                >
+                                                    📚 専門的
+                                                </button>
+                                                <button
+                                                    onClick={() => setAiDepth('beginner')}
+                                                    className={`flex-1 py-2 px-3 rounded text-sm transition-all ${aiDepth === 'beginner' ? 'bg-amber-900/60 text-amber-100 border border-amber-500' : 'bg-neutral-800 text-neutral-400 border border-neutral-700 hover:bg-neutral-700'}`}
+                                                >
+                                                    🔰 初学者
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={handleAiConsultation}
+                                        disabled={isAiLoading}
+                                        className="w-full bg-gradient-to-r from-amber-700 to-amber-900 hover:from-amber-600 hover:to-amber-800 text-white font-bold py-4 rounded-lg shadow-lg border border-amber-500/30 transition-all flex items-center justify-center gap-2 group"
+                                    >
+                                        {isAiLoading ? (
+                                            <>
+                                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                <span>思考中... (Thinking)</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span>🔮</span>
+                                                <span>運命を解読する (Consult AI)</span>
+                                            </>
+                                        )}
+                                    </button>
+
+                                    {/* AI Result Area */}
+                                    {aiResult && (
+                                        <div className="mt-6 bg-neutral-900/80 p-6 rounded-lg border border-amber-500/30 text-amber-100 animate-fade-in-up shadow-inner relative">
+                                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50"></div>
+                                            <div className="prose prose-invert prose-amber max-w-none text-sm leading-relaxed whitespace-pre-wrap font-serif">
+                                                {aiResult}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </section>
                         )}
 
@@ -340,3 +454,4 @@ export default function Calculator() {
         </div>
     );
 }
+

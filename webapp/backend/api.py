@@ -7,7 +7,8 @@ import sys
 import os
 
 # Add project root to sys.path to access sanmei_engine.py
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+sys.path.insert(0, project_root)
 from sanmei_engine import SanmeiEngine
 
 app = FastAPI(title="Teiou Logic API", version="1.0.0")
@@ -15,7 +16,7 @@ app = FastAPI(title="Teiou Logic API", version="1.0.0")
 # CORS Configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],  # Allow all for now, restrict after deployment
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
