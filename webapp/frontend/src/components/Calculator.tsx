@@ -1,5 +1,13 @@
 "use client";
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ResultGrid, BentoItem } from './ResultGrid';
+import { InsenCard } from './InsenCard';
+import { YosenCard } from './YosenCard';
+import { DaiunCard } from './DaiunCard';
+import { AiStrategist } from './StrategistCard';
 
 // Types definition
 interface SanmeiReport {
@@ -36,8 +44,6 @@ export default function Calculator() {
     const [copySuccess, setCopySuccess] = useState('');
 
     // AI Strategist State
-    const [aiPersona, setAiPersona] = useState<'jiya' | 'master'>('jiya');
-    const [aiDepth, setAiDepth] = useState<'professional' | 'beginner'>('professional');
     const [isAiLoading, setIsAiLoading] = useState(false);
     const [aiResult, setAiResult] = useState<string | null>(null);
 
@@ -81,15 +87,17 @@ export default function Calculator() {
         }
     };
 
-    const handleAiConsultation = async () => {
+    const handleAiConsultation = async (persona: 'jiya' | 'master', depth: 'professional' | 'beginner') => {
         if (!report) return;
         setIsAiLoading(true);
         setAiResult(null);
 
         // Simulate API call for Mock
         setTimeout(() => {
-            const personaName = aiPersona === 'jiya' ? '老執事 (Jiya)' : '厳格な師匠 (Master)';
-            const depthName = aiDepth === 'professional' ? '専門的' : '初学者向け';
+            const personaName = persona === 'jiya' ? '老執事 (Jiya)' : '厳格な師匠 (Master)';
+            const depthName = depth === 'professional' ? '専門的' : '初学者向け';
+
+            // Note: In a real implementation, we would call the backend here with persona/depth
 
             const mockResponse =
                 `【MOCK MODE】
@@ -103,7 +111,7 @@ export default function Calculator() {
 
 **想定される出力（例: 老執事モード）**:
 「お待ちしておりました、王よ。
-あなた様の本質は『${report.陰占 && report.陰占.日 ? getKanshi(report.陰占.日).kan : '不明'}』、すなわち...（続きが生成されます）」`;
+あなた様の本質は『${report.陰占?.日 ? report.陰占.日.split(' ')[1] : '不明'}』、すなわち...（続きが生成されます）」`;
 
             setAiResult(mockResponse);
             setIsAiLoading(false);
@@ -112,347 +120,175 @@ export default function Calculator() {
 
     if (!mounted) return null; // Prevent hydration issues
 
-    // Helper to safely extract Kanshi part
-    const getKanshi = (str: string | undefined) => {
-        if (!str) return { num: '', kan: '' };
-        const parts = str.split(' ');
-        if (parts.length >= 2) return { num: parts[0], kan: parts[1] };
-        return { num: '', kan: str };
-    };
-
-    // Helper to get Daiun cycle array
-    const getDaiunCycle = (daiun: any) => {
-        if (!daiun) return [];
-        if (Array.isArray(daiun)) return daiun;
-        if (daiun.サイクル && Array.isArray(daiun.サイクル)) return daiun.サイクル;
-        return [];
-    };
-
     return (
-        <div className="min-h-screen bg-neutral-900 text-gray-100 p-6 font-sans">
-            <div className="max-w-4xl mx-auto space-y-8">
+        <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-neutral-900 via-neutral-950 to-black text-gray-100 font-sans pb-20 selection:bg-amber-500/30">
+            {/* Ambient Background Lights */}
+            <div className="fixed top-0 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-[128px] pointer-events-none" />
+            <div className="fixed bottom-0 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-[128px] pointer-events-none" />
+
+            <div className="max-w-7xl mx-auto px-4 py-8 space-y-12 relative z-10">
 
                 {/* Header */}
-                <header className="text-center space-y-2">
-                    <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600 tracking-wider uppercase">
-                        Teiou Logic
-                    </h1>
-                    <p className="text-neutral-400 text-sm">Empower your destiny with imperial wisdom.</p>
+                <header className="text-center space-y-4 py-10">
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8 }}
+                    >
+                        <h1 className="text-5xl md:text-7xl font-serif font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 tracking-tighter drop-shadow-sm">
+                            TEIOU LOGIC
+                        </h1>
+                        <p className="text-neutral-400 text-sm md:text-base font-medium tracking-widest mt-4 uppercase">
+                            Empower your destiny with imperial wisdom
+                        </p>
+                    </motion.div>
                 </header>
 
-                {/* Input Form */}
-                <div className="bg-neutral-800 p-6 rounded-xl border border-neutral-700 shadow-2xl space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <label className="block text-sm font-medium text-amber-500">Date of Birth</label>
-                            <input
-                                type="date"
-                                value={birthday}
-                                onChange={(e) => setBirthday(e.target.value)}
-                                className="w-full bg-neutral-900 border border-neutral-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-amber-500 outline-none transition-all"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="block text-sm font-medium text-amber-500">Gender</label>
-                            <div className="flex space-x-4">
-                                <button
-                                    onClick={() => setGender('M')}
-                                    className={`flex-1 py-3 rounded-lg border transition-all ${gender === 'M' ? 'bg-amber-600 border-amber-500 text-white' : 'bg-neutral-900 border-neutral-700 text-neutral-400 hover:bg-neutral-800'}`}
-                                >
-                                    Male
-                                </button>
-                                <button
-                                    onClick={() => setGender('F')}
-                                    className={`flex-1 py-3 rounded-lg border transition-all ${gender === 'F' ? 'bg-amber-600 border-amber-500 text-white' : 'bg-neutral-900 border-neutral-700 text-neutral-400 hover:bg-neutral-800'}`}
-                                >
-                                    Female
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button
-                        onClick={handleCalculate}
-                        disabled={loading}
-                        className="w-full bg-gradient-to-r from-amber-500 to-amber-700 text-white font-bold py-4 rounded-lg shadow-lg hover:from-amber-400 hover:to-amber-600 transform hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {loading ? 'Analyzing Destiny...' : 'CALCULATE DESTINY'}
-                    </button>
-
-                    {error && <p className="text-red-400 text-center">{error}</p>}
-                </div>
-
-                {/* Result Display */}
-                {report && report.陰占 && report.陽占 && report.天中殺 && (
-                    <div className="space-y-8 animate-fade-in-up">
-
-                        {/* 1. In-sen (陰占) */}
-                        <section className="bg-neutral-800 p-6 rounded-xl border border-neutral-700">
-                            <h2 className="text-xl font-bold text-amber-500 mb-4 border-b border-neutral-700 pb-2">陰占 (In-sen)</h2>
-                            <div className="grid grid-cols-3 gap-4 text-center">
-                                <div className="p-4 bg-neutral-900 rounded-lg">
-                                    <div className="text-xs text-neutral-500 mb-1">Year</div>
-                                    <div className="text-lg font-bold">{getKanshi(report.陰占.年).kan}</div>
-                                    <div className="text-xs text-neutral-400 mt-1">{getKanshi(report.陰占.年).num}</div>
+                {/* Input Section - Hero Card */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className="max-w-2xl mx-auto"
+                >
+                    <Card className="border-amber-500/30 shadow-2xl shadow-amber-900/10 bg-black/40 backdrop-blur-xl">
+                        <CardHeader>
+                            <CardTitle className="text-center text-amber-500">Analysis Profile</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Date of Birth</label>
+                                    <input
+                                        type="date"
+                                        value={birthday}
+                                        onChange={(e) => setBirthday(e.target.value)}
+                                        className="w-full bg-neutral-900/50 border border-neutral-700/50 rounded-lg p-3 text-white focus:ring-1 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all font-mono"
+                                    />
                                 </div>
-                                <div className="p-4 bg-neutral-900 rounded-lg">
-                                    <div className="text-xs text-neutral-500 mb-1">Month</div>
-                                    <div className="text-lg font-bold">{getKanshi(report.陰占.月).kan}</div>
-                                    <div className="text-xs text-neutral-400 mt-1">{getKanshi(report.陰占.月).num}</div>
-                                </div>
-                                <div className="p-4 bg-neutral-900 rounded-lg border border-amber-900/50">
-                                    <div className="text-xs text-amber-500 mb-1">Day (Self)</div>
-                                    <div className="text-lg font-bold text-amber-100">{getKanshi(report.陰占.日).kan}</div>
-                                    <div className="text-xs text-neutral-400 mt-1">{getKanshi(report.陰占.日).num}</div>
-                                </div>
-                            </div>
-                        </section>
-
-                        {/* 2. Yo-sen (陽占) */}
-                        <section className="bg-neutral-800 p-6 rounded-xl border border-neutral-700">
-                            <h2 className="text-xl font-bold text-amber-500 mb-4 border-b border-neutral-700 pb-2">陽占 (Yo-sen)</h2>
-                            <div className="grid grid-cols-3 gap-2 max-w-md mx-auto aspect-square text-sm">
-                                {/* Top Row */}
-                                <div className="bg-neutral-900 p-1 flex items-center justify-center text-center rounded border border-neutral-700">
-                                    {/* Empty */}
-                                </div>
-                                <div className="bg-neutral-900 p-1 flex items-center justify-center text-center rounded border border-neutral-700">
-                                    <div>
-                                        <div className="text-[10px] text-neutral-500">頭 (North)</div>
-                                        <div className="font-bold text-amber-200">{report.陽占.十大主星.頭}</div>
-                                    </div>
-                                </div>
-                                <div className="bg-neutral-900 p-1 flex items-center justify-center text-center rounded border border-neutral-700">
-                                    <div>
-                                        <div className="text-[10px] text-neutral-500">初年</div>
-                                        <div className="font-bold">{report.陽占.十二大従星詳細?.初年?.full || report.陽占.十二大従星.初年}</div>
-                                    </div>
-                                </div>
-
-                                {/* Middle Row */}
-                                <div className="bg-neutral-900 p-1 flex items-center justify-center text-center rounded border border-neutral-700">
-                                    <div>
-                                        <div className="text-[10px] text-neutral-500">右手 (West)</div>
-                                        <div className="font-bold text-amber-200">{report.陽占.十大主星.右手}</div>
-                                    </div>
-                                </div>
-                                <div className="bg-neutral-900 p-1 flex items-center justify-center text-center rounded border border-amber-600 bg-amber-900/20">
-                                    <div>
-                                        <div className="text-[10px] text-amber-500">胸 (Center)</div>
-                                        <div className="font-bold text-amber-100">{report.陽占.十大主星.胸}</div>
-                                    </div>
-                                </div>
-                                <div className="bg-neutral-900 p-1 flex items-center justify-center text-center rounded border border-neutral-700">
-                                    <div>
-                                        <div className="text-[10px] text-neutral-500">左手 (East)</div>
-                                        <div className="font-bold text-amber-200">{report.陽占.十大主星.左手}</div>
-                                    </div>
-                                </div>
-
-                                {/* Bottom Row */}
-                                <div className="bg-neutral-900 p-1 flex items-center justify-center text-center rounded border border-neutral-700">
-                                    <div>
-                                        <div className="text-[10px] text-neutral-500">晩年</div>
-                                        <div className="font-bold">{report.陽占.十二大従星詳細?.晩年?.full || report.陽占.十二大従星.晩年}</div>
-                                    </div>
-                                </div>
-                                <div className="bg-neutral-900 p-1 flex items-center justify-center text-center rounded border border-neutral-700">
-                                    <div>
-                                        <div className="text-[10px] text-neutral-500">腹 (South)</div>
-                                        <div className="font-bold text-amber-200">{report.陽占.十大主星.腹}</div>
-                                    </div>
-                                </div>
-                                <div className="bg-neutral-900 p-1 flex items-center justify-center text-center rounded border border-neutral-700">
-                                    <div>
-                                        <div className="text-[10px] text-neutral-500">中年</div>
-                                        <div className="font-bold">{report.陽占.十二大従星詳細?.中年?.full || report.陽占.十二大従星.中年}</div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Gender</label>
+                                    <div className="flex bg-neutral-900/50 p-1 rounded-lg border border-neutral-700/50">
+                                        <button
+                                            onClick={() => setGender('M')}
+                                            className={`flex-1 py-2 rounded-md transition-all text-sm font-medium ${gender === 'M' ? 'bg-amber-600 text-white shadow' : 'text-neutral-400 hover:text-white'}`}
+                                        >
+                                            Male
+                                        </button>
+                                        <button
+                                            onClick={() => setGender('F')}
+                                            className={`flex-1 py-2 rounded-md transition-all text-sm font-medium ${gender === 'F' ? 'bg-amber-600 text-white shadow' : 'text-neutral-400 hover:text-white'}`}
+                                        >
+                                            Female
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-                        </section>
 
-                        {/* 3. Tenchusatsu */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <section className="bg-neutral-800 p-6 rounded-xl border border-neutral-700">
-                                <h2 className="text-xl font-bold text-amber-500 mb-4">天中殺 (Tenchusatsu)</h2>
-                                <div className="text-2xl font-bold mb-2">{report.天中殺.グループ}天中殺</div>
+                            <Button
+                                onClick={handleCalculate}
+                                disabled={loading}
+                                variant="premium"
+                                className="w-full text-lg h-14 font-serif"
+                            >
+                                {loading ? 'Reading the Stars...' : 'REVEAL DESTINY'}
+                            </Button>
 
-                                {report.天中殺.タイミング && (
-                                    <div className="mt-4 bg-neutral-900 p-4 rounded text-sm space-y-2">
-                                        <div className="flex justify-between border-b border-neutral-800 pb-1">
-                                            <span className="text-neutral-500">Time</span>
-                                            <span>{report.天中殺.タイミング.time}</span>
-                                        </div>
-                                        <div className="flex justify-between border-b border-neutral-800 pb-1">
-                                            <span className="text-neutral-500">Month</span>
-                                            <span>{report.天中殺.タイミング.month}</span>
-                                        </div>
-                                        <div className="pt-1">
-                                            <span className="text-neutral-500 block mb-1">Years</span>
-                                            <div className="flex flex-wrap gap-2">
-                                                {report.天中殺.タイミング.years?.map((y: string) => (
-                                                    <span key={y} className="bg-amber-900/40 px-2 py-0.5 rounded text-amber-200 text-xs">{y}</span>
-                                                ))}
+                            {error && <p className="text-destructive text-center text-sm">{error}</p>}
+                        </CardContent>
+                    </Card>
+                </motion.div>
+
+                {/* Result Display - Bento Grid */}
+                <AnimatePresence mode="wait">
+                    {report && report.陰占 && report.陽占 && report.天中殺 && (
+                        <ResultGrid>
+
+                            {/* Row 1: Core Analysis (Insen & Yosen) */}
+                            <BentoItem colSpan="md:col-span-12 lg:col-span-4" delay={0.1}>
+                                <InsenCard data={report.陰占} />
+                            </BentoItem>
+
+                            <BentoItem colSpan="md:col-span-12 lg:col-span-4" delay={0.2}>
+                                <YosenCard data={report.陽占} />
+                            </BentoItem>
+
+                            <BentoItem colSpan="md:col-span-12 lg:col-span-4" delay={0.3}>
+                                <div className="grid grid-cols-1 gap-6 h-full">
+                                    {/* Tenchusatsu & Destiny Info */}
+                                    <Card className="h-full border-l-4 border-l-purple-500/50">
+                                        <CardHeader>
+                                            <CardTitle className="text-purple-400">Destiny & Void</CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="space-y-4">
+                                            <div>
+                                                <div className="text-xs text-muted-foreground uppercase">Tenchusatsu Group</div>
+                                                <div className="text-2xl font-bold text-foreground">{report.天中殺.グループ}天中殺</div>
                                             </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </section>
-
-                            <section className="bg-neutral-800 p-6 rounded-xl border border-neutral-700">
-                                <h2 className="text-xl font-bold text-amber-500 mb-4">宿命・異常 (Destiny)</h2>
-                                <div className="space-y-4">
-                                    <div>
-                                        <div className="text-xs text-neutral-500">宿命天中殺</div>
-                                        <div className="font-medium">
-                                            {report.天中殺.宿命天中殺 && report.天中殺.宿命天中殺.length > 0 ? report.天中殺.宿命天中殺.join(', ') : 'なし'}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className="text-xs text-neutral-500">異常干支</div>
-                                        <div className="font-medium">
-                                            {report.異常干支 && report.異常干支.length > 0 ? report.異常干支.map(s => <div key={s}>{s}</div>) : 'なし'}
-                                        </div>
-                                    </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <div className="text-xs text-muted-foreground uppercase">Fate Valid</div>
+                                                    <div className="font-medium text-sm text-neutral-300">
+                                                        {report.天中殺.宿命天中殺 && report.天中殺.宿命天中殺.length > 0 ? report.天中殺.宿命天中殺.join(', ') : 'None'}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div className="text-xs text-muted-foreground uppercase">Anomalies</div>
+                                                    <div className="font-medium text-sm text-neutral-300">
+                                                        {report.異常干支 && report.異常干支.length > 0 ? report.異常干支.join(', ') : 'None'}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
                                 </div>
-                            </section>
-                        </div>
+                            </BentoItem>
 
-                        {/* 4. Daiun */}
-                        {report.大運 && (
-                            <section className="bg-neutral-800 p-6 rounded-xl border border-neutral-700 overflow-hidden">
-                                <h2 className="text-xl font-bold text-amber-500 mb-4">大運 (10-Year Cycle)</h2>
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-sm text-left whitespace-nowrap">
-                                        <thead className="bg-neutral-900 text-neutral-400">
-                                            <tr>
-                                                <th className="p-2">Age</th>
-                                                <th className="p-2">干支</th>
-                                                <th className="p-2">主星</th>
-                                                <th className="p-2">従星</th>
-                                                <th className="p-2">位相法</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-neutral-700">
-                                            {getDaiunCycle(report.大運).map((row: any, i: number) => (
-                                                <tr key={i} className="hover:bg-neutral-700/50">
-                                                    <td className="p-2 font-bold">{row.年齢}</td>
-                                                    <td className="p-2">{row.干支}</td>
-                                                    <td className="p-2">{row.十大主星}</td>
-                                                    <td className="p-2">{row.十二大従星}</td>
-                                                    <td className="p-2 text-xs text-neutral-400">
-                                                        {row.位相法 && row.位相法.length > 0 ? row.位相法.join(', ') : '-'}
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </section>
-                        )}
+                            {/* Row 2: Daiun (Timeline) */}
+                            <BentoItem colSpan="md:col-span-12" delay={0.4}>
+                                <DaiunCard data={report.大運} />
+                            </BentoItem>
 
-                        {/* 5. Prompt Output */}
-                        {report.output_text && (
-                            <section className="bg-neutral-800 p-6 rounded-xl border border-neutral-700">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h2 className="text-xl font-bold text-amber-500">AI Prompt Ready Text</h2>
-                                    <button
-                                        onClick={handleCopyText}
-                                        className="bg-neutral-700 hover:bg-neutral-600 text-white px-4 py-2 rounded text-sm transition-colors border border-neutral-600"
-                                    >
-                                        {copySuccess || 'Copy to Clipboard'}
-                                    </button>
-                                </div>
-                                <textarea
-                                    readOnly
-                                    className="w-full h-20 bg-neutral-900 text-neutral-500 font-mono text-xs p-4 rounded border border-neutral-700 focus:outline-none mb-6"
-                                    value={report.output_text}
+                            {/* Row 3: AI Strategist */}
+                            <BentoItem colSpan="md:col-span-12 lg:col-span-8" delay={0.5}>
+                                <AiStrategist
+                                    onConsult={handleAiConsultation}
+                                    loading={isAiLoading}
+                                    result={aiResult}
                                 />
+                            </BentoItem>
 
-                                {/* AI Strategist Section */}
-                                <div className="border-t border-neutral-700 pt-6 mt-6">
-                                    <h3 className="text-lg font-bold text-amber-500 mb-4 flex items-center">
-                                        <span className="mr-2">🧠</span> AI軍師 (AI Strategist)
-                                    </h3>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                        {/* Persona Selection */}
-                                        <div className="bg-neutral-900 p-4 rounded-lg border border-neutral-700">
-                                            <label className="block text-xs text-neutral-400 mb-3">軍師のタイプ (Persona)</label>
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={() => setAiPersona('jiya')}
-                                                    className={`flex-1 py-2 px-3 rounded text-sm transition-all ${aiPersona === 'jiya' ? 'bg-amber-900/60 text-amber-100 border border-amber-500' : 'bg-neutral-800 text-neutral-400 border border-neutral-700 hover:bg-neutral-700'}`}
-                                                >
-                                                    🏰 老執事 (Jiya)
-                                                </button>
-                                                <button
-                                                    onClick={() => setAiPersona('master')}
-                                                    className={`flex-1 py-2 px-3 rounded text-sm transition-all ${aiPersona === 'master' ? 'bg-amber-900/60 text-amber-100 border border-amber-500' : 'bg-neutral-800 text-neutral-400 border border-neutral-700 hover:bg-neutral-700'}`}
-                                                >
-                                                    ⚔️ 師匠 (Master)
-                                                </button>
-                                            </div>
+                            {/* Row 3: Prompt Text (Side) */}
+                            <BentoItem colSpan="md:col-span-12 lg:col-span-4" delay={0.6}>
+                                <Card className="h-full bg-secondary/20">
+                                    <CardHeader>
+                                        <CardTitle className="text-base text-muted-foreground">Prompt Data</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="relative">
+                                            <textarea
+                                                readOnly
+                                                className="w-full h-40 bg-black/50 text-xs font-mono text-muted-foreground p-3 rounded border border-white/5 resize-none focus:outline-none"
+                                                value={report.output_text}
+                                            />
+                                            <Button
+                                                size="sm"
+                                                variant="secondary"
+                                                className="absolute bottom-2 right-2 text-xs h-7"
+                                                onClick={handleCopyText}
+                                            >
+                                                {copySuccess || "Copy"}
+                                            </Button>
                                         </div>
+                                    </CardContent>
+                                </Card>
+                            </BentoItem>
 
-                                        {/* Depth Selection */}
-                                        <div className="bg-neutral-900 p-4 rounded-lg border border-neutral-700">
-                                            <label className="block text-xs text-neutral-400 mb-3">解説レベル (Depth)</label>
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={() => setAiDepth('professional')}
-                                                    className={`flex-1 py-2 px-3 rounded text-sm transition-all ${aiDepth === 'professional' ? 'bg-amber-900/60 text-amber-100 border border-amber-500' : 'bg-neutral-800 text-neutral-400 border border-neutral-700 hover:bg-neutral-700'}`}
-                                                >
-                                                    📚 専門的
-                                                </button>
-                                                <button
-                                                    onClick={() => setAiDepth('beginner')}
-                                                    className={`flex-1 py-2 px-3 rounded text-sm transition-all ${aiDepth === 'beginner' ? 'bg-amber-900/60 text-amber-100 border border-amber-500' : 'bg-neutral-800 text-neutral-400 border border-neutral-700 hover:bg-neutral-700'}`}
-                                                >
-                                                    🔰 初学者
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        onClick={handleAiConsultation}
-                                        disabled={isAiLoading}
-                                        className="w-full bg-gradient-to-r from-amber-700 to-amber-900 hover:from-amber-600 hover:to-amber-800 text-white font-bold py-4 rounded-lg shadow-lg border border-amber-500/30 transition-all flex items-center justify-center gap-2 group"
-                                    >
-                                        {isAiLoading ? (
-                                            <>
-                                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                </svg>
-                                                <span>思考中... (Thinking)</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <span>🔮</span>
-                                                <span>運命を解読する (Consult AI)</span>
-                                            </>
-                                        )}
-                                    </button>
-
-                                    {/* AI Result Area */}
-                                    {aiResult && (
-                                        <div className="mt-6 bg-neutral-900/80 p-6 rounded-lg border border-amber-500/30 text-amber-100 animate-fade-in-up shadow-inner relative">
-                                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50"></div>
-                                            <div className="prose prose-invert prose-amber max-w-none text-sm leading-relaxed whitespace-pre-wrap font-serif">
-                                                {aiResult}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </section>
-                        )}
-
-                    </div>
-                )}
+                        </ResultGrid>
+                    )}
+                </AnimatePresence>
             </div>
         </div>
     );
-}
+};
 
