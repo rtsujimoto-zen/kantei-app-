@@ -88,7 +88,7 @@ def ai_consult(req: AiConsultRequest):
     try:
         # No explicit credentials needed for Cloud Run
         vertexai.init(project=project_id, location=location)
-        model = GenerativeModel("gemini-1.5-pro")
+        model = GenerativeModel("gemini-2.5-pro")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Vertex AI initialization failed: {str(e)}")
     
