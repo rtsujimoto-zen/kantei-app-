@@ -7,7 +7,6 @@ interface DaiunCardProps {
 }
 
 export function DaiunCard({ data, className }: DaiunCardProps) {
-    // Helper to safely get the cycle array
     const getDaiunCycle = (daiun: any) => {
         if (!daiun) return [];
         if (Array.isArray(daiun)) return daiun;
@@ -18,40 +17,40 @@ export function DaiunCard({ data, className }: DaiunCardProps) {
     const cycle = getDaiunCycle(data);
 
     return (
-        <Card className={cn("h-full overflow-hidden", className)}>
+        <Card className={cn("h-full border-none shadow-soft rounded-3xl bg-white overflow-hidden", className)}>
             <CardHeader>
-                <CardTitle>大運 (10-Year Cycle)</CardTitle>
+                <CardTitle className="text-xl text-foreground/80 font-bold">大運 (10年ごとの運気)</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left whitespace-nowrap">
-                        <thead className="bg-secondary/50 text-muted-foreground text-xs uppercase tracking-wider">
+                        <thead className="bg-secondary/50 text-muted-foreground text-xs font-bold uppercase tracking-wider">
                             <tr>
-                                <th className="p-4 rounded-tl-lg">Age</th>
-                                <th className="p-4">Pillar</th>
-                                <th className="p-4">Main Star</th>
-                                <th className="p-4">Energy</th>
-                                <th className="p-4 rounded-tr-lg">Special</th>
+                                <th className="p-4 pl-6">年齢</th>
+                                <th className="p-4">干支</th>
+                                <th className="p-4">主星</th>
+                                <th className="p-4">従星</th>
+                                <th className="p-4 pr-6">特殊</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-gray-100">
                             {cycle.map((row: any, i: number) => (
-                                <tr key={i} className="hover:bg-white/5 transition-colors">
-                                    <td className="p-4 font-bold text-amber-500">{row.年齢}</td>
-                                    <td className="p-4 font-serif">{row.干支}</td>
-                                    <td className="p-4">{row.十大主星}</td>
-                                    <td className="p-4 text-neutral-400">{row.十二大従星}</td>
-                                    <td className="p-4 text-xs text-neutral-500">
+                                <tr key={i} className="hover:bg-orange-50/50 transition-colors">
+                                    <td className="p-4 pl-6 font-bold text-orange-500">{row.年齢}歳</td>
+                                    <td className="p-4 font-mono text-foreground/80">{row.干支}</td>
+                                    <td className="p-4 text-foreground/90">{row.十大主星}</td>
+                                    <td className="p-4 text-muted-foreground">{row.十二大従星}</td>
+                                    <td className="p-4 pr-6 text-xs text-muted-foreground">
                                         {row.位相法 && row.位相法.length > 0 ? (
                                             <div className="flex flex-wrap gap-1">
                                                 {row.位相法.map((item: string, j: number) => (
-                                                    <span key={j} className="inline-block px-1.5 py-0.5 rounded bg-white/5 text-xs text-neutral-300 border border-white/10">
+                                                    <span key={j} className="inline-block px-2 py-0.5 rounded-full bg-gray-100 text-xs text-gray-600 font-medium">
                                                         {item}
                                                     </span>
                                                 ))}
                                             </div>
                                         ) : (
-                                            <span className="opacity-30">-</span>
+                                            <span className="opacity-20">-</span>
                                         )}
                                     </td>
                                 </tr>
