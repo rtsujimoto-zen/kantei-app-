@@ -94,128 +94,127 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
             </CardHeader>
 
             <CardContent className="p-6 md:p-8 -mt-6 bg-white rounded-t-3xl relative z-10 space-y-6">
-                {/* Initial Configuration (only show before first message) */}
-                {messages.length === 0 && (
-                    <>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Persona Selection */}
-                            <div className="space-y-3">
-                                <label className="text-xs font-bold text-muted-foreground flex items-center gap-2">
-                                    <User className="w-4 h-4" /> 相談相手
-                                </label>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <Button
-                                        variant={persona === 'jiya' ? 'default' : 'outline'}
-                                        onClick={() => setPersona('jiya')}
-                                        className={cn(
-                                            "rounded-xl h-12 shadow-none border-gray-200",
-                                            persona === 'jiya' ? "bg-orange-100 text-orange-700 hover:bg-orange-200 border-transparent" : "text-gray-500"
-                                        )}
-                                    >
-                                        👴 老執事
-                                    </Button>
-                                    <Button
-                                        variant={persona === 'master' ? 'default' : 'outline'}
-                                        onClick={() => setPersona('master')}
-                                        className={cn(
-                                            "rounded-xl h-12 shadow-none border-gray-200",
-                                            persona === 'master' ? "bg-slate-100 text-slate-700 hover:bg-slate-200 border-transparent" : "text-gray-500"
-                                        )}
-                                    >
-                                        ⚔️ 師匠
-                                    </Button>
-                                </div>
-                            </div>
-
-                            {/* Depth Selection */}
-                            <div className="space-y-3">
-                                <label className="text-xs font-bold text-muted-foreground flex items-center gap-2">
-                                    <BookOpen className="w-4 h-4" /> 解説レベル
-                                </label>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <Button
-                                        variant={depth === 'professional' ? 'default' : 'outline'}
-                                        onClick={() => setDepth('professional')}
-                                        className={cn(
-                                            "rounded-xl h-12 shadow-none border-gray-200",
-                                            depth === 'professional' ? "bg-orange-100 text-orange-700 hover:bg-orange-200 border-transparent" : "text-gray-500"
-                                        )}
-                                    >
-                                        専門的
-                                    </Button>
-                                    <Button
-                                        variant={depth === 'beginner' ? 'default' : 'outline'}
-                                        onClick={() => setDepth('beginner')}
-                                        className={cn(
-                                            "rounded-xl h-12 shadow-none border-gray-200",
-                                            depth === 'beginner' ? "bg-green-100 text-green-700 hover:bg-green-200 border-transparent" : "text-gray-500"
-                                        )}
-                                    >
-                                        初心者向け
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Model Selection */}
-                        <div className="space-y-3 pt-2">
+                {/* Configuration - Always visible */}
+                <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Persona Selection */}
+                        <div className="space-y-3">
                             <label className="text-xs font-bold text-muted-foreground flex items-center gap-2">
-                                <Brain className="w-4 h-4" /> AIモデル選択
+                                <User className="w-4 h-4" /> 相談相手
                             </label>
-                            <div className="grid grid-cols-3 gap-3">
+                            <div className="grid grid-cols-2 gap-3">
                                 <Button
-                                    variant={model === 'gemini-3.0-pro-high' ? 'default' : 'outline'}
-                                    onClick={() => setModel('gemini-3.0-pro-high')}
+                                    variant={persona === 'jiya' ? 'default' : 'outline'}
+                                    onClick={() => setPersona('jiya')}
                                     className={cn(
-                                        "rounded-xl h-auto py-3 shadow-none border-gray-200 flex flex-col items-center gap-1",
-                                        model === 'gemini-3.0-pro-high' ? "bg-purple-100 text-purple-700 hover:bg-purple-200 border-transparent ring-2 ring-purple-500/20" : "text-gray-500"
+                                        "rounded-xl h-12 shadow-none border-gray-200",
+                                        persona === 'jiya' ? "bg-orange-100 text-orange-700 hover:bg-orange-200 border-transparent" : "text-gray-500"
                                     )}
                                 >
-                                    <span className="font-bold text-sm">Pro High</span>
-                                    <span className="text-[10px] opacity-80 font-normal">熟考・最大性能</span>
+                                    👴 老執事
                                 </Button>
                                 <Button
-                                    variant={model === 'gemini-3.0-pro-low' ? 'default' : 'outline'}
-                                    onClick={() => setModel('gemini-3.0-pro-low')}
+                                    variant={persona === 'master' ? 'default' : 'outline'}
+                                    onClick={() => setPersona('master')}
                                     className={cn(
-                                        "rounded-xl h-auto py-3 shadow-none border-gray-200 flex flex-col items-center gap-1",
-                                        model === 'gemini-3.0-pro-low' ? "bg-blue-100 text-blue-700 hover:bg-blue-200 border-transparent ring-2 ring-blue-500/20" : "text-gray-500"
+                                        "rounded-xl h-12 shadow-none border-gray-200",
+                                        persona === 'master' ? "bg-slate-100 text-slate-700 hover:bg-slate-200 border-transparent" : "text-gray-500"
                                     )}
                                 >
-                                    <span className="font-bold text-sm">Pro Low</span>
-                                    <span className="text-[10px] opacity-80 font-normal">通常・バランス</span>
-                                </Button>
-                                <Button
-                                    variant={model === 'gemini-flash' ? 'default' : 'outline'}
-                                    onClick={() => setModel('gemini-flash')}
-                                    className={cn(
-                                        "rounded-xl h-auto py-3 shadow-none border-gray-200 flex flex-col items-center gap-1",
-                                        model === 'gemini-flash' ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 border-transparent ring-2 ring-yellow-500/20" : "text-gray-500"
-                                    )}
-                                >
-                                    <span className="flex items-center gap-1 font-bold text-sm"><Zap className="w-3 h-3" /> Flash</span>
-                                    <span className="text-[10px] opacity-80 font-normal">Gemini 3 Flash</span>
+                                    ⚔️ 師匠
                                 </Button>
                             </div>
                         </div>
 
-                        <Button
-                            size="lg"
-                            className="w-full h-14 rounded-2xl bg-foreground text-background hover:bg-foreground/90 shadow-lg font-bold text-lg mt-4"
-                            onClick={handleInitialConsult}
-                            disabled={loading}
-                        >
-                            {loading ? (
-                                <span className="flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-orange-400 animate-ping" />
-                                    思考中...
-                                </span>
-                            ) : (
-                                "鑑定結果を読み解く"
-                            )}
-                        </Button>
-                    </>
-                )}
+                        {/* Depth Selection */}
+                        <div className="space-y-3">
+                            <label className="text-xs font-bold text-muted-foreground flex items-center gap-2">
+                                <BookOpen className="w-4 h-4" /> 解説レベル
+                            </label>
+                            <div className="grid grid-cols-2 gap-3">
+                                <Button
+                                    variant={depth === 'professional' ? 'default' : 'outline'}
+                                    onClick={() => setDepth('professional')}
+                                    className={cn(
+                                        "rounded-xl h-12 shadow-none border-gray-200",
+                                        depth === 'professional' ? "bg-orange-100 text-orange-700 hover:bg-orange-200 border-transparent" : "text-gray-500"
+                                    )}
+                                >
+                                    専門的
+                                </Button>
+                                <Button
+                                    variant={depth === 'beginner' ? 'default' : 'outline'}
+                                    onClick={() => setDepth('beginner')}
+                                    className={cn(
+                                        "rounded-xl h-12 shadow-none border-gray-200",
+                                        depth === 'beginner' ? "bg-green-100 text-green-700 hover:bg-green-200 border-transparent" : "text-gray-500"
+                                    )}
+                                >
+                                    初心者向け
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Model Selection */}
+                    <div className="space-y-3 pt-2">
+                        <label className="text-xs font-bold text-muted-foreground flex items-center gap-2">
+                            <Brain className="w-4 h-4" /> AIモデル選択
+                        </label>
+                        <div className="grid grid-cols-3 gap-3">
+                            <Button
+                                variant={model === 'gemini-3.0-pro-high' ? 'default' : 'outline'}
+                                onClick={() => setModel('gemini-3.0-pro-high')}
+                                className={cn(
+                                    "rounded-xl h-auto py-3 shadow-none border-gray-200 flex flex-col items-center gap-1",
+                                    model === 'gemini-3.0-pro-high' ? "bg-purple-100 text-purple-700 hover:bg-purple-200 border-transparent ring-2 ring-purple-500/20" : "text-gray-500"
+                                )}
+                            >
+                                <span className="font-bold text-sm">Pro High</span>
+                                <span className="text-[10px] opacity-80 font-normal">熟考・最大性能</span>
+                            </Button>
+                            <Button
+                                variant={model === 'gemini-3.0-pro-low' ? 'default' : 'outline'}
+                                onClick={() => setModel('gemini-3.0-pro-low')}
+                                className={cn(
+                                    "rounded-xl h-auto py-3 shadow-none border-gray-200 flex flex-col items-center gap-1",
+                                    model === 'gemini-3.0-pro-low' ? "bg-blue-100 text-blue-700 hover:bg-blue-200 border-transparent ring-2 ring-blue-500/20" : "text-gray-500"
+                                )}
+                            >
+                                <span className="font-bold text-sm">Pro Low</span>
+                                <span className="text-[10px] opacity-80 font-normal">通常・バランス</span>
+                            </Button>
+                            <Button
+                                variant={model === 'gemini-flash' ? 'default' : 'outline'}
+                                onClick={() => setModel('gemini-flash')}
+                                className={cn(
+                                    "rounded-xl h-auto py-3 shadow-none border-gray-200 flex flex-col items-center gap-1",
+                                    model === 'gemini-flash' ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 border-transparent ring-2 ring-yellow-500/20" : "text-gray-500"
+                                )}
+                            >
+                                <span className="flex items-center gap-1 font-bold text-sm"><Zap className="w-3 h-3" /> Flash</span>
+                                <span className="text-[10px] opacity-80 font-normal">Gemini 3 Flash</span>
+                            </Button>
+                        </div>
+                    </div>
+
+                    <Button
+                        size="lg"
+                        className="w-full h-14 rounded-2xl bg-foreground text-background hover:bg-foreground/90 shadow-lg font-bold text-lg mt-4"
+                        onClick={handleInitialConsult}
+                        disabled={loading}
+                    >
+                        {loading ? (
+                            <span className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-orange-400 animate-ping" />
+                                思考中...
+                            </span>
+                        ) : (
+                            "鑑定結果を読み解く"
+                        )}
+                    </Button>
+                </>
+
 
                 {/* Chat Messages */}
                 {messages.length > 0 && (
