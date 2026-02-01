@@ -7,7 +7,7 @@ import { ResultGrid, BentoItem } from './ResultGrid';
 import { InsenCard } from './InsenCard';
 import { YosenCard } from './YosenCard';
 import { DaiunCard } from './DaiunCard';
-import { AiStrategist, AiModel } from './StrategistCard';
+import { AiStrategist, AiModel, AiPersona } from './StrategistCard';
 
 // Types definition
 interface SanmeiReport {
@@ -92,7 +92,7 @@ export default function Calculator() {
     }
 
     const handleAiConsultation = async (
-        persona: 'jiya' | 'master',
+        persona: AiPersona,
         depth: 'professional' | 'beginner',
         model: AiModel,
         message?: string,

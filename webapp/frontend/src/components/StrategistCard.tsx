@@ -12,9 +12,11 @@ interface ChatMessage {
 
 export type AiModel = 'gemini-3.0-pro-high' | 'gemini-3.0-pro-low' | 'gemini-flash';
 
+export type AiPersona = 'jiya' | 'master' | 'tokyo_mother' | 'onmyoji';
+
 interface AiStrategistProps {
     onConsult: (
-        persona: 'jiya' | 'master',
+        persona: AiPersona,
         depth: 'professional' | 'beginner',
         model: AiModel,
         message?: string,
@@ -25,7 +27,7 @@ interface AiStrategistProps {
 }
 
 export function AiStrategist({ onConsult, loading, className }: AiStrategistProps) {
-    const [persona, setPersona] = useState<'jiya' | 'master'>('jiya');
+    const [persona, setPersona] = useState<AiPersona>('onmyoji');
     const [depth, setDepth] = useState<'professional' | 'beginner'>('professional');
     const [model, setModel] = useState<AiModel>('gemini-3.0-pro-high');
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -102,26 +104,50 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                             <label className="text-xs font-bold text-muted-foreground flex items-center gap-2">
                                 <User className="w-4 h-4" /> 相談相手
                             </label>
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-2 gap-2">
+                                <Button
+                                    variant={persona === 'onmyoji' ? 'default' : 'outline'}
+                                    onClick={() => setPersona('onmyoji')}
+                                    className={cn(
+                                        "rounded-xl h-auto py-2 shadow-none border-gray-200 flex flex-col items-center gap-0.5",
+                                        persona === 'onmyoji' ? "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 border-transparent ring-2 ring-indigo-500/20" : "text-gray-500"
+                                    )}
+                                >
+                                    <span className="text-lg">🌙</span>
+                                    <span className="font-bold text-xs">現代の陰陽師</span>
+                                </Button>
+                                <Button
+                                    variant={persona === 'tokyo_mother' ? 'default' : 'outline'}
+                                    onClick={() => setPersona('tokyo_mother')}
+                                    className={cn(
+                                        "rounded-xl h-auto py-2 shadow-none border-gray-200 flex flex-col items-center gap-0.5",
+                                        persona === 'tokyo_mother' ? "bg-pink-100 text-pink-700 hover:bg-pink-200 border-transparent ring-2 ring-pink-500/20" : "text-gray-500"
+                                    )}
+                                >
+                                    <span className="text-lg">👩</span>
+                                    <span className="font-bold text-xs">東京の母</span>
+                                </Button>
                                 <Button
                                     variant={persona === 'jiya' ? 'default' : 'outline'}
                                     onClick={() => setPersona('jiya')}
                                     className={cn(
-                                        "rounded-xl h-12 shadow-none border-gray-200",
-                                        persona === 'jiya' ? "bg-orange-100 text-orange-700 hover:bg-orange-200 border-transparent" : "text-gray-500"
+                                        "rounded-xl h-auto py-2 shadow-none border-gray-200 flex flex-col items-center gap-0.5",
+                                        persona === 'jiya' ? "bg-orange-100 text-orange-700 hover:bg-orange-200 border-transparent ring-2 ring-orange-500/20" : "text-gray-500"
                                     )}
                                 >
-                                    👴 老執事
+                                    <span className="text-lg">👴</span>
+                                    <span className="font-bold text-xs">老執事</span>
                                 </Button>
                                 <Button
                                     variant={persona === 'master' ? 'default' : 'outline'}
                                     onClick={() => setPersona('master')}
                                     className={cn(
-                                        "rounded-xl h-12 shadow-none border-gray-200",
-                                        persona === 'master' ? "bg-slate-100 text-slate-700 hover:bg-slate-200 border-transparent" : "text-gray-500"
+                                        "rounded-xl h-auto py-2 shadow-none border-gray-200 flex flex-col items-center gap-0.5",
+                                        persona === 'master' ? "bg-slate-100 text-slate-700 hover:bg-slate-200 border-transparent ring-2 ring-slate-500/20" : "text-gray-500"
                                     )}
                                 >
-                                    ⚔️ 師匠
+                                    <span className="text-lg">⚔️</span>
+                                    <span className="font-bold text-xs">師匠</span>
                                 </Button>
                             </div>
                         </div>
