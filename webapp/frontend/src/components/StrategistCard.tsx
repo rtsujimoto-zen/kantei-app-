@@ -194,7 +194,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                                     )}
                                 >
                                     <span className="flex items-center gap-1 font-bold text-sm"><Zap className="w-3 h-3" /> Flash</span>
-                                    <span className="text-[10px] opacity-80 font-normal">超高速・軽量</span>
+                                    <span className="text-[10px] opacity-80 font-normal">Gemini 3 Flash</span>
                                 </Button>
                             </div>
                         </div>

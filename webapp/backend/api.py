@@ -136,7 +136,7 @@ def ai_consult(req: AiConsultRequest):
              model_name = "gemini-3-pro-preview"
              # No thinking config (Standard/Low reasoning)
         elif req.model == "gemini-flash":
-             model_name = "gemini-2.0-flash-001" # Using latest confirmed Flash
+             model_name = "gemini-3-flash-preview" # Using gemini-3-flash-preview as requested
         
         if req.message and len(req.history) > 0:
             contents = []
