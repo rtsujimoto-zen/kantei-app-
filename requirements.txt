@@ -2,4 +2,4 @@ fastapi
 uvicorn[standard]
 python-dateutil
 pydantic
-google-generativeai
+google-cloud-aiplatform

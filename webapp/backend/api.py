@@ -1,74 +1,59 @@
 from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
-import datetime
-import sys
+import uvicorn
 import os
-
-# Add project root to sys.path to access sanmei_engine.py
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
-sys.path.insert(0, project_root)
+import json
+import tempfile
 from sanmei_engine import SanmeiEngine
 
-app = FastAPI(title="Teiou Logic API", version="1.0.0")
+# Vertex AI imports
+import vertexai
+from vertexai.generative_models import GenerativeModel, ChatSession
+from google.oauth2 import service_account
 
-# CORS Configuration
+app = FastAPI()
+
+# ============================================
+# CORS (Cross-Origin Resource Sharing) Setup
+# ============================================
+from fastapi.middleware.cors import CORSMiddleware
+
+origins = [
+    "http://localhost:3000",
+    "https://kantei-app.onrender.com",
+    "https://app.the-zen-terra.com",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all for now, restrict after deployment
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-class CalculationRequest(BaseModel):
-    birthday: str  # YYYY-MM-DD or YYYY/MM/DD
-    gender: str    # "M" or "F"
-
-@app.get("/")
-def read_root():
-    return {"status": "ok", "service": "Teiou Logic API"}
+# ============================================
+# Calculation Endpoint
+# ============================================
+class CalcRequest(BaseModel):
+    birthday: str
+    gender: str
 
 @app.post("/calculate")
-def calculate(req: CalculationRequest):
+def calculate(req: CalcRequest):
     try:
-        # Date Parsing
-        date_str = req.birthday.replace("/", "-")
-        y, m, d = map(int, date_str.split("-"))
-        
-        engine = SanmeiEngine(y, m, d)
-        report = engine.get_full_report(req.gender)
-        
-        # Add Tenchusatsu Timing (Extension)
-        timing = engine.get_tenchusatsu_timing_info()
-        if timing:
-            report["天中殺"]["タイミング"] = timing
-            
-        # Add Aliases for Junidai Jusei (Frontend convenience)
-        # 陽占の十二大従星に言い換えを追加した辞書を作成
-        junidai_with_alias = {}
-        if "十二大従星" in report["陽占"]:
-            for k, v in report["陽占"]["十二大従星"].items():
-                base_name = v.replace("星", "")
-                alias = SanmeiEngine.JUNIDAI_JUSEI_KEYWORDS.get(base_name, "")
-                junidai_with_alias[k] = {"name": v, "alias": alias, "full": f"{v} {alias}"}
-            report["陽占"]["十二大従星詳細"] = junidai_with_alias
-
-        # Add Prompt-Ready Text Output
-        report["output_text"] = engine.format_as_text_report(report)
-
-        return report
-
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
+        engine = SanmeiEngine()
+        report = engine.generate_report(req.birthday, req.gender)
+        return {"report": report}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 # ============================================
-# AI Strategist Endpoint (Vertex AI / Gemini)
+# AI Strategist Endpoint (Vertex AI)
 # ============================================
-import google.generativeai as genai
 
 class ChatMessage(BaseModel):
     role: str  # "user" or "assistant"
@@ -83,14 +68,31 @@ class AiConsultRequest(BaseModel):
 
 @app.post("/ai/consult")
 def ai_consult(req: AiConsultRequest):
-    api_key = os.environ.get("GOOGLE_API_KEY")
-    if not api_key:
-        raise HTTPException(status_code=500, detail="API key not configured")
+    # 1. Retrieve Credential JSON from Environment Variable
+    creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
+    project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
+    location = os.environ.get("GOOGLE_CLOUD_REGION", "us-central1")
     
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    if not creds_json:
+        raise HTTPException(status_code=500, detail="Vertex AI credentials not configured (GOOGLE_CREDENTIALS_JSON missing)")
+
+    try:
+        # Parse credentials from JSON string
+        creds_dict = json.loads(creds_json)
+        credentials = service_account.Credentials.from_service_account_info(creds_dict)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="Invalid JSON credentials format")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Credential error: {str(e)}")
+
+    # 2. Initialize Vertex AI
+    try:
+        vertexai.init(project=project_id, location=location, credentials=credentials)
+        model = GenerativeModel("gemini-1.5-flash")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Vertex AI initialization failed: {str(e)}")
     
-    # Build persona-specific system instruction
+    # 3. Build prompts
     if req.persona == "jiya":
         persona_instruction = """あなたは「老執事」です。長年主人に仕えてきた知恵深い執事として、
 丁寧かつ温かみのある口調で算命学の鑑定結果を解説してください。
@@ -115,18 +117,18 @@ def ai_consult(req: AiConsultRequest):
 
 {output_text}"""
 
+    # 4. Generate Content (Chat or Single)
     try:
-        # If this is a follow-up message, use chat history
         if req.message and len(req.history) > 0:
-            # Build conversation history for Gemini
-            gemini_history = []
+            # Build history for Vertex AI Chat
+            vertex_history = []
             for msg in req.history:
-                gemini_history.append({
+                vertex_history.append({
                     "role": "user" if msg.role == "user" else "model",
-                    "parts": [msg.content]
+                    "parts": [{"text": msg.content}]
                 })
             
-            chat = model.start_chat(history=gemini_history)
+            chat = model.start_chat(history=vertex_history)
             response = chat.send_message(f"{system_context}\n\nユーザーからの追加質問: {req.message}")
         else:
             # Initial consultation
@@ -142,4 +144,3 @@ def ai_consult(req: AiConsultRequest):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
