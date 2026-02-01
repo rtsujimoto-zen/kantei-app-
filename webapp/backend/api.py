@@ -122,21 +122,22 @@ def ai_consult(req: AiConsultRequest):
     # 4. Generate Content (Chat or Single)
     try:
         # Determine Model and Config
-        model_name = "gemini-3-pro-preview"
+        # Fallback to stable models due to 404 on Preview/Experimental models
+        model_name = "gemini-1.5-pro-002"
         config = None
 
         if req.model == "gemini-3.0-pro-high":
-            model_name = "gemini-3-pro-preview"
-            config = genai.types.GenerateContentConfig(
-                thinking_config=genai.types.ThinkingConfig(
-                    thinking_level="HIGH"
-                )
-            )
+            # high reasoning -> 1.5 Pro 002 (Stable High Intelligence)
+            model_name = "gemini-1.5-pro-002"
+            # thinking_config removed for stability
+            
         elif req.model == "gemini-3.0-pro-low":
-             model_name = "gemini-3-pro-preview"
-             # No thinking config (Standard/Low reasoning)
+             # balanced -> 2.0 Flash (Good reasoning, fast)
+             model_name = "gemini-2.0-flash-001"
+             
         elif req.model == "gemini-flash":
-             model_name = "gemini-3-flash-preview" # Using gemini-3-flash-preview as requested
+             # fast -> 2.0 Flash
+             model_name = "gemini-2.0-flash-001"
         
         if req.message and len(req.history) > 0:
             contents = []
