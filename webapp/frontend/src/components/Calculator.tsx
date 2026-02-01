@@ -56,7 +56,7 @@ export default function Calculator() {
         setError('');
         setCopySuccess('');
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://kantei-app.onrender.com';
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://kantei-api-538317999249.us-central1.run.app';
             const res = await fetch(`${apiUrl}/calculate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -65,7 +65,7 @@ export default function Calculator() {
             if (!res.ok) throw new Error('Failed to fetch data');
             const data = await res.json();
             console.log("API Response:", data); // Debug logging
-            setReport(data);
+            setReport(data.report);
         } catch (err: any) {
             console.error(err);
             setError(err.message || 'An error occurred');
@@ -251,27 +251,29 @@ export default function Calculator() {
                                 <DaiunCard data={report.大運} />
                             </BentoItem>
 
-                            {/* Row 3: Prompt Data (output_text) */}
+                            {/* Row 5: Prompt Data (Copy) */}
                             {report.output_text && (
-                                <BentoItem colSpan="md:col-span-12" delay={0.45}>
-                                    <Card className="border-none shadow-soft rounded-3xl bg-stone-900 overflow-hidden">
-                                        <CardHeader className="flex flex-row items-center justify-between">
-                                            <CardTitle className="text-stone-300 text-lg font-mono tracking-widest">PROMPT DATA</CardTitle>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={handleCopyText}
-                                                className="text-stone-400 hover:text-white hover:bg-stone-800"
-                                            >
-                                                {copySuccess || 'Copy'}
-                                            </Button>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <pre className="bg-black/50 p-4 rounded-xl text-stone-300 text-xs font-mono whitespace-pre-wrap overflow-x-auto max-h-[300px] overflow-y-auto">
-                                                {report.output_text}
-                                            </pre>
-                                        </CardContent>
-                                    </Card>
+                                <BentoItem colSpan="md:col-span-12" delay={0.6}>
+                                    <div className="mx-auto max-w-4xl">
+                                        <Card className="glass-card border-none rounded-3xl overflow-hidden">
+                                            <CardHeader className="flex flex-row items-center justify-between pb-2 bg-black/20">
+                                                <CardTitle className="text-sm font-bold text-stone-400 tracking-widest font-mono pl-2">PROMPT DATA</CardTitle>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={handleCopyText}
+                                                    className="text-stone-400 hover:text-white hover:bg-stone-800"
+                                                >
+                                                    {copySuccess || 'Copy'}
+                                                </Button>
+                                            </CardHeader>
+                                            <CardContent className="p-0">
+                                                <pre className="bg-black/80 p-6 text-stone-300 text-xs font-mono whitespace-pre-wrap overflow-x-auto max-h-[300px] overflow-y-auto leading-relaxed">
+                                                    {report.output_text}
+                                                </pre>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
                                 </BentoItem>
                             )}
 

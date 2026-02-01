@@ -53,8 +53,8 @@ def calculate(req: CalcRequest):
         report = engine.get_full_report(req.gender)
         
         # Generate text representation for AI context
-        text_lines = engine.format_as_text_report(report)
-        report["output_text"] = "\n".join(text_lines)
+        text_report = engine.format_as_text_report(report)
+        report["output_text"] = text_report
         
         return {"report": report}
     except ValueError as e:
