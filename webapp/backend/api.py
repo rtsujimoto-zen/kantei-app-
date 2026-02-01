@@ -81,9 +81,10 @@ class AiConsultRequest(BaseModel):
 
 @app.post("/ai/consult")
 def ai_consult(req: AiConsultRequest):
-    # ... (initialization code) ...
+    # Initialize Google Gen AI Client
     project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
-    location = os.environ.get("GOOGLE_CLOUD_REGION", "us-central1")
+    # Gemini 3 Preview models require the GLOBAL endpoint, not regional
+    location = "global"
     
     try:
         client = genai.Client(
