@@ -99,10 +99,8 @@ def ai_consult(req: AiConsultRequest):
     else:
         depth_instruction = "算命学の専門用語を適切に使い、深い洞察を提供してください。"
     
-    # Extract key info from report
-    insen = req.report.get("陰占", {})
-    yosen = req.report.get("陽占", {})
-    tenchusatsu = req.report.get("天中殺", {})
+    # Use the pre-formatted output_text (same as PROMPT DATA copy content)
+    output_text = req.report.get("output_text", "鑑定データがありません")
     
     prompt = f"""{persona_instruction}
 
@@ -110,20 +108,7 @@ def ai_consult(req: AiConsultRequest):
 
 以下の算命学鑑定結果を解説してください：
 
-【陰占】
-日干: {insen.get('日', '不明')}
-月干: {insen.get('月', '不明')}
-年干: {insen.get('年', '不明')}
-
-【陽占・十大主星】
-胸（中心）: {yosen.get('十大主星', {}).get('胸', '不明')}
-頭（北）: {yosen.get('十大主星', {}).get('頭', '不明')}
-左手（東）: {yosen.get('十大主星', {}).get('左手', '不明')}
-右手（西）: {yosen.get('十大主星', {}).get('右手', '不明')}
-腹（南）: {yosen.get('十大主星', {}).get('腹', '不明')}
-
-【天中殺】
-グループ: {tenchusatsu.get('グループ', '不明')}天中殺
+{output_text}
 
 この人の本質、強み、弱み、そして人生のアドバイスを300〜500文字程度で述べてください。"""
 
