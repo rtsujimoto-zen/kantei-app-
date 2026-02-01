@@ -68,26 +68,14 @@ class AiConsultRequest(BaseModel):
 
 @app.post("/ai/consult")
 def ai_consult(req: AiConsultRequest):
-    # 1. Retrieve Credential JSON from Environment Variable
-    creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
+    # 1. Initialize Vertex AI with ADC (Application Default Credentials)
+    # Cloud Run automatically provides credentials via the Metadata Server.
     project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
     location = os.environ.get("GOOGLE_CLOUD_REGION", "us-central1")
     
-    if not creds_json:
-        raise HTTPException(status_code=500, detail="Vertex AI credentials not configured (GOOGLE_CREDENTIALS_JSON missing)")
-
     try:
-        # Parse credentials from JSON string
-        creds_dict = json.loads(creds_json)
-        credentials = service_account.Credentials.from_service_account_info(creds_dict)
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=500, detail="Invalid JSON credentials format")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Credential error: {str(e)}")
-
-    # 2. Initialize Vertex AI
-    try:
-        vertexai.init(project=project_id, location=location, credentials=credentials)
+        # No explicit credentials needed for Cloud Run
+        vertexai.init(project=project_id, location=location)
         model = GenerativeModel("gemini-1.5-flash")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Vertex AI initialization failed: {str(e)}")
