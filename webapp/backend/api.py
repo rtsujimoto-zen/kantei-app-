@@ -43,12 +43,24 @@ class CalcRequest(BaseModel):
 @app.post("/calculate")
 def calculate(req: CalcRequest):
     try:
-        engine = SanmeiEngine()
-        report = engine.generate_report(req.birthday, req.gender)
+        # Parse birthday string "YYYY-MM-DD"
+        y, m, d = map(int, req.birthday.split("-"))
+        
+        # Instantiate Engine with correct arguments
+        engine = SanmeiEngine(y, m, d)
+        
+        # Get structured report
+        report = engine.get_full_report(req.gender)
+        
+        # Generate text representation for AI context
+        text_lines = engine.format_as_text_report(report)
+        report["output_text"] = "\n".join(text_lines)
+        
         return {"report": report}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        print(f"Error: {e}") # Add logging for debugging
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 # ============================================
