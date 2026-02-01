@@ -8,9 +8,9 @@ import tempfile
 from sanmei_engine import SanmeiEngine
 
 # Vertex AI imports
-import vertexai
-from vertexai.generative_models import GenerativeModel, ChatSession
-from google.oauth2 import service_account
+# Vertex AI imports
+from google import genai
+from google.genai.types import HttpOptions
 
 app = FastAPI()
 
@@ -64,7 +64,7 @@ def calculate(req: CalcRequest):
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 # ============================================
-# AI Strategist Endpoint (Vertex AI)
+# AI Strategist Endpoint (Vertex AI via google-genai)
 # ============================================
 
 class ChatMessage(BaseModel):
@@ -80,17 +80,19 @@ class AiConsultRequest(BaseModel):
 
 @app.post("/ai/consult")
 def ai_consult(req: AiConsultRequest):
-    # 1. Initialize Vertex AI with ADC (Application Default Credentials)
-    # Cloud Run automatically provides credentials via the Metadata Server.
+    # 1. Initialize Google Gen AI Client
+    # Cloud Run automatically provides credentials (ADC)
     project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
     location = os.environ.get("GOOGLE_CLOUD_REGION", "us-central1")
     
     try:
-        # No explicit credentials needed for Cloud Run
-        vertexai.init(project=project_id, location=location)
-        model = GenerativeModel("gemini-2.5-pro")
+        client = genai.Client(
+            vertexai=True,
+            project=project_id, 
+            location=location
+        )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Vertex AI initialization failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"GenAI Client initialization failed: {str(e)}")
     
     # 3. Build prompts
     if req.persona == "jiya":
@@ -119,26 +121,51 @@ def ai_consult(req: AiConsultRequest):
 
     # 4. Generate Content (Chat or Single)
     try:
+        model_name = "gemini-2.5-pro" # Using stable 2.5 Pro as confirmed in docs
+        
         if req.message and len(req.history) > 0:
-            # Build history for Vertex AI Chat
-            vertex_history = []
-            for msg in req.history:
-                vertex_history.append({
-                    "role": "user" if msg.role == "user" else "model",
-                    "parts": [{"text": msg.content}]
-                })
+            # Build history for Chat
+            # Note: google-genai SDK handles history slightly differently or we can simply pass last user message + context in prompt 
+            # or use the 'contents' parameter properly with alternating roles.
             
-            chat = model.start_chat(history=vertex_history)
-            response = chat.send_message(f"{system_context}\n\nユーザーからの追加質問: {req.message}")
+            contents = []
+            # Inject system context as the first user message or system instruction if supported.
+            # For simplicity and robustness with the new SDK, we'll prepend context to the session.
+            
+            # Reconstruct history objects
+            # The SDK expects 'role' to be 'user' or 'model'
+            for msg in req.history:
+                role = "user" if msg.role == "user" else "model"
+                contents.append(genai.types.Content(
+                    role=role,
+                    parts=[genai.types.Part.from_text(text=msg.content)]
+                ))
+            
+            # The new request
+            full_prompt = f"{system_context}\n\nユーザーからの追加質問: {req.message}"
+            contents.append(genai.types.Content(
+                role="user",
+                parts=[genai.types.Part.from_text(text=full_prompt)]
+            ))
+
+            response = client.models.generate_content(
+                model=model_name,
+                contents=contents
+            )
         else:
             # Initial consultation
             prompt = f"""{system_context}
 
 この人の本質、強み、弱み、そして人生のアドバイスを300〜500文字程度で述べてください。"""
-            response = model.generate_content(prompt)
+            
+            response = client.models.generate_content(
+                model=model_name,
+                contents=prompt
+            )
         
         return {"response": response.text}
     except Exception as e:
+        print(f"GenAI Error: {e}")
         raise HTTPException(status_code=500, detail=f"AI generation failed: {str(e)}")
 
 if __name__ == "__main__":
