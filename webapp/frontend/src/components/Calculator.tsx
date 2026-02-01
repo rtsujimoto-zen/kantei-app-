@@ -45,7 +45,6 @@ export default function Calculator() {
 
     // AI Strategist State
     const [isAiLoading, setIsAiLoading] = useState(false);
-    const [aiResult, setAiResult] = useState<string | null>(null);
 
 
     useEffect(() => {
@@ -87,17 +86,32 @@ export default function Calculator() {
         }
     };
 
-    const handleAiConsultation = async (persona: 'jiya' | 'master', depth: 'professional' | 'beginner') => {
-        if (!report) return;
+    interface ChatMessage {
+        role: 'user' | 'assistant';
+        content: string;
+    }
+
+    const handleAiConsultation = async (
+        persona: 'jiya' | 'master',
+        depth: 'professional' | 'beginner',
+        message?: string,
+        history?: ChatMessage[]
+    ): Promise<string | null> => {
+        if (!report) return null;
         setIsAiLoading(true);
-        setAiResult(null);
 
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://kantei-app.onrender.com';
             const res = await fetch(`${apiUrl}/ai/consult`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ report, persona, depth }),
+                body: JSON.stringify({
+                    report,
+                    persona,
+                    depth,
+                    message,
+                    history: history || []
+                }),
             });
 
             if (!res.ok) {
@@ -106,10 +120,10 @@ export default function Calculator() {
             }
 
             const data = await res.json();
-            setAiResult(data.response);
+            return data.response;
         } catch (err: any) {
             console.error('AI consultation error:', err);
-            setAiResult(`エラー: ${err.message || 'AI軍師への接続に失敗しました'}`);
+            return `エラー: ${err.message || 'AI軍師への接続に失敗しました'}`;
         } finally {
             setIsAiLoading(false);
         }
@@ -266,7 +280,6 @@ export default function Calculator() {
                                 <AiStrategist
                                     onConsult={handleAiConsultation}
                                     loading={isAiLoading}
-                                    result={aiResult}
                                 />
                             </BentoItem>
 

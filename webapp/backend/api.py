@@ -70,10 +70,16 @@ def calculate(req: CalculationRequest):
 # ============================================
 import google.generativeai as genai
 
+class ChatMessage(BaseModel):
+    role: str  # "user" or "assistant"
+    content: str
+
 class AiConsultRequest(BaseModel):
     report: dict
     persona: str = "jiya"  # "jiya" or "master"
     depth: str = "professional"  # "professional" or "beginner"
+    message: Optional[str] = None  # Follow-up message
+    history: list[ChatMessage] = []  # Chat history
 
 @app.post("/ai/consult")
 def ai_consult(req: AiConsultRequest):
@@ -84,7 +90,7 @@ def ai_consult(req: AiConsultRequest):
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel("gemini-1.5-flash")
     
-    # Build persona-specific prompt
+    # Build persona-specific system instruction
     if req.persona == "jiya":
         persona_instruction = """あなたは「老執事」です。長年主人に仕えてきた知恵深い執事として、
 丁寧かつ温かみのある口調で算命学の鑑定結果を解説してください。
@@ -99,21 +105,36 @@ def ai_consult(req: AiConsultRequest):
     else:
         depth_instruction = "算命学の専門用語を適切に使い、深い洞察を提供してください。"
     
-    # Use the pre-formatted output_text (same as PROMPT DATA copy content)
     output_text = req.report.get("output_text", "鑑定データがありません")
     
-    prompt = f"""{persona_instruction}
+    system_context = f"""{persona_instruction}
 
 {depth_instruction}
 
-以下の算命学鑑定結果を解説してください：
+以下はこの人の算命学鑑定結果です：
 
-{output_text}
-
-この人の本質、強み、弱み、そして人生のアドバイスを300〜500文字程度で述べてください。"""
+{output_text}"""
 
     try:
-        response = model.generate_content(prompt)
+        # If this is a follow-up message, use chat history
+        if req.message and len(req.history) > 0:
+            # Build conversation history for Gemini
+            gemini_history = []
+            for msg in req.history:
+                gemini_history.append({
+                    "role": "user" if msg.role == "user" else "model",
+                    "parts": [msg.content]
+                })
+            
+            chat = model.start_chat(history=gemini_history)
+            response = chat.send_message(f"{system_context}\n\nユーザーからの追加質問: {req.message}")
+        else:
+            # Initial consultation
+            prompt = f"""{system_context}
+
+この人の本質、強み、弱み、そして人生のアドバイスを300〜500文字程度で述べてください。"""
+            response = model.generate_content(prompt)
+        
         return {"response": response.text}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"AI generation failed: {str(e)}")
