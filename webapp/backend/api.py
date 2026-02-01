@@ -188,7 +188,16 @@ def ai_consult(req: AiConsultRequest):
              model_name = "gemini-3-flash-preview"
         
         if req.message and len(req.history) > 0:
+            # Follow-up conversation: Include history and ask naturally
             contents = []
+            
+            # Add system context as the first message in the conversation
+            contents.append(genai.types.Content(
+                role="user",
+                parts=[genai.types.Part.from_text(text=f"{system_context}\n\n上記のフォーマットに従って、この人の宿命を読み解いてください。")]
+            ))
+            
+            # Add previous conversation history
             for msg in req.history:
                 role = "user" if msg.role == "user" else "model"
                 contents.append(genai.types.Content(
@@ -196,10 +205,14 @@ def ai_consult(req: AiConsultRequest):
                     parts=[genai.types.Part.from_text(text=msg.content)]
                 ))
             
-            full_prompt = f"{system_context}\n\nユーザーからの追加質問: {req.message}"
+            # Add current follow-up question with continuation instruction
+            follow_up_prompt = f"""{req.message}
+
+（※これは前回の鑑定の続きです。話の流れを自然に繋げて、追加質問に答えてください。最初からやり直さず、前の回答を踏まえて深掘りしてください。）"""
+            
             contents.append(genai.types.Content(
                 role="user",
-                parts=[genai.types.Part.from_text(text=full_prompt)]
+                parts=[genai.types.Part.from_text(text=follow_up_prompt)]
             ))
 
             response = client.models.generate_content(
