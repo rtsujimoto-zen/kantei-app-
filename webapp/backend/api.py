@@ -121,19 +121,18 @@ def ai_consult(req: AiConsultRequest):
 
     # 4. Generate Content (Chat or Single)
     try:
-        model_name = "gemini-2.5-pro" # Using stable 2.5 Pro as confirmed in docs
+        model_name = "gemini-3-pro-preview" 
+        
+        # Configure thinking for high reasoning tasks (as per docs)
+        config = genai.types.GenerateContentConfig(
+            thinking_config=genai.types.ThinkingConfig(
+                thinking_level="HIGH"
+            )
+        )
         
         if req.message and len(req.history) > 0:
             # Build history for Chat
-            # Note: google-genai SDK handles history slightly differently or we can simply pass last user message + context in prompt 
-            # or use the 'contents' parameter properly with alternating roles.
-            
             contents = []
-            # Inject system context as the first user message or system instruction if supported.
-            # For simplicity and robustness with the new SDK, we'll prepend context to the session.
-            
-            # Reconstruct history objects
-            # The SDK expects 'role' to be 'user' or 'model'
             for msg in req.history:
                 role = "user" if msg.role == "user" else "model"
                 contents.append(genai.types.Content(
@@ -150,7 +149,8 @@ def ai_consult(req: AiConsultRequest):
 
             response = client.models.generate_content(
                 model=model_name,
-                contents=contents
+                contents=contents,
+                config=config
             )
         else:
             # Initial consultation
@@ -160,7 +160,8 @@ def ai_consult(req: AiConsultRequest):
             
             response = client.models.generate_content(
                 model=model_name,
-                contents=prompt
+                contents=prompt,
+                config=config
             )
         
         return {"response": response.text}
