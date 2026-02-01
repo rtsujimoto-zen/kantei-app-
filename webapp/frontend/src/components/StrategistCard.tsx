@@ -172,7 +172,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                                     )}
                                 >
                                     <span className="font-bold text-sm">Pro High</span>
-                                    <span className="text-[10px] opacity-80 font-normal">Gemini 1.5 Pro</span>
+                                    <span className="text-[10px] opacity-80 font-normal">熟考・最大性能</span>
                                 </Button>
                                 <Button
                                     variant={model === 'gemini-3.0-pro-low' ? 'default' : 'outline'}
@@ -183,7 +183,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                                     )}
                                 >
                                     <span className="font-bold text-sm">Pro Low</span>
-                                    <span className="text-[10px] opacity-80 font-normal">Gemini 2.0 Flash</span>
+                                    <span className="text-[10px] opacity-80 font-normal">通常・バランス</span>
                                 </Button>
                                 <Button
                                     variant={model === 'gemini-flash' ? 'default' : 'outline'}
@@ -194,7 +194,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                                     )}
                                 >
                                     <span className="flex items-center gap-1 font-bold text-sm"><Zap className="w-3 h-3" /> Flash</span>
-                                    <span className="text-[10px] opacity-80 font-normal">Gemini 2.0 Flash</span>
+                                    <span className="text-[10px] opacity-80 font-normal">Gemini 3 Flash</span>
                                 </Button>
                             </div>
                         </div>
