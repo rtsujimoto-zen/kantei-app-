@@ -3,15 +3,23 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, User, BookOpen, Copy, Check, Send } from "lucide-react";
+import { Sparkles, User, BookOpen, Copy, Check, Send, Zap, Brain } from "lucide-react";
 
 interface ChatMessage {
     role: 'user' | 'assistant';
     content: string;
 }
 
+export type AiModel = 'gemini-3.0-pro-high' | 'gemini-3.0-pro-low' | 'gemini-flash';
+
 interface AiStrategistProps {
-    onConsult: (persona: 'jiya' | 'master', depth: 'professional' | 'beginner', message?: string, history?: ChatMessage[]) => Promise<string | null>;
+    onConsult: (
+        persona: 'jiya' | 'master',
+        depth: 'professional' | 'beginner',
+        model: AiModel,
+        message?: string,
+        history?: ChatMessage[]
+    ) => Promise<string | null>;
     loading: boolean;
     className?: string;
 }
@@ -19,6 +27,7 @@ interface AiStrategistProps {
 export function AiStrategist({ onConsult, loading, className }: AiStrategistProps) {
     const [persona, setPersona] = useState<'jiya' | 'master'>('jiya');
     const [depth, setDepth] = useState<'professional' | 'beginner'>('professional');
+    const [model, setModel] = useState<AiModel>('gemini-3.0-pro-high');
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputValue, setInputValue] = useState('');
     const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -30,7 +39,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
     }, [messages]);
 
     const handleInitialConsult = async () => {
-        const response = await onConsult(persona, depth, undefined, []);
+        const response = await onConsult(persona, depth, model, undefined, []);
         if (response) {
             setMessages([{ role: 'assistant', content: response }]);
         }
@@ -44,7 +53,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
         setMessages(newHistory);
         setInputValue('');
 
-        const response = await onConsult(persona, depth, inputValue.trim(), messages);
+        const response = await onConsult(persona, depth, model, inputValue.trim(), messages);
         if (response) {
             setMessages([...newHistory, { role: 'assistant', content: response }]);
         }
@@ -80,12 +89,12 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                     AI軍師に相談する
                 </CardTitle>
                 <CardDescription className="text-orange-700/60">
-                    あなたの運勢について、専門的なアドバイスを受け取れます。
+                    最新のGeminiモデルを活用し、深い洞察と戦略を提供します。
                 </CardDescription>
             </CardHeader>
 
             <CardContent className="p-6 md:p-8 -mt-6 bg-white rounded-t-3xl relative z-10 space-y-6">
-                {/* Persona & Depth Selection (only show before first message) */}
+                {/* Initial Configuration (only show before first message) */}
                 {messages.length === 0 && (
                     <>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -148,9 +157,51 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                             </div>
                         </div>
 
+                        {/* Model Selection */}
+                        <div className="space-y-3 pt-2">
+                            <label className="text-xs font-bold text-muted-foreground flex items-center gap-2">
+                                <Brain className="w-4 h-4" /> AIモデル選択
+                            </label>
+                            <div className="grid grid-cols-3 gap-3">
+                                <Button
+                                    variant={model === 'gemini-3.0-pro-high' ? 'default' : 'outline'}
+                                    onClick={() => setModel('gemini-3.0-pro-high')}
+                                    className={cn(
+                                        "rounded-xl h-auto py-3 shadow-none border-gray-200 flex flex-col items-center gap-1",
+                                        model === 'gemini-3.0-pro-high' ? "bg-purple-100 text-purple-700 hover:bg-purple-200 border-transparent ring-2 ring-purple-500/20" : "text-gray-500"
+                                    )}
+                                >
+                                    <span className="font-bold text-sm">Pro High</span>
+                                    <span className="text-[10px] opacity-80 font-normal">熟考・最大性能</span>
+                                </Button>
+                                <Button
+                                    variant={model === 'gemini-3.0-pro-low' ? 'default' : 'outline'}
+                                    onClick={() => setModel('gemini-3.0-pro-low')}
+                                    className={cn(
+                                        "rounded-xl h-auto py-3 shadow-none border-gray-200 flex flex-col items-center gap-1",
+                                        model === 'gemini-3.0-pro-low' ? "bg-blue-100 text-blue-700 hover:bg-blue-200 border-transparent ring-2 ring-blue-500/20" : "text-gray-500"
+                                    )}
+                                >
+                                    <span className="font-bold text-sm">Pro Low</span>
+                                    <span className="text-[10px] opacity-80 font-normal">通常・バランス</span>
+                                </Button>
+                                <Button
+                                    variant={model === 'gemini-flash' ? 'default' : 'outline'}
+                                    onClick={() => setModel('gemini-flash')}
+                                    className={cn(
+                                        "rounded-xl h-auto py-3 shadow-none border-gray-200 flex flex-col items-center gap-1",
+                                        model === 'gemini-flash' ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 border-transparent ring-2 ring-yellow-500/20" : "text-gray-500"
+                                    )}
+                                >
+                                    <span className="flex items-center gap-1 font-bold text-sm"><Zap className="w-3 h-3" /> Flash</span>
+                                    <span className="text-[10px] opacity-80 font-normal">超高速・軽量</span>
+                                </Button>
+                            </div>
+                        </div>
+
                         <Button
                             size="lg"
-                            className="w-full h-14 rounded-2xl bg-foreground text-background hover:bg-foreground/90 shadow-lg font-bold text-lg"
+                            className="w-full h-14 rounded-2xl bg-foreground text-background hover:bg-foreground/90 shadow-lg font-bold text-lg mt-4"
                             onClick={handleInitialConsult}
                             disabled={loading}
                         >
@@ -202,8 +253,16 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                                                 {msg.role === 'user' ? '👤' : (persona === 'jiya' ? '👴' : '⚔️')}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <div className="text-xs font-bold text-muted-foreground mb-1">
-                                                    {msg.role === 'user' ? 'あなた' : (persona === 'jiya' ? '老執事' : '師匠')}
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className="text-xs font-bold text-muted-foreground">
+                                                        {msg.role === 'user' ? 'あなた' : (persona === 'jiya' ? '老執事' : '師匠')}
+                                                    </span>
+                                                    {msg.role !== 'user' && index === 0 && (
+                                                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-stone-100 text-stone-500 border border-stone-200">
+                                                            {model === 'gemini-3.0-pro-high' ? 'Gemini 3.0 Pro High' :
+                                                                model === 'gemini-3.0-pro-low' ? 'Gemini 3.0 Pro' : 'Gemini Flash'}
+                                                        </span>
+                                                    )}
                                                 </div>
                                                 <div className="text-foreground/80 leading-relaxed whitespace-pre-wrap break-words">
                                                     {msg.content}
