@@ -3,3 +3,4 @@ uvicorn[standard]
 python-dateutil
 pydantic
 google-genai
+pytz
