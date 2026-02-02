@@ -102,7 +102,7 @@ export default function Calculator() {
         setIsAiLoading(true);
 
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://kantei-app.onrender.com';
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://kantei-api-538317999249.us-central1.run.app';
             const res = await fetch(`${apiUrl}/ai/consult`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
