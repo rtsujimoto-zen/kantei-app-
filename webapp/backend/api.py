@@ -157,7 +157,15 @@ def ai_consult(req: AiConsultRequest):
 - 1500〜2500文字程度で詳しく、かつ読みやすく構成する
 """
 
-    system_context = f"""{persona_instruction}
+    # Get current date for AI context
+    from datetime import datetime
+    import pytz
+    japan_tz = pytz.timezone('Asia/Tokyo')
+    current_date = datetime.now(japan_tz).strftime('%Y年%m月%d日')
+
+    system_context = f"""【重要】今日の日付は {current_date} です。年運や時期の話をする際は、必ずこの日付を基準にしてください。
+
+{persona_instruction}
 
 {depth_instruction}
 
