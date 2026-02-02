@@ -208,7 +208,7 @@ def ai_consult(req: AiConsultRequest):
             # Add current follow-up question with continuation instruction
             follow_up_prompt = f"""{req.message}
 
-（※これは前回の鑑定の続きです。話の流れを自然に繋げて、追加質問に答えてください。最初からやり直さず、前の回答を踏まえて深掘りしてください。）"""
+（※これは前回の鑑定の続きです。冒頭の挨拶や導入は省略し、すぐに本題から入ってください。話の流れを自然に繋げて、前の回答を踏まえて深掘りしてください。）"""
             
             contents.append(genai.types.Content(
                 role="user",
