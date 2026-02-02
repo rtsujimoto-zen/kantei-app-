@@ -4,3 +4,4 @@ python-dateutil
 pydantic
 google-genai
 pytz
+google-auth
