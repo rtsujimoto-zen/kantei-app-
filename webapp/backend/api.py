@@ -82,25 +82,31 @@ class AiConsultRequest(BaseModel):
 
 @app.post("/ai/consult")
 def ai_consult(req: AiConsultRequest):
-    # Initialize Google Gen AI Client with explicit credentials for Cloud Run
-    project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
-    # Gemini 3 Preview models require the GLOBAL endpoint, not regional
+    # Initialize Google Gen AI Client
+    # Cloud Run automatically provides ADC via metadata server
+    # Setting environment variables explicitly helps the SDK find them
+    
+    # Get project ID - Cloud Run sets this automatically
+    project_id = os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("GCLOUD_PROJECT")
+    if not project_id:
+        # Try to get from metadata server
+        try:
+            import urllib.request
+            req_url = "http://metadata.google.internal/computeMetadata/v1/project/project-id"
+            req_obj = urllib.request.Request(req_url, headers={"Metadata-Flavor": "Google"})
+            with urllib.request.urlopen(req_obj, timeout=2) as response:
+                project_id = response.read().decode()
+        except:
+            project_id = "kantei-app-486114"  # Fallback
+    
+    # Gemini 3 Preview models require the GLOBAL endpoint
     location = "global"
     
     try:
-        # Get default credentials explicitly for Cloud Run environment
-        credentials, project = google.auth.default(
-            scopes=["https://www.googleapis.com/auth/cloud-platform"]
-        )
-        # Use project from environment or fallback to detected project
-        if not project_id:
-            project_id = project
-        
         client = genai.Client(
             vertexai=True,
             project=project_id, 
-            location=location,
-            credentials=credentials
+            location=location
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"GenAI Client initialization failed: {str(e)}")
