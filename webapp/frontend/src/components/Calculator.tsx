@@ -3,21 +3,18 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ResultGrid, BentoItem } from './ResultGrid';
-import { InsenCard } from './InsenCard';
-import { YosenCard } from './YosenCard';
-import { DaiunCard } from './DaiunCard';
+import { TraditionalChart } from './TraditionalChart';
 import { AiStrategist, AiModel, AiPersona } from './StrategistCard';
 
 // Types definition
 interface SanmeiReport {
     陰占?: {
         年: string; 月: string; 日: string;
-        蔵干: any;
+        蔵干: { 年: string; 月: string; 日: string; 遷移: string };
     };
     陽占?: {
-        十大主星: { [key: string]: string };
-        十二大従星: { [key: string]: string };
+        十大主星: { 頭: string; 胸: string; 腹: string; 左手: string; 右手: string };
+        十二大従星: { 初年: string; 中年: string; 晩年: string };
         十二大従星詳細?: { [key: string]: { name: string; alias: string; full: string } };
     };
     天中殺?: {
@@ -26,11 +23,13 @@ interface SanmeiReport {
         タイミング?: { time: string; month: string; years: string[] };
     };
     異常干支?: string[];
-    数理法?: { 総エネルギー: number; 五行分布: any };
+    位相法?: string[];
+    数理法?: { 総エネルギー: number; 五行分布: any; 十干内訳: { [key: string]: number } };
     気図法?: any;
-    八門法?: any;
-    大運?: { サイクル: any[];[key: string]: any } | any[];
+    八門法?: { [key: string]: number };
+    大運?: { 立運: number; 方向: string; サイクル: any[] };
     年運?: any[];
+    宇宙盤?: { 干支番号: number[] };
     output_text?: string;
 }
 
@@ -206,88 +205,56 @@ export default function Calculator() {
 
                 {/* Result Display */}
                 <AnimatePresence mode="wait">
-                    {report && report.陰占 && report.陽占 && report.天中殺 && (
-                        <ResultGrid>
+                    {report && report.陰占 && report.陽占 && report.大運 && report.年運 && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className="space-y-8"
+                        >
+                            {/* Traditional Chart */}
+                            <TraditionalChart
+                                report={{
+                                    陰占: report.陰占,
+                                    陽占: report.陽占,
+                                    位相法: report.位相法 || [],
+                                    大運: report.大運,
+                                    年運: report.年運,
+                                    宇宙盤: report.宇宙盤 || { 干支番号: [] },
+                                    八門法: report.八門法 || {},
+                                    数理法: report.数理法 || { 総エネルギー: 0, 五行分布: {}, 十干内訳: {} }
+                                }}
+                                birthYear={parseInt(birthday.split('-')[0])}
+                            />
 
-                            {/* Row 1: Core Analysis */}
-                            <BentoItem colSpan="md:col-span-12 lg:col-span-4" delay={0.1}>
-                                <InsenCard data={report.陰占} />
-                            </BentoItem>
-
-                            <BentoItem colSpan="md:col-span-12 lg:col-span-4" delay={0.2}>
-                                <YosenCard data={report.陽占} />
-                            </BentoItem>
-
-                            <BentoItem colSpan="md:col-span-12 lg:col-span-4" delay={0.3}>
-                                <div className="grid grid-cols-1 gap-6 h-full">
-                                    <Card className="h-full border-none shadow-soft rounded-3xl bg-white/60 backdrop-blur-sm">
-                                        <CardHeader>
-                                            <CardTitle className="text-purple-400 text-lg">宿命情報</CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="space-y-4">
-                                            <div>
-                                                <div className="text-xs text-muted-foreground mb-1">天中殺</div>
-                                                <div className="text-2xl font-bold text-foreground">{report.天中殺.グループ}天中殺</div>
-                                            </div>
-                                            <div className="space-y-4 pt-2">
-                                                <div className="bg-purple-50/50 p-3 rounded-xl">
-                                                    <div className="text-xs text-purple-400 font-bold mb-1">宿命天中殺</div>
-                                                    <div className="font-medium text-sm text-foreground">
-                                                        {report.天中殺.宿命天中殺 && report.天中殺.宿命天中殺.length > 0 ? report.天中殺.宿命天中殺.join(', ') : 'なし'}
-                                                    </div>
-                                                </div>
-                                                <div className="bg-purple-50/50 p-3 rounded-xl">
-                                                    <div className="text-xs text-purple-400 font-bold mb-1">異常干支</div>
-                                                    <div className="font-medium text-sm text-foreground">
-                                                        {report.異常干支 && report.異常干支.length > 0 ? report.異常干支.join(', ') : 'なし'}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                </div>
-                            </BentoItem>
-
-                            {/* Row 2: Daiun */}
-                            <BentoItem colSpan="md:col-span-12" delay={0.4}>
-                                <DaiunCard data={report.大運} />
-                            </BentoItem>
-
-                            {/* Row 5: Prompt Data (Copy) */}
+                            {/* Prompt Data (Copy) */}
                             {report.output_text && (
-                                <BentoItem colSpan="md:col-span-12" delay={0.6}>
-                                    <div className="mx-auto max-w-4xl">
-                                        <Card className="glass-card border-none rounded-3xl overflow-hidden">
-                                            <CardHeader className="flex flex-row items-center justify-between pb-2 bg-black/20">
-                                                <CardTitle className="text-sm font-bold text-stone-400 tracking-widest font-mono pl-2">PROMPT DATA</CardTitle>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={handleCopyText}
-                                                    className="text-stone-400 hover:text-white hover:bg-stone-800"
-                                                >
-                                                    {copySuccess || 'Copy'}
-                                                </Button>
-                                            </CardHeader>
-                                            <CardContent className="p-0">
-                                                <pre className="bg-black/80 p-6 text-stone-300 text-xs font-mono whitespace-pre-wrap overflow-x-auto max-h-[300px] overflow-y-auto leading-relaxed">
-                                                    {report.output_text}
-                                                </pre>
-                                            </CardContent>
-                                        </Card>
-                                    </div>
-                                </BentoItem>
+                                <Card className="glass-card border-none rounded-3xl overflow-hidden">
+                                    <CardHeader className="flex flex-row items-center justify-between pb-2 bg-black/20">
+                                        <CardTitle className="text-sm font-bold text-stone-400 tracking-widest font-mono pl-2">PROMPT DATA</CardTitle>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={handleCopyText}
+                                            className="text-stone-400 hover:text-white hover:bg-stone-800"
+                                        >
+                                            {copySuccess || 'Copy'}
+                                        </Button>
+                                    </CardHeader>
+                                    <CardContent className="p-0">
+                                        <pre className="bg-black/80 p-6 text-stone-300 text-xs font-mono whitespace-pre-wrap overflow-x-auto max-h-[300px] overflow-y-auto leading-relaxed">
+                                            {report.output_text}
+                                        </pre>
+                                    </CardContent>
+                                </Card>
                             )}
 
-                            {/* Row 4: AI Strategist */}
-                            <BentoItem colSpan="md:col-span-12" delay={0.5}>
-                                <AiStrategist
-                                    onConsult={handleAiConsultation}
-                                    loading={isAiLoading}
-                                />
-                            </BentoItem>
-
-                        </ResultGrid>
+                            {/* AI Strategist */}
+                            <AiStrategist
+                                onConsult={handleAiConsultation}
+                                loading={isAiLoading}
+                            />
+                        </motion.div>
                     )}
                 </AnimatePresence>
             </div>
