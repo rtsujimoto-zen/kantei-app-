@@ -1,5 +1,4 @@
 "use client";
-import { Card } from '@/components/ui/card';
 
 // =====================================
 // 【陰占】Insen Section
@@ -38,44 +37,35 @@ export function InsenSection({ data }: { data: InsenData }) {
     const senyi = data.蔵干.遷移.replace(/>/g, '').trim().split(' ').filter(Boolean);
 
     return (
-        <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-5 shadow-sm border border-slate-200/50">
-            <h3 className="text-base font-bold text-slate-700 mb-4 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <h3 className="text-sm font-bold text-gray-600 mb-4 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
                 陰占
             </h3>
-            <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="grid grid-cols-3 gap-4 text-center">
                 {/* Day */}
-                <div className="space-y-1">
-                    <div className="text-xs text-slate-400 font-medium">日</div>
-                    <div className="text-xs text-slate-400">({day.number})</div>
-                    <div className="text-2xl font-bold text-slate-800">{day.kan}</div>
-                    <div className="text-lg text-slate-600">{day.shi}</div>
-                    <div className="text-xs text-slate-400 pt-1 border-t border-slate-200">
-                        {zokanDay.join(' ')}
-                    </div>
-                    <div className="text-xs text-indigo-500">→ {senyi[0]}</div>
+                <div>
+                    <div className="text-xs text-gray-400 mb-1">日({day.number})</div>
+                    <div className="text-3xl font-light text-gray-700">{day.kan}</div>
+                    <div className="text-xl text-gray-500">{day.shi}</div>
+                    <div className="text-xs text-gray-400 mt-2">{zokanDay[0] || ''}</div>
+                    <div className="text-xs text-gray-300">→ {senyi[0]}</div>
                 </div>
                 {/* Month */}
-                <div className="space-y-1">
-                    <div className="text-xs text-slate-400 font-medium">月</div>
-                    <div className="text-xs text-slate-400">({month.number})</div>
-                    <div className="text-2xl font-bold text-slate-800">{month.kan}</div>
-                    <div className="text-lg text-slate-600">{month.shi}</div>
-                    <div className="text-xs text-slate-400 pt-1 border-t border-slate-200">
-                        {zokanMonth.join(' ')}
-                    </div>
-                    <div className="text-xs text-indigo-500">→ {senyi[1]}</div>
+                <div>
+                    <div className="text-xs text-gray-400 mb-1">月({month.number})</div>
+                    <div className="text-3xl font-light text-gray-700">{month.kan}</div>
+                    <div className="text-xl text-gray-500">{month.shi}</div>
+                    <div className="text-xs text-gray-400 mt-2">{zokanMonth[0] || ''}</div>
+                    <div className="text-xs text-gray-300">→ {senyi[1]}</div>
                 </div>
                 {/* Year */}
-                <div className="space-y-1">
-                    <div className="text-xs text-slate-400 font-medium">年</div>
-                    <div className="text-xs text-slate-400">({year.number})</div>
-                    <div className="text-2xl font-bold text-slate-800">{year.kan}</div>
-                    <div className="text-lg text-slate-600">{year.shi}</div>
-                    <div className="text-xs text-slate-400 pt-1 border-t border-slate-200">
-                        {zokanYear.join(' ')}
-                    </div>
-                    <div className="text-xs text-indigo-500">→ {senyi[2]}</div>
+                <div>
+                    <div className="text-xs text-gray-400 mb-1">年({year.number})</div>
+                    <div className="text-3xl font-light text-gray-700">{year.kan}</div>
+                    <div className="text-xl text-gray-500">{year.shi}</div>
+                    <div className="text-xs text-gray-400 mt-2">{zokanYear[0] || ''}</div>
+                    <div className="text-xs text-gray-300">→ {senyi[2]}</div>
                 </div>
             </div>
         </div>
@@ -91,45 +81,47 @@ interface YosenData {
 }
 
 export function YosenSection({ data }: { data: YosenData }) {
-    const StarCell = ({ star, type = 'main' }: { star: string; type?: 'main' | 'sub' }) => (
-        <div className={`
-            ${type === 'main'
-                ? 'bg-white text-slate-700 border-slate-200'
-                : 'bg-amber-50 text-amber-700 border-amber-200'
-            }
-            border rounded-lg p-2 text-center text-sm font-medium shadow-sm
-        `}>
-            {star}
-        </div>
-    );
-
     return (
-        <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 shadow-sm border border-amber-200/50">
-            <h3 className="text-base font-bold text-slate-700 mb-4 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <h3 className="text-sm font-bold text-gray-600 mb-4 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
                 陽占
             </h3>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-1.5">
+                <div className="bg-gray-50 rounded-lg p-2 text-center text-sm text-gray-500">
+                    {data.十大主星.頭}
+                </div>
+                <div className="bg-amber-100 rounded-lg p-2 text-center text-sm font-medium text-amber-700 border border-amber-200">
+                    {data.十二大従星.初年}
+                </div>
                 <div></div>
-                <StarCell star={data.十大主星.頭} />
-                <StarCell star={data.十二大従星.初年} type="sub" />
 
-                <StarCell star={data.十大主星.右手} />
-                <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white border border-indigo-400 rounded-lg p-2 text-center text-sm font-bold shadow-md">
+                <div className="bg-gray-50 rounded-lg p-2 text-center text-sm text-gray-500">
+                    {data.十大主星.右手}
+                </div>
+                <div className="bg-orange-400 rounded-lg p-2 text-center text-sm font-bold text-white">
                     {data.十大主星.胸}
                 </div>
-                <StarCell star={data.十大主星.左手} />
+                <div className="bg-gray-50 rounded-lg p-2 text-center text-sm text-gray-500">
+                    {data.十大主星.左手}
+                </div>
 
-                <StarCell star={data.十二大従星.晩年} type="sub" />
-                <StarCell star={data.十大主星.腹} />
-                <StarCell star={data.十二大従星.中年} type="sub" />
+                <div className="bg-gray-50 rounded-lg p-2 text-center text-sm text-gray-500">
+                    {data.十大主星.腹}
+                </div>
+                <div className="bg-gray-50 rounded-lg p-2 text-center text-sm text-gray-500">
+                    {data.十二大従星.晩年}
+                </div>
+                <div className="bg-gray-50 rounded-lg p-2 text-center text-sm text-gray-500">
+                    {data.十二大従星.中年}
+                </div>
             </div>
         </div>
     );
 }
 
 // =====================================
-// 【位相法】Isohou Section
+// 【位相法】Isohou Section - Triangle Diagram
 // =====================================
 export function IsohouSection({ data, shis }: { data: string[]; shis: { 年: string; 月: string; 日: string } }) {
     const getShi = (str: string) => {
@@ -150,39 +142,110 @@ export function IsohouSection({ data, shis }: { data: string[]; shis: { 年: str
     };
 
     return (
-        <div className="bg-gradient-to-br from-rose-50 to-pink-50 rounded-2xl p-5 shadow-sm border border-rose-200/50">
-            <h3 className="text-base font-bold text-slate-700 mb-4 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <h3 className="text-sm font-bold text-gray-600 mb-4 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
                 位相法
             </h3>
-            <div className="grid grid-cols-3 gap-3 mb-4">
-                <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-slate-200">
-                    <div className="text-xs text-slate-400">日</div>
-                    <div className="text-xl font-bold text-slate-700">{shiDay}</div>
-                </div>
-                <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-slate-200">
-                    <div className="text-xs text-slate-400">月</div>
-                    <div className="text-xl font-bold text-slate-700">{shiMonth}</div>
-                </div>
-                <div className="bg-white rounded-lg p-2 text-center shadow-sm border border-slate-200">
-                    <div className="text-xs text-slate-400">年</div>
-                    <div className="text-xl font-bold text-slate-700">{shiYear}</div>
-                </div>
+            {/* Triangle Diagram */}
+            <div className="relative w-full h-32 mb-4">
+                <svg viewBox="0 0 120 100" className="w-full h-full">
+                    {/* Triangle lines */}
+                    <line x1="60" y1="15" x2="20" y2="85" stroke="#e5e7eb" strokeWidth="1" />
+                    <line x1="60" y1="15" x2="100" y2="85" stroke="#e5e7eb" strokeWidth="1" />
+                    <line x1="20" y1="85" x2="100" y2="85" stroke="#e5e7eb" strokeWidth="1" />
+
+                    {/* Labels with background */}
+                    <g>
+                        <rect x="50" y="3" width="20" height="16" rx="4" fill="#fff7ed" stroke="#fed7aa" strokeWidth="1" />
+                        <text x="60" y="15" textAnchor="middle" className="text-xs fill-orange-600 font-medium">{shiDay}</text>
+                    </g>
+                    <g>
+                        <rect x="5" y="77" width="30" height="16" rx="4" fill="#fef3c7" stroke="#fcd34d" strokeWidth="1" />
+                        <text x="20" y="89" textAnchor="middle" className="text-xs fill-amber-600 font-medium">半会(火)</text>
+                    </g>
+                    <g>
+                        <rect x="85" y="77" width="30" height="16" rx="4" fill="#ecfdf5" stroke="#6ee7b7" strokeWidth="1" />
+                        <text x="100" y="89" textAnchor="middle" className="text-xs fill-emerald-600 font-medium">害(未)</text>
+                    </g>
+
+                    {/* Branch boxes */}
+                    <g>
+                        <rect x="5" y="40" width="22" height="22" rx="4" fill="white" stroke="#d1d5db" strokeWidth="1" />
+                        <text x="16" y="55" textAnchor="middle" className="text-sm fill-gray-700">{shiMonth}</text>
+                    </g>
+                    <g>
+                        <rect x="93" y="40" width="22" height="22" rx="4" fill="white" stroke="#d1d5db" strokeWidth="1" />
+                        <text x="104" y="55" textAnchor="middle" className="text-sm fill-gray-700">{shiYear}</text>
+                    </g>
+                </svg>
             </div>
-            <div className="space-y-2">
+            {/* Relationship tags */}
+            <div className="flex flex-wrap gap-1.5">
                 {data.map((item, i) => (
-                    <div
+                    <span
                         key={i}
-                        className={`
-                            text-sm px-3 py-1.5 rounded-lg
-                            ${isSpecial(item)
-                                ? 'bg-rose-100 text-rose-700 font-medium'
-                                : 'bg-white/50 text-slate-600'}
-                        `}
+                        className={`text-xs px-2 py-1 rounded-full ${isSpecial(item)
+                                ? 'bg-orange-100 text-orange-600'
+                                : 'bg-gray-100 text-gray-500'
+                            }`}
                     >
                         {item}
-                    </div>
+                    </span>
                 ))}
+            </div>
+        </div>
+    );
+}
+
+// =====================================
+// 【天中殺】Tenchu Section
+// =====================================
+interface TenchuData {
+    グループ: string;
+    宿命天中殺: string[];
+}
+
+export function TenchuSection({ data, ijokanshi }: { data: TenchuData; ijokanshi: string[] }) {
+    return (
+        <div className="bg-white rounded-2xl p-4 shadow-sm border-2 border-orange-200 h-fit">
+            <div className="bg-orange-100 text-orange-600 text-xs font-bold px-2 py-1 rounded-md inline-block mb-3">
+                天中殺
+            </div>
+            <div className="text-xl font-bold text-gray-800 mb-4">
+                {data.グループ}天中殺
+            </div>
+
+            <div className="space-y-3">
+                <div>
+                    <div className="text-xs text-orange-500 font-medium mb-1">宿命天中殺</div>
+                    <div className="flex flex-wrap gap-1">
+                        {data.宿命天中殺 && data.宿命天中殺.length > 0 ? (
+                            data.宿命天中殺.map((item, i) => (
+                                <span key={i} className="bg-orange-100 text-orange-600 text-xs px-2 py-0.5 rounded">
+                                    {item}
+                                </span>
+                            ))
+                        ) : (
+                            <span className="text-gray-400 text-sm">なし</span>
+                        )}
+                    </div>
+                </div>
+
+                <div>
+                    <div className="text-xs text-gray-400 mb-1">異常干支</div>
+                    <div className="flex flex-wrap gap-1">
+                        {ijokanshi && ijokanshi.length > 0 ? (
+                            ijokanshi.map((item, i) => (
+                                <span key={i} className="bg-amber-50 text-amber-600 text-xs px-2 py-0.5 rounded border border-amber-200">
+                                    {item}
+                                </span>
+                            ))
+                        ) : (
+                            <span className="text-gray-400 text-sm">なし</span>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     );
@@ -225,63 +288,60 @@ export function DaiunSection({ data, birthYear }: { data: DaiunData; birthYear: 
     };
 
     return (
-        <div className="bg-gradient-to-br from-violet-50 to-indigo-50 rounded-2xl p-5 shadow-sm border border-violet-200/50">
-            <h3 className="text-base font-bold text-slate-700 mb-4 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-violet-500"></span>
-                大運
-            </h3>
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-bold text-gray-600 flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
+                    大運
+                </h3>
+                <span className="text-xs text-blue-500 cursor-pointer hover:underline">開始7歳順</span>
+            </div>
             <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-xs">
                     <thead>
-                        <tr className="text-xs text-slate-400 border-b border-slate-200">
-                            <th className="py-2 px-2 text-left"></th>
-                            <th className="py-2 px-2 text-right">西暦</th>
-                            <th className="py-2 px-2 text-right">歳</th>
-                            <th className="py-2 px-2 text-left">干支</th>
-                            <th className="py-2 px-2 text-left">主星</th>
-                            <th className="py-2 px-2 text-left">従星</th>
-                            <th className="py-2 px-2 text-left">位相</th>
-                            <th className="py-2 px-2 text-left"></th>
+                        <tr className="text-gray-400 border-b border-gray-100">
+                            <th className="py-1.5 px-1 text-left font-normal">西暦</th>
+                            <th className="py-1.5 px-1 text-left font-normal">歳</th>
+                            <th className="py-1.5 px-1 text-left font-normal">干支</th>
+                            <th className="py-1.5 px-1 text-left font-normal">主星</th>
+                            <th className="py-1.5 px-1 text-left font-normal">従星</th>
+                            <th className="py-1.5 px-1 text-left font-normal">位相法</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {data.サイクル.map((row, i) => (
+                        {data.サイクル.slice(0, 10).map((row, i) => (
                             <tr
                                 key={i}
-                                className={`
-                                    border-b border-slate-100 transition-colors
-                                    ${i === currentIdx
-                                        ? 'bg-violet-100/50 font-medium'
-                                        : 'hover:bg-white/50'}
-                                `}
+                                className={`border-b border-gray-50 ${i === currentIdx ? 'bg-amber-50' : ''
+                                    }`}
                             >
-                                <td className="py-2 px-2 text-violet-600 font-bold">
-                                    {i === currentIdx ? '▶' : ''}
+                                <td className="py-1.5 px-1 text-gray-600">
+                                    {i === currentIdx && <span className="text-orange-500 mr-1">▶</span>}
+                                    {row.西暦}
                                 </td>
-                                <td className="py-2 px-2 text-right text-slate-600">{row.西暦}</td>
-                                <td className="py-2 px-2 text-right text-slate-500">{row.年齢}</td>
-                                <td className="py-2 px-2 font-medium text-slate-700">{row.干支}</td>
-                                <td className="py-2 px-2 text-slate-600">{row.十大主星}</td>
-                                <td className="py-2 px-2 text-slate-500">{row.十二大従星}</td>
-                                <td className="py-2 px-2">
-                                    <div className="flex flex-wrap gap-1">
-                                        {row.位相法.map((p, j) => (
+                                <td className="py-1.5 px-1 text-gray-500">{row.年齢}</td>
+                                <td className="py-1.5 px-1 text-gray-700 font-medium">{row.干支}</td>
+                                <td className="py-1.5 px-1 text-gray-600">{row.十大主星}</td>
+                                <td className="py-1.5 px-1 text-gray-500">{row.十二大従星}</td>
+                                <td className="py-1.5 px-1">
+                                    <div className="flex flex-wrap gap-0.5">
+                                        {row.位相法.slice(0, 3).map((p, j) => (
                                             <span
                                                 key={j}
-                                                className={`
-                                                    text-xs px-1.5 py-0.5 rounded
-                                                    ${isSpecial(p)
-                                                        ? 'bg-rose-100 text-rose-600'
-                                                        : 'bg-slate-100 text-slate-500'}
-                                                `}
+                                                className={`text-[10px] px-1 rounded ${isSpecial(p)
+                                                        ? 'bg-orange-100 text-orange-600'
+                                                        : 'bg-gray-100 text-gray-500'
+                                                    }`}
                                             >
                                                 {p}
                                             </span>
                                         ))}
+                                        {row.天中殺 && (
+                                            <span className="text-[10px] px-1 rounded bg-red-100 text-red-500">
+                                                {row.天中殺}
+                                            </span>
+                                        )}
                                     </div>
-                                </td>
-                                <td className={`py-2 px-2 text-xs font-medium ${row.天中殺 ? 'text-rose-500' : ''}`}>
-                                    {row.天中殺}
                                 </td>
                             </tr>
                         ))}
@@ -305,7 +365,7 @@ interface NenunData {
     天中殺: string;
 }
 
-export function NenunSection({ data, limit = 12 }: { data: NenunData[]; limit?: number }) {
+export function NenunSection({ data, limit = 10 }: { data: NenunData[]; limit?: number }) {
     const currentYear = new Date().getFullYear();
     const currentIdx = data.findIndex(d => d.西暦 === currentYear);
     const startIdx = Math.max(0, currentIdx - 2);
@@ -317,68 +377,62 @@ export function NenunSection({ data, limit = 12 }: { data: NenunData[]; limit?: 
     };
 
     return (
-        <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-5 shadow-sm border border-emerald-200/50">
-            <h3 className="text-base font-bold text-slate-700 mb-4 flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-bold text-gray-600 flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
                     年運
-                </span>
-                <span className="text-xs font-normal text-emerald-600 bg-emerald-100 px-2 py-1 rounded-full">
+                </h3>
+                <span className="text-xs text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full">
                     直近{limit}年
                 </span>
-            </h3>
+            </div>
             <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-xs">
                     <thead>
-                        <tr className="text-xs text-slate-400 border-b border-slate-200">
-                            <th className="py-2 px-2 text-left"></th>
-                            <th className="py-2 px-2 text-right">西暦</th>
-                            <th className="py-2 px-2 text-right">歳</th>
-                            <th className="py-2 px-2 text-left">干支</th>
-                            <th className="py-2 px-2 text-left">主星</th>
-                            <th className="py-2 px-2 text-left">従星</th>
-                            <th className="py-2 px-2 text-left">位相</th>
-                            <th className="py-2 px-2 text-left"></th>
+                        <tr className="text-gray-400 border-b border-gray-100">
+                            <th className="py-1.5 px-1 text-left font-normal">西暦</th>
+                            <th className="py-1.5 px-1 text-left font-normal">歳</th>
+                            <th className="py-1.5 px-1 text-left font-normal">干支</th>
+                            <th className="py-1.5 px-1 text-left font-normal">主星</th>
+                            <th className="py-1.5 px-1 text-left font-normal">従星</th>
+                            <th className="py-1.5 px-1 text-left font-normal">位相法</th>
                         </tr>
                     </thead>
                     <tbody>
                         {displayData.map((row, i) => (
                             <tr
                                 key={i}
-                                className={`
-                                    border-b border-slate-100 transition-colors
-                                    ${row.西暦 === currentYear
-                                        ? 'bg-emerald-100/50 font-medium'
-                                        : 'hover:bg-white/50'}
-                                `}
+                                className={`border-b border-gray-50 ${row.西暦 === currentYear ? 'bg-amber-50' : ''
+                                    }`}
                             >
-                                <td className="py-2 px-2 text-emerald-600 font-bold">
-                                    {row.西暦 === currentYear ? '▶' : ''}
+                                <td className="py-1.5 px-1 text-gray-600">
+                                    {row.西暦 === currentYear && <span className="text-orange-500 mr-1">▶</span>}
+                                    {row.西暦}
                                 </td>
-                                <td className="py-2 px-2 text-right text-slate-600">{row.西暦}</td>
-                                <td className="py-2 px-2 text-right text-slate-500">{row.年齢}</td>
-                                <td className="py-2 px-2 font-medium text-slate-700">{row.干支}</td>
-                                <td className="py-2 px-2 text-slate-600">{row.十大主星}</td>
-                                <td className="py-2 px-2 text-slate-500">{row.十二大従星}</td>
-                                <td className="py-2 px-2">
-                                    <div className="flex flex-wrap gap-1">
-                                        {row.位相法.map((p, j) => (
+                                <td className="py-1.5 px-1 text-gray-500">{row.年齢}</td>
+                                <td className="py-1.5 px-1 text-gray-700 font-medium">{row.干支}</td>
+                                <td className="py-1.5 px-1 text-gray-600">{row.十大主星}</td>
+                                <td className="py-1.5 px-1 text-gray-500">{row.十二大従星}</td>
+                                <td className="py-1.5 px-1">
+                                    <div className="flex flex-wrap gap-0.5">
+                                        {row.位相法.slice(0, 3).map((p, j) => (
                                             <span
                                                 key={j}
-                                                className={`
-                                                    text-xs px-1.5 py-0.5 rounded
-                                                    ${isSpecial(p)
-                                                        ? 'bg-rose-100 text-rose-600'
-                                                        : 'bg-slate-100 text-slate-500'}
-                                                `}
+                                                className={`text-[10px] px-1 rounded ${isSpecial(p)
+                                                        ? 'bg-orange-100 text-orange-600'
+                                                        : 'bg-gray-100 text-gray-500'
+                                                    }`}
                                             >
                                                 {p}
                                             </span>
                                         ))}
+                                        {row.天中殺 && (
+                                            <span className="text-[10px] px-1 rounded bg-red-100 text-red-500">
+                                                {row.天中殺}
+                                            </span>
+                                        )}
                                     </div>
-                                </td>
-                                <td className={`py-2 px-2 text-xs font-medium ${row.天中殺 ? 'text-rose-500' : ''}`}>
-                                    {row.天中殺}
                                 </td>
                             </tr>
                         ))}
@@ -395,7 +449,7 @@ export function NenunSection({ data, limit = 12 }: { data: NenunData[]; limit?: 
 export function UchubanSection({ data }: { data: { 干支番号: number[] } }) {
     const nums = data.干支番号;
 
-    const getPosition = (num: number, radius: number = 38) => {
+    const getPosition = (num: number, radius: number = 35) => {
         const angle = ((num - 1) / 60) * 2 * Math.PI - Math.PI / 2;
         return {
             x: 50 + radius * Math.cos(angle),
@@ -406,39 +460,27 @@ export function UchubanSection({ data }: { data: { 干支番号: number[] } }) {
     const positions = nums.map(n => getPosition(n));
 
     return (
-        <div className="bg-gradient-to-br from-sky-50 to-cyan-50 rounded-2xl p-5 shadow-sm border border-sky-200/50">
-            <h3 className="text-base font-bold text-slate-700 mb-4 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-sky-500"></span>
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <h3 className="text-sm font-bold text-gray-600 mb-4 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
                 宇宙盤
             </h3>
             <div className="flex justify-center">
-                <svg viewBox="0 0 100 100" className="w-36 h-36">
-                    <defs>
-                        <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stopColor="#3b82f6" />
-                            <stop offset="100%" stopColor="#8b5cf6" />
-                        </linearGradient>
-                    </defs>
+                <svg viewBox="0 0 100 100" className="w-28 h-28">
                     {/* Outer circle */}
-                    <circle cx="50" cy="50" r="42" fill="none" stroke="#cbd5e1" strokeWidth="1" />
-                    <circle cx="50" cy="50" r="38" fill="none" stroke="#e2e8f0" strokeWidth="0.5" strokeDasharray="2,2" />
-                    {/* Triangle lines */}
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="#e5e7eb" strokeWidth="1" />
+                    {/* Triangle */}
                     {positions.length >= 3 && (
-                        <>
-                            <line x1={positions[0].x} y1={positions[0].y} x2={positions[1].x} y2={positions[1].y}
-                                stroke="url(#lineGradient)" strokeWidth="2" strokeLinecap="round" />
-                            <line x1={positions[1].x} y1={positions[1].y} x2={positions[2].x} y2={positions[2].y}
-                                stroke="url(#lineGradient)" strokeWidth="2" strokeLinecap="round" />
-                            <line x1={positions[2].x} y1={positions[2].y} x2={positions[0].x} y2={positions[0].y}
-                                stroke="url(#lineGradient)" strokeWidth="2" strokeLinecap="round" />
-                        </>
+                        <polygon
+                            points={`${positions[0].x},${positions[0].y} ${positions[1].x},${positions[1].y} ${positions[2].x},${positions[2].y}`}
+                            fill="rgba(59, 130, 246, 0.1)"
+                            stroke="#3b82f6"
+                            strokeWidth="1.5"
+                        />
                     )}
                     {/* Points */}
                     {positions.map((pos, i) => (
-                        <g key={i}>
-                            <circle cx={pos.x} cy={pos.y} r="5" fill="#fff" stroke="#3b82f6" strokeWidth="2" />
-                            <circle cx={pos.x} cy={pos.y} r="2" fill="#3b82f6" />
-                        </g>
+                        <circle key={i} cx={pos.x} cy={pos.y} r="3" fill="#3b82f6" />
                     ))}
                 </svg>
             </div>
@@ -447,7 +489,7 @@ export function UchubanSection({ data }: { data: { 干支番号: number[] } }) {
 }
 
 // =====================================
-// 【八門法】Hachimon Section
+// 【八門法】Hachimon Section - Cross Layout
 // =====================================
 interface HachimonData {
     [key: string]: number;
@@ -462,30 +504,38 @@ export function HachimonSection({ data }: { data: HachimonData }) {
         金: data['西方(仕事・社会/名誉)'] || 0,
     };
 
-    const ElementBox = ({ element, value, color }: { element: string; value: number; color: string }) => (
-        <div className={`${color} rounded-lg p-2 text-center shadow-sm`}>
-            <div className="text-xs text-slate-500 mb-1">{element}</div>
-            <div className="text-lg font-bold text-slate-700">{value}</div>
-        </div>
-    );
-
     return (
-        <div className="bg-gradient-to-br from-lime-50 to-green-50 rounded-2xl p-5 shadow-sm border border-lime-200/50">
-            <h3 className="text-base font-bold text-slate-700 mb-4 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-lime-500"></span>
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <h3 className="text-sm font-bold text-gray-600 mb-4 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
                 八門法
             </h3>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-1 text-center">
                 <div></div>
-                <ElementBox element="水" value={gogyoValues.水} color="bg-blue-100" />
+                <div className="bg-blue-50 rounded-lg p-2">
+                    <div className="text-xs text-blue-400">水</div>
+                    <div className="text-lg font-bold text-blue-600">{gogyoValues.水}</div>
+                </div>
                 <div></div>
 
-                <ElementBox element="金" value={gogyoValues.金} color="bg-slate-100" />
-                <ElementBox element="木" value={gogyoValues.木} color="bg-green-100" />
-                <ElementBox element="土" value={gogyoValues.土} color="bg-amber-100" />
+                <div className="bg-gray-50 rounded-lg p-2">
+                    <div className="text-xs text-gray-400">金</div>
+                    <div className="text-lg font-bold text-gray-600">{gogyoValues.金}</div>
+                </div>
+                <div className="bg-green-50 rounded-lg p-2">
+                    <div className="text-xs text-green-400">木</div>
+                    <div className="text-lg font-bold text-green-600">{gogyoValues.木}</div>
+                </div>
+                <div className="bg-amber-50 rounded-lg p-2">
+                    <div className="text-xs text-amber-400">土</div>
+                    <div className="text-lg font-bold text-amber-600">{gogyoValues.土}</div>
+                </div>
 
                 <div></div>
-                <ElementBox element="火" value={gogyoValues.火} color="bg-red-100" />
+                <div className="bg-red-50 rounded-lg p-2">
+                    <div className="text-xs text-red-400">火</div>
+                    <div className="text-lg font-bold text-red-600">{gogyoValues.火}</div>
+                </div>
                 <div></div>
             </div>
         </div>
@@ -493,7 +543,7 @@ export function HachimonSection({ data }: { data: HachimonData }) {
 }
 
 // =====================================
-// 【数理法】Surihou Section
+// 【数理法】Surihou Section - 2 Row Table
 // =====================================
 interface SurihouData {
     総エネルギー: number;
@@ -501,87 +551,42 @@ interface SurihouData {
 }
 
 export function SurihouSection({ data }: { data: SurihouData }) {
-    const kans = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
-    const kanColors = ['bg-green-50', 'bg-green-50', 'bg-red-50', 'bg-red-50', 'bg-amber-50',
-        'bg-amber-50', 'bg-slate-50', 'bg-slate-50', 'bg-blue-50', 'bg-blue-50'];
+    const row1 = ['甲', '乙', '丙', '丁', '戊'];
+    const row2 = ['己', '庚', '辛', '壬', '癸'];
 
     return (
-        <div className="bg-gradient-to-br from-fuchsia-50 to-purple-50 rounded-2xl p-5 shadow-sm border border-fuchsia-200/50">
-            <h3 className="text-base font-bold text-slate-700 mb-4 flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-fuchsia-500"></span>
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold text-gray-600 flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
                     数理法
-                </span>
-                <span className="text-lg font-bold text-fuchsia-600">
+                </h3>
+                <span className="text-sm font-bold text-orange-500">
                     合計 {data.総エネルギー}
                 </span>
-            </h3>
-            <div className="grid grid-cols-5 gap-2">
-                {kans.map((k, i) => (
-                    <div key={k} className={`${kanColors[i]} rounded-lg p-2 text-center shadow-sm`}>
-                        <div className="text-xs text-slate-500 mb-1">{k}</div>
-                        <div className="text-sm font-bold text-slate-700">{data.十干内訳[k] || 0}</div>
-                    </div>
-                ))}
             </div>
-        </div>
-    );
-}
-
-// =====================================
-// 【天中殺】Tenchu Section
-// =====================================
-interface TenchuData {
-    グループ: string;
-    宿命天中殺: string[];
-}
-
-export function TenchuSection({ data, ijokanshi }: { data: TenchuData; ijokanshi: string[] }) {
-    return (
-        <div className="bg-gradient-to-br from-red-50 to-rose-100 rounded-2xl p-5 shadow-sm border border-red-200/50">
-            <h3 className="text-base font-bold text-slate-700 mb-4 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                天中殺・宿命
-            </h3>
-            <div className="space-y-4">
-                {/* 天中殺グループ */}
-                <div className="bg-white/80 rounded-xl p-4 text-center">
-                    <div className="text-xs text-slate-400 mb-1">天中殺</div>
-                    <div className="text-2xl font-bold text-red-600">
-                        {data.グループ}天中殺
-                    </div>
+            <div className="space-y-1">
+                {/* Row 1 */}
+                <div className="grid grid-cols-5 gap-1">
+                    {row1.map(k => (
+                        <div key={k} className="text-center">
+                            <div className="text-xs text-gray-400">{k}</div>
+                            <div className="text-lg font-bold text-gray-700 bg-gray-50 rounded py-1">
+                                {data.十干内訳[k] || 0}
+                            </div>
+                        </div>
+                    ))}
                 </div>
-
-                {/* 宿命天中殺 */}
-                <div className="bg-white/60 rounded-xl p-3">
-                    <div className="text-xs text-slate-400 mb-2">宿命天中殺</div>
-                    <div className="flex flex-wrap gap-2">
-                        {data.宿命天中殺 && data.宿命天中殺.length > 0 ? (
-                            data.宿命天中殺.map((item, i) => (
-                                <span key={i} className="bg-red-100 text-red-700 text-sm px-2 py-1 rounded-lg">
-                                    {item}
-                                </span>
-                            ))
-                        ) : (
-                            <span className="text-slate-400 text-sm">なし</span>
-                        )}
-                    </div>
-                </div>
-
-                {/* 異常干支 */}
-                <div className="bg-white/60 rounded-xl p-3">
-                    <div className="text-xs text-slate-400 mb-2">異常干支</div>
-                    <div className="flex flex-wrap gap-2">
-                        {ijokanshi && ijokanshi.length > 0 ? (
-                            ijokanshi.map((item, i) => (
-                                <span key={i} className="bg-amber-100 text-amber-700 text-sm px-2 py-1 rounded-lg">
-                                    {item}
-                                </span>
-                            ))
-                        ) : (
-                            <span className="text-slate-400 text-sm">なし</span>
-                        )}
-                    </div>
+                {/* Row 2 */}
+                <div className="grid grid-cols-5 gap-1">
+                    {row2.map(k => (
+                        <div key={k} className="text-center">
+                            <div className="text-xs text-gray-400">{k}</div>
+                            <div className="text-lg font-bold text-gray-700 bg-gray-50 rounded py-1">
+                                {data.十干内訳[k] || 0}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
@@ -609,8 +614,8 @@ interface TraditionalChartProps {
 
 export function TraditionalChart({ report, birthYear }: TraditionalChartProps) {
     return (
-        <div className="space-y-6">
-            {/* Top Row: 陰占, 陽占, 位相法 */}
+        <div className="space-y-4">
+            {/* Row 1: 陰占, 陽占, 位相法 */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <InsenSection data={report.陰占} />
                 <YosenSection data={report.陽占} />
@@ -624,32 +629,25 @@ export function TraditionalChart({ report, birthYear }: TraditionalChartProps) {
                 />
             </div>
 
-            {/* 天中殺 Section */}
-            {report.天中殺 && (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <TenchuSection
-                        data={report.天中殺}
-                        ijokanshi={report.異常干支 || []}
-                    />
-                    <div className="md:col-span-3">
-                        {/* 大運, 年運 */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            <DaiunSection data={report.大運} birthYear={birthYear} />
-                            <NenunSection data={report.年運} />
-                        </div>
+            {/* Row 2: 天中殺, 大運, 年運 */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                {report.天中殺 && (
+                    <div className="md:col-span-2">
+                        <TenchuSection
+                            data={report.天中殺}
+                            ijokanshi={report.異常干支 || []}
+                        />
                     </div>
-                </div>
-            )}
-
-            {/* Fallback if no 天中殺 */}
-            {!report.天中殺 && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                )}
+                <div className={report.天中殺 ? "md:col-span-5" : "md:col-span-6"}>
                     <DaiunSection data={report.大運} birthYear={birthYear} />
+                </div>
+                <div className={report.天中殺 ? "md:col-span-5" : "md:col-span-6"}>
                     <NenunSection data={report.年運} />
                 </div>
-            )}
+            </div>
 
-            {/* Bottom Row: 宇宙盤, 八門法, 数理法 */}
+            {/* Row 3: 宇宙盤, 八門法, 数理法 */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <UchubanSection data={report.宇宙盤} />
                 <HachimonSection data={report.八門法} />
