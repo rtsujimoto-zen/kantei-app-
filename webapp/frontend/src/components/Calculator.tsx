@@ -222,7 +222,9 @@ export default function Calculator() {
                                     年運: report.年運,
                                     宇宙盤: report.宇宙盤 || { 干支番号: [] },
                                     八門法: report.八門法 || {},
-                                    数理法: report.数理法 || { 総エネルギー: 0, 五行分布: {}, 十干内訳: {} }
+                                    数理法: report.数理法 || { 総エネルギー: 0, 五行分布: {}, 十干内訳: {} },
+                                    天中殺: report.天中殺,
+                                    異常干支: report.異常干支
                                 }}
                                 birthYear={parseInt(birthday.split('-')[0])}
                             />

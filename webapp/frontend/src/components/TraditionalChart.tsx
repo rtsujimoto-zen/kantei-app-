@@ -529,6 +529,66 @@ export function SurihouSection({ data }: { data: SurihouData }) {
 }
 
 // =====================================
+// 【天中殺】Tenchu Section
+// =====================================
+interface TenchuData {
+    グループ: string;
+    宿命天中殺: string[];
+}
+
+export function TenchuSection({ data, ijokanshi }: { data: TenchuData; ijokanshi: string[] }) {
+    return (
+        <div className="bg-gradient-to-br from-red-50 to-rose-100 rounded-2xl p-5 shadow-sm border border-red-200/50">
+            <h3 className="text-base font-bold text-slate-700 mb-4 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                天中殺・宿命
+            </h3>
+            <div className="space-y-4">
+                {/* 天中殺グループ */}
+                <div className="bg-white/80 rounded-xl p-4 text-center">
+                    <div className="text-xs text-slate-400 mb-1">天中殺</div>
+                    <div className="text-2xl font-bold text-red-600">
+                        {data.グループ}天中殺
+                    </div>
+                </div>
+
+                {/* 宿命天中殺 */}
+                <div className="bg-white/60 rounded-xl p-3">
+                    <div className="text-xs text-slate-400 mb-2">宿命天中殺</div>
+                    <div className="flex flex-wrap gap-2">
+                        {data.宿命天中殺 && data.宿命天中殺.length > 0 ? (
+                            data.宿命天中殺.map((item, i) => (
+                                <span key={i} className="bg-red-100 text-red-700 text-sm px-2 py-1 rounded-lg">
+                                    {item}
+                                </span>
+                            ))
+                        ) : (
+                            <span className="text-slate-400 text-sm">なし</span>
+                        )}
+                    </div>
+                </div>
+
+                {/* 異常干支 */}
+                <div className="bg-white/60 rounded-xl p-3">
+                    <div className="text-xs text-slate-400 mb-2">異常干支</div>
+                    <div className="flex flex-wrap gap-2">
+                        {ijokanshi && ijokanshi.length > 0 ? (
+                            ijokanshi.map((item, i) => (
+                                <span key={i} className="bg-amber-100 text-amber-700 text-sm px-2 py-1 rounded-lg">
+                                    {item}
+                                </span>
+                            ))
+                        ) : (
+                            <span className="text-slate-400 text-sm">なし</span>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// =====================================
 // Main TraditionalChart Component
 // =====================================
 interface TraditionalChartProps {
@@ -541,6 +601,8 @@ interface TraditionalChartProps {
         宇宙盤: { 干支番号: number[] };
         八門法: HachimonData;
         数理法: SurihouData;
+        天中殺?: TenchuData;
+        異常干支?: string[];
     };
     birthYear: number;
 }
@@ -562,11 +624,30 @@ export function TraditionalChart({ report, birthYear }: TraditionalChartProps) {
                 />
             </div>
 
-            {/* Middle Row: 大運, 年運 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <DaiunSection data={report.大運} birthYear={birthYear} />
-                <NenunSection data={report.年運} />
-            </div>
+            {/* 天中殺 Section */}
+            {report.天中殺 && (
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <TenchuSection
+                        data={report.天中殺}
+                        ijokanshi={report.異常干支 || []}
+                    />
+                    <div className="md:col-span-3">
+                        {/* 大運, 年運 */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <DaiunSection data={report.大運} birthYear={birthYear} />
+                            <NenunSection data={report.年運} />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Fallback if no 天中殺 */}
+            {!report.天中殺 && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <DaiunSection data={report.大運} birthYear={birthYear} />
+                    <NenunSection data={report.年運} />
+                </div>
+            )}
 
             {/* Bottom Row: 宇宙盤, 八門法, 数理法 */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
