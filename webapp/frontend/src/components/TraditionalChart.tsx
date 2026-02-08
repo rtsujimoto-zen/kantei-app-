@@ -29,7 +29,7 @@ export function InsenSection({ data }: { data: InsenData }) {
 
     const parseZokan = (str: string) => {
         const parts = str.split(':');
-        return parts.length > 1 ? parts[1].trim().split(' ') : [];
+        return parts.length > 1 ? parts[1].trim().split(' ').filter(Boolean) : [];
     };
 
     const zokanYear = parseZokan(data.蔵干.年);
@@ -37,26 +37,82 @@ export function InsenSection({ data }: { data: InsenData }) {
     const zokanDay = parseZokan(data.蔵干.日);
     const senyi = data.蔵干.遷移.replace(/>/g, '').trim().split(' ').filter(Boolean);
 
+    // キャプチャ準拠: 日(左) 月(中) 年(右)
     const cols = [
-        { label: "日", num: day.number, kan: day.kan, shi: day.shi, zo: zokanDay[0] || '', sen: senyi[0] },
-        { label: "月", num: month.number, kan: month.kan, shi: month.shi, zo: zokanMonth[0] || '', sen: senyi[1] },
-        { label: "年", num: year.number, kan: year.kan, shi: year.shi, zo: zokanYear[0] || '', sen: senyi[2] },
+        { num: day.number, kan: day.kan, shi: day.shi, zokan: zokanDay },
+        { num: month.number, kan: month.kan, shi: month.shi, zokan: zokanMonth },
+        { num: year.number, kan: year.kan, shi: year.shi, zokan: zokanYear },
     ];
+
+    const cellStyle: React.CSSProperties = {
+        textAlign: "center",
+        fontFamily: fonts.serif,
+        padding: "2px 0",
+    };
 
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 20, transition: "all 0.3s", boxShadow: t.shadowCard }}>
             <div style={{ fontFamily: fonts.mono, fontSize: 11, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const, marginBottom: 14 }}>陰占</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, textAlign: "center" }}>
-                {cols.map((c) => (
-                    <div key={c.label}>
-                        <div style={{ fontSize: 11, color: t.text3, fontFamily: fonts.mono, marginBottom: 4 }}>{c.label}({c.num})</div>
-                        <div style={{ fontSize: 32, fontWeight: 200, color: t.text1, fontFamily: fonts.serif, lineHeight: 1.2 }}>{c.kan}</div>
-                        <div style={{ fontSize: 18, color: t.text2, fontFamily: fonts.serif }}>{c.shi}</div>
-                        <div style={{ fontSize: 11, color: t.text3, marginTop: 6, fontFamily: fonts.serif }}>{c.zo}</div>
-                        <div style={{ fontSize: 10, color: t.text4 }}>→ {c.sen}</div>
-                    </div>
-                ))}
-            </div>
+
+            {/* テーブル形式で表示 */}
+            <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+                <tbody>
+                    {/* 番号行 */}
+                    <tr>
+                        <td style={{ ...cellStyle, width: "15%" }} />
+                        {cols.map((c, i) => (
+                            <td key={`num-${i}`} style={{ ...cellStyle, fontSize: 11, color: t.text3, fontFamily: fonts.mono }}>
+                                ({c.num})
+                            </td>
+                        ))}
+                        <td style={{ ...cellStyle, width: "15%" }} />
+                    </tr>
+                    {/* 天干行 */}
+                    <tr>
+                        <td style={cellStyle} />
+                        {cols.map((c, i) => (
+                            <td key={`kan-${i}`} style={{ ...cellStyle, fontSize: 24, fontWeight: 200, color: t.text1, padding: "4px 0" }}>
+                                {c.kan}
+                            </td>
+                        ))}
+                        <td style={cellStyle} />
+                    </tr>
+                    {/* 地支行 (左右に蔵干の追加表示) */}
+                    <tr>
+                        <td style={{ ...cellStyle, fontSize: 13, color: t.text3 }}>
+                            {cols[0].zokan.length > 1 ? cols[0].zokan[1] : ''}
+                        </td>
+                        {cols.map((c, i) => (
+                            <td key={`shi-${i}`} style={{ ...cellStyle, fontSize: 18, color: t.text2, fontWeight: 400, padding: "4px 0" }}>
+                                {c.shi}
+                            </td>
+                        ))}
+                        <td style={{ ...cellStyle, fontSize: 13, color: t.text3 }}>
+                            {cols[2].zokan.length > 1 ? cols[2].zokan[1] : ''}
+                        </td>
+                    </tr>
+                    {/* 蔵干行 */}
+                    <tr>
+                        <td style={{ ...cellStyle, fontSize: 13, color: t.text4 }}>
+                            {cols[0].zokan.length > 2 ? cols[0].zokan[2] : ''}
+                        </td>
+                        {cols.map((c, i) => (
+                            <td key={`zo-${i}`} style={{ ...cellStyle, fontSize: 13, color: t.text3, padding: "2px 0" }}>
+                                {c.zokan[0] || ''}
+                            </td>
+                        ))}
+                        <td style={{ ...cellStyle, fontSize: 13, color: t.text4 }}>
+                            {cols[2].zokan.length > 2 ? cols[2].zokan[2] : ''}
+                        </td>
+                    </tr>
+                    {/* 遷移行 */}
+                    <tr>
+                        <td colSpan={5} style={{ ...cellStyle, fontSize: 10, color: t.text4, paddingTop: 8, letterSpacing: 2 }}>
+                            {'> ' + senyi.join(' > ')}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     );
 }
@@ -90,25 +146,57 @@ export function YosenSection({ data }: { data: YosenData }) {
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 20, transition: "all 0.3s", boxShadow: t.shadowCard }}>
             <div style={{ fontFamily: fonts.mono, fontSize: 11, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const, marginBottom: 14 }}>陽占</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4 }}>
-                {grid.map((item, i) => {
-                    if (!item) return <div key={i} />;
-                    return (
-                        <div key={i} style={{
-                            background: item.main ? `${t.text1}08` : t.inputBg,
-                            border: item.main ? `1px solid ${t.text1}20` : `1px solid ${t.border}`,
-                            padding: "7px 3px",
-                            textAlign: "center",
-                            fontSize: item.main ? 13 : 12,
-                            fontWeight: item.main ? 600 : 300,
-                            color: item.main ? t.text1 : t.text2,
-                            fontFamily: fonts.serif,
-                            transition: "all 0.3s",
-                        }}>
-                            {item.v}
-                        </div>
-                    );
-                })}
+            <div style={{ position: "relative" }}>
+                {/* 人体図SVG背景 */}
+                <svg viewBox="0 0 200 220" style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    width: "70%",
+                    height: "90%",
+                    opacity: 0.06,
+                    pointerEvents: "none",
+                    zIndex: 0,
+                }}>
+                    {/* 頭 */}
+                    <circle cx="100" cy="28" r="20" fill="none" stroke={t.text1} strokeWidth="2" />
+                    {/* 首 */}
+                    <line x1="100" y1="48" x2="100" y2="60" stroke={t.text1} strokeWidth="2" />
+                    {/* 胴体 */}
+                    <line x1="100" y1="60" x2="100" y2="140" stroke={t.text1} strokeWidth="2" />
+                    {/* 肩ライン */}
+                    <line x1="50" y1="72" x2="150" y2="72" stroke={t.text1} strokeWidth="2" />
+                    {/* 左腕 */}
+                    <line x1="50" y1="72" x2="25" y2="120" stroke={t.text1} strokeWidth="2" />
+                    {/* 右腕 */}
+                    <line x1="150" y1="72" x2="175" y2="120" stroke={t.text1} strokeWidth="2" />
+                    {/* 左脚 */}
+                    <line x1="100" y1="140" x2="65" y2="210" stroke={t.text1} strokeWidth="2" />
+                    {/* 右脚 */}
+                    <line x1="100" y1="140" x2="135" y2="210" stroke={t.text1} strokeWidth="2" />
+                </svg>
+                {/* 星の配置グリッド */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, position: "relative", zIndex: 1 }}>
+                    {grid.map((item, i) => {
+                        if (!item) return <div key={i} />;
+                        return (
+                            <div key={i} style={{
+                                background: item.main ? `${t.text1}08` : `${t.inputBg}cc`,
+                                border: item.main ? `1px solid ${t.text1}20` : `1px solid ${t.border}`,
+                                padding: "14px 3px",
+                                textAlign: "center",
+                                fontSize: item.main ? 13 : 12,
+                                fontWeight: item.main ? 600 : 300,
+                                color: item.main ? t.text1 : t.text2,
+                                fontFamily: fonts.serif,
+                                transition: "all 0.3s",
+                            }}>
+                                {item.v}
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );
@@ -118,7 +206,7 @@ export function YosenSection({ data }: { data: YosenData }) {
 // 【位相法】Isohou Section
 // =====================================
 export function IsohouSection({ data, shis }: { data: string[]; shis: { 年: string; 月: string; 日: string } }) {
-    const { t } = useTheme();
+    const { t, isDark } = useTheme();
     const getShi = (str: string) => {
         const match = str.match(/\((\d+)\)\s*(.+)/);
         if (match && match[2].length >= 2) return match[2][1];
@@ -129,39 +217,132 @@ export function IsohouSection({ data, shis }: { data: string[]; shis: { 年: str
     const shiMonth = getShi(shis.月);
     const shiYear = getShi(shis.年);
 
-    const isSpecial = (item: string) => {
-        const specials = ['半会', '会局', '支合', '冲', '害', '刑', '破', '天剋地冲'];
-        return specials.some(s => item.includes(s));
+    // 位相法データをパースして接続関係を抽出
+    // 例: "中央支合(卯辰)" → { type: "中央支合", shis: ["卯", "辰"] }
+    const parseRelation = (tag: string) => {
+        const match = tag.match(/(.+?)\((.+)\)/);
+        if (match) {
+            const chars = match[2].split('');
+            return { name: match[1], shis: chars };
+        }
+        return { name: tag, shis: [] as string[] };
     };
+
+    const isNegative = (name: string) => {
+        return ['冲', '害', '刑', '破', '天剋地冲'].some(s => name.includes(s));
+    };
+
+    const isPositive = (name: string) => {
+        return ['半会', '会局', '支合', '合'].some(s => name.includes(s));
+    };
+
+    // 地支の配置: 月支(左) - 日支(中) - 年支(右) → キャプチャ準拠は 月 日 年
+    // キャプチャを見ると 亥 卯 辰 で、月支 日支 年支の順
+    const shiLabels = [
+        { label: shiMonth, key: '月' },
+        { label: shiDay, key: '日' },
+        { label: shiYear, key: '年' },
+    ];
+
+    const relations = data.map(parseRelation);
+
+    // 方位名から接続する柱のインデックスを決定
+    // 中央 = 月支(0) - 日支(1), 西方 = 日支(1) - 年支(2), 東方 = 月支(0) - 年支(2)
+    const getIndicesFromDirection = (name: string): [number, number] | null => {
+        if (name.includes('中央')) return [0, 1];
+        if (name.includes('西方')) return [1, 2];
+        if (name.includes('東方')) return [0, 2];
+        // 方位が含まれない場合は地支文字からフォールバック
+        return null;
+    };
+
+    const getShiIndex = (char: string): number => {
+        if (char === shiMonth) return 0;
+        if (char === shiDay) return 1;
+        if (char === shiYear) return 2;
+        return -1;
+    };
+
+    // SVGで接続図を描画
+    const svgW = 240;
+    const svgH = 40 + relations.length * 32;
+    const shiX = [40, 120, 200]; // 各地支のX座標
 
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 20, transition: "all 0.3s", boxShadow: t.shadowCard }}>
             <div style={{ fontFamily: fonts.mono, fontSize: 11, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const, marginBottom: 14 }}>位相法</div>
-            <div style={{ position: "relative", width: "100%", height: 100, marginBottom: 10 }}>
-                <svg viewBox="0 0 120 90" style={{ width: "100%", height: "100%" }}>
-                    <line x1="60" y1="12" x2="20" y2="72" stroke={`${t.text1}15`} strokeWidth="1" />
-                    <line x1="60" y1="12" x2="100" y2="72" stroke={`${t.text1}15`} strokeWidth="1" />
-                    <line x1="20" y1="72" x2="100" y2="72" stroke={`${t.text1}15`} strokeWidth="1" />
-                    <text x="60" y="10" textAnchor="middle" fill={t.text1} fontSize="12" fontFamily={fonts.serif}>{shiDay}</text>
-                    <text x="15" y="82" textAnchor="middle" fill={t.text2} fontSize="12" fontFamily={fonts.serif}>{shiMonth}</text>
-                    <text x="105" y="82" textAnchor="middle" fill={t.text2} fontSize="12" fontFamily={fonts.serif}>{shiYear}</text>
-                </svg>
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-                {data.map((tag, i) => (
-                    <span key={i} style={{
-                        fontSize: 11,
-                        padding: "2px 8px",
-                        border: `1px solid ${isSpecial(tag) ? t.text1 + "30" : t.border}`,
-                        color: isSpecial(tag) ? t.text1 : t.text3,
-                        fontFamily: fonts.serif,
-                        background: isSpecial(tag) ? `${t.text1}06` : "transparent",
-                        transition: "all 0.3s",
+
+            {/* 地支を横一列に表示 */}
+            <div style={{ display: "flex", justifyContent: "space-around", marginBottom: 4 }}>
+                {shiLabels.map((s, i) => (
+                    <div key={i} style={{
+                        fontSize: 16, fontWeight: 500, color: t.text1,
+                        fontFamily: fonts.serif, textAlign: "center",
+                        width: 60,
                     }}>
-                        {tag}
-                    </span>
+                        {s.label}
+                    </div>
                 ))}
             </div>
+
+            {/* 接続ライン図 */}
+            {relations.length > 0 && (
+                <svg viewBox={`0 0 ${svgW} ${svgH}`} style={{ width: "100%", height: svgH * 0.7, display: "block" }}>
+                    {/* 地支位置からの垂直ドロップライン */}
+                    {shiLabels.map((_, i) => (
+                        <line key={`drop-${i}`}
+                            x1={shiX[i]} y1={0} x2={shiX[i]} y2={svgH - 4}
+                            stroke={`${t.text1}12`} strokeWidth="1"
+                        />
+                    ))}
+                    {/* 各関係の接続ライン */}
+                    {relations.map((rel, ri) => {
+                        const y = 14 + ri * 32;
+                        // 方位名から接続インデックスを取得（優先）、なければ地支文字からフォールバック
+                        const dirIndices = getIndicesFromDirection(rel.name);
+                        let idx0: number, idx1: number;
+                        if (dirIndices) {
+                            [idx0, idx1] = dirIndices;
+                        } else if (rel.shis.length >= 2) {
+                            idx0 = getShiIndex(rel.shis[0]);
+                            idx1 = getShiIndex(rel.shis[1]);
+                        } else {
+                            return null;
+                        }
+                        if (idx0 === -1 || idx1 === -1) return null;
+
+                        const x0 = shiX[Math.min(idx0, idx1)];
+                        const x1 = shiX[Math.max(idx0, idx1)];
+                        const midX = (x0 + x1) / 2;
+
+                        const color = isNegative(rel.name) ? (isDark ? '#E07050' : '#C75B39')
+                            : isPositive(rel.name) ? (isDark ? '#6AADE4' : '#2E6FA8')
+                                : t.text3;
+
+                        return (
+                            <g key={ri}>
+                                {/* 水平接続ライン */}
+                                <line x1={x0} y1={y} x2={x1} y2={y} stroke={color} strokeWidth="1.5" />
+                                {/* 左端のドロップ */}
+                                <line x1={x0} y1={y - 6} x2={x0} y2={y} stroke={color} strokeWidth="1.5" />
+                                {/* 右端のドロップ */}
+                                <line x1={x1} y1={y - 6} x2={x1} y2={y} stroke={color} strokeWidth="1.5" />
+                                {/* 関係ラベル */}
+                                <text x={midX} y={y + 14} textAnchor="middle" fill={color} fontSize="11" fontFamily={fonts.serif} fontWeight="600">
+                                    {rel.name}
+                                </text>
+                            </g>
+                        );
+                    })}
+                </svg>
+            )}
+
+            {/* 関係なしの表示 */}
+            {data.length === 0 && (
+                <div style={{ textAlign: "center", fontSize: 11, color: t.text4, padding: "12px 0", fontFamily: fonts.serif }}>
+                    なし
+                </div>
+            )}
         </div>
     );
 }
