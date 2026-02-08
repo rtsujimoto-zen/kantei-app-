@@ -29,11 +29,11 @@ interface AiStrategistProps {
     className?: string;
 }
 
-const personas: { id: AiPersona; emoji: string; label: string }[] = [
-    { id: "onmyoji", emoji: "🌙", label: "現代の陰陽師" },
-    { id: "tokyo_mother", emoji: "👩", label: "東京の母" },
-    { id: "jiya", emoji: "👴", label: "老執事" },
-    { id: "master", emoji: "⚔️", label: "師匠" },
+const personas: { id: AiPersona; icon: string; label: string }[] = [
+    { id: "onmyoji", icon: "/icons/onmyoji.png", label: "現代の陰陽師" },
+    { id: "tokyo_mother", icon: "/icons/mother.png", label: "東京の母" },
+    { id: "jiya", icon: "/icons/butler.png", label: "老執事" },
+    { id: "master", icon: "/icons/master.png", label: "師匠" },
 ];
 
 const models: { id: AiModel; label: string; sub: string }[] = [
@@ -142,7 +142,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                                     borderRadius: 0,
                                 }}
                             >
-                                <span style={{ fontSize: 16 }}>{p.emoji}</span>
+                                <img src={p.icon} alt={p.label} style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }} />
                                 <span style={{
                                     fontSize: 9,
                                     fontWeight: persona === p.id ? 600 : 300,
@@ -276,9 +276,11 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                                 }}
                             >
                                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                                    <span style={{ fontSize: 16 }}>
-                                        {msg.role === 'user' ? '👤' : getPersonaDisplay().emoji}
-                                    </span>
+                                    {msg.role === 'user' ? (
+                                        <span style={{ fontSize: 16 }}>👤</span>
+                                    ) : (
+                                        <img src={getPersonaDisplay().icon} alt={getPersonaDisplay().label} style={{ width: 24, height: 24, borderRadius: "50%", objectFit: "cover" }} />
+                                    )}
                                     <span style={{ fontSize: 10, fontWeight: 600, color: t.text3, fontFamily: fonts.mono }}>
                                         {msg.role === 'user' ? 'あなた' : getPersonaDisplay().label}
                                     </span>
