@@ -1,8 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { ThemeProvider, useTheme, ThemeToggle } from './ThemeContext';
 import { TraditionalChart } from './TraditionalChart';
 import { AiStrategist, AiModel, AiPersona } from './StrategistCard';
 
@@ -33,22 +31,23 @@ interface SanmeiReport {
     output_text?: string;
 }
 
-export default function Calculator() {
+const fonts = {
+    serif: "var(--font-noto-serif-jp), 'Noto Serif JP', serif",
+    mono: "var(--font-dm-mono), 'DM Mono', monospace",
+    display: "var(--font-cormorant), 'Cormorant Garamond', serif",
+};
+
+function CalculatorInner() {
+    const { t, isDark } = useTheme();
     const [birthday, setBirthday] = useState('1988-03-21');
     const [gender, setGender] = useState('M');
     const [report, setReport] = useState<SanmeiReport | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [mounted, setMounted] = useState(false);
     const [copySuccess, setCopySuccess] = useState('');
 
     // AI Strategist State
     const [isAiLoading, setIsAiLoading] = useState(false);
-
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
 
     const handleCalculate = async () => {
         setLoading(true);
@@ -63,7 +62,7 @@ export default function Calculator() {
             });
             if (!res.ok) throw new Error('Failed to fetch data');
             const data = await res.json();
-            console.log("API Response:", data); // Debug logging
+            console.log("API Response:", data);
             setReport(data.report);
         } catch (err: any) {
             console.error(err);
@@ -130,89 +129,161 @@ export default function Calculator() {
         }
     };
 
-    if (!mounted) return null; // Prevent hydration issues
-
     return (
-        <div className="min-h-screen pb-20 selection:bg-orange-100">
-            <div className="max-w-4xl mx-auto px-4 py-8 space-y-12">
-
+        <div
+            style={{
+                minHeight: "100vh",
+                background: t.bg,
+                fontFamily: fonts.serif,
+                transition: "background 0.4s ease, color 0.4s ease",
+            }}
+        >
+            <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 16px 80px" }}>
                 {/* Header */}
-                <header className="text-center space-y-4 py-10">
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
-                    >
-                        <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-gradient-sunrise inline-block mb-2">
-                            算命学
-                        </h1>
-                        <p className="text-muted-foreground text-sm tracking-wide">
-                            あなたの本質と運命を、シンプルに紐解く
-                        </p>
-                    </motion.div>
+                <header style={{ padding: "44px 20px 0" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                        <div>
+                            <div style={{ fontFamily: fonts.mono, fontSize: 9, color: t.text3, letterSpacing: 2 }}>
+                                算命学鑑定
+                            </div>
+                            <h1 style={{
+                                fontFamily: fonts.display,
+                                fontSize: 40,
+                                fontWeight: 300,
+                                color: t.text1,
+                                letterSpacing: 12,
+                                lineHeight: 1,
+                                margin: "8px 0 4px",
+                            }}>
+                                TEIŌ
+                            </h1>
+                            <div style={{ fontFamily: fonts.mono, fontSize: 8, color: t.text4, letterSpacing: 4 }}>
+                                IMPERIAL STUDIES
+                            </div>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                            <ThemeToggle />
+                            {/* Seal */}
+                            <div style={{
+                                width: 30, height: 30,
+                                border: `1.5px solid ${t.vermillion}`,
+                                borderRadius: 2,
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                transform: "rotate(-6deg)",
+                                background: t.vermillionBg,
+                            }}>
+                                <span style={{
+                                    color: t.vermillion, fontSize: 12, fontWeight: 700,
+                                    fontFamily: fonts.serif, lineHeight: 1,
+                                }}>帝</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style={{ height: 1, background: t.border, width: "100%", marginTop: 20 }} />
                 </header>
 
                 {/* Input Section */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5, delay: 0.1 }}
-                    className="max-w-xl mx-auto"
-                >
-                    <Card className="glass-card border-none rounded-3xl overflow-hidden p-2">
-                        <CardContent className="p-6 md:p-8 space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider pl-1">生年月日</label>
-                                    <input
-                                        type="date"
-                                        value={birthday}
-                                        onChange={(e) => setBirthday(e.target.value)}
-                                        className="w-full bg-secondary/50 border-none rounded-2xl p-4 text-foreground focus:ring-2 focus:ring-primary/20 outline-none transition-all font-mono text-lg shadow-inner"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider pl-1">性別</label>
-                                    <div className="flex bg-secondary/50 p-1 rounded-2xl">
+                <div style={{ padding: "24px 20px 0" }}>
+                    <div style={{ fontFamily: fonts.mono, fontSize: 9, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const, marginBottom: 14 }}>
+                        鑑定入力
+                    </div>
+                    <div style={{
+                        background: t.card,
+                        border: `1px solid ${t.border}`,
+                        borderRadius: 2,
+                        padding: "24px",
+                        boxShadow: t.shadowCard,
+                        transition: "all 0.3s",
+                    }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+                            <div>
+                                <label style={{ display: "block", fontSize: 8, color: t.text4, letterSpacing: 2, fontFamily: fonts.mono, textTransform: "uppercase" as const, marginBottom: 6 }}>
+                                    生年月日
+                                </label>
+                                <input
+                                    type="date"
+                                    value={birthday}
+                                    onChange={(e) => setBirthday(e.target.value)}
+                                    style={{
+                                        width: "100%",
+                                        background: t.inputBg,
+                                        border: `1px solid ${t.inputBorder}`,
+                                        borderRadius: 0,
+                                        padding: "10px 12px",
+                                        color: t.text1,
+                                        fontFamily: fonts.mono,
+                                        fontSize: 13,
+                                        outline: "none",
+                                        transition: "all 0.3s",
+                                    }}
+                                />
+                            </div>
+                            <div>
+                                <label style={{ display: "block", fontSize: 8, color: t.text4, letterSpacing: 2, fontFamily: fonts.mono, textTransform: "uppercase" as const, marginBottom: 6 }}>
+                                    性別
+                                </label>
+                                <div style={{ display: "flex", border: `1px solid ${t.inputBorder}`, background: t.inputBg }}>
+                                    {(["M", "F"] as const).map((g) => (
                                         <button
-                                            onClick={() => setGender('M')}
-                                            className={`flex-1 py-3 rounded-xl transition-all text-sm font-bold ${gender === 'M' ? 'bg-white text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                                            key={g}
+                                            onClick={() => setGender(g)}
+                                            style={{
+                                                flex: 1,
+                                                padding: "10px 0",
+                                                border: "none",
+                                                cursor: "pointer",
+                                                fontSize: 12,
+                                                fontFamily: fonts.serif,
+                                                fontWeight: gender === g ? 600 : 300,
+                                                color: gender === g ? t.activeChipText : t.text3,
+                                                background: gender === g ? t.activeChip : "transparent",
+                                                transition: "all 0.2s",
+                                            }}
                                         >
-                                            男性
+                                            {g === "M" ? "男性" : "女性"}
                                         </button>
-                                        <button
-                                            onClick={() => setGender('F')}
-                                            className={`flex-1 py-3 rounded-xl transition-all text-sm font-bold ${gender === 'F' ? 'bg-white text-rose-400 shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
-                                        >
-                                            女性
-                                        </button>
-                                    </div>
+                                    ))}
                                 </div>
                             </div>
-
-                            <Button
-                                onClick={handleCalculate}
-                                disabled={loading}
-                                className="w-full text-lg h-16 rounded-2xl bg-gradient-sunrise hover:opacity-90 transition-opacity shadow-lg shadow-orange-200 font-bold tracking-wide"
-                            >
-                                {loading ? '計算中...' : '鑑定する'}
-                            </Button>
-
-                            {error && <p className="text-destructive text-center text-sm bg-red-50 py-2 rounded-lg">{error}</p>}
-                        </CardContent>
-                    </Card>
-                </motion.div>
-
-                {/* Result Display */}
-                <AnimatePresence mode="wait">
-                    {report && report.陰占 && report.陽占 && report.大運 && report.年運 && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            className="space-y-8"
+                        </div>
+                        <button
+                            onClick={handleCalculate}
+                            disabled={loading}
+                            style={{
+                                width: "100%",
+                                padding: "13px 0",
+                                border: `1.5px solid ${t.text1}`,
+                                borderRadius: 0,
+                                cursor: loading ? "wait" : "pointer",
+                                fontSize: 13,
+                                fontWeight: 600,
+                                fontFamily: fonts.serif,
+                                letterSpacing: 4,
+                                color: t.text1,
+                                background: "transparent",
+                                transition: "all 0.2s",
+                                opacity: loading ? 0.5 : 1,
+                            }}
                         >
-                            {/* Traditional Chart */}
+                            {loading ? '計算中...' : '鑑定する'}
+                        </button>
+                        {error && (
+                            <p style={{ color: t.vermillion, textAlign: "center", fontSize: 12, marginTop: 12, background: t.vermillionBg, padding: "8px", fontFamily: fonts.mono }}>
+                                {error}
+                            </p>
+                        )}
+                    </div>
+                </div>
+
+                {/* Divider */}
+                {report && report.陰占 && report.陽占 && report.大運 && report.年運 && (
+                    <>
+                        <div style={{ padding: "24px 20px 0" }}>
+                            <div style={{ height: 1, background: t.border, width: "100%" }} />
+                        </div>
+
+                        {/* Chart Results */}
+                        <div style={{ padding: "24px 20px 0" }}>
                             <TraditionalChart
                                 report={{
                                     陰占: report.陰占,
@@ -228,38 +299,92 @@ export default function Calculator() {
                                 }}
                                 birthYear={parseInt(birthday.split('-')[0])}
                             />
+                        </div>
 
-                            {/* Prompt Data (Copy) */}
-                            {report.output_text && (
-                                <Card className="glass-card border-none rounded-3xl overflow-hidden">
-                                    <CardHeader className="flex flex-row items-center justify-between pb-2 bg-black/20">
-                                        <CardTitle className="text-sm font-bold text-stone-400 tracking-widest font-mono pl-2">PROMPT DATA</CardTitle>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
+                        {/* Prompt Data */}
+                        {report.output_text && (
+                            <div style={{ padding: "12px 20px 0" }}>
+                                <div style={{
+                                    background: t.card,
+                                    border: `1px solid ${t.border}`,
+                                    borderRadius: 2,
+                                    overflow: "hidden",
+                                    transition: "all 0.3s",
+                                }}>
+                                    <div style={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        padding: "10px 20px",
+                                        borderBottom: `1px solid ${t.border}`,
+                                    }}>
+                                        <span style={{ fontSize: 10, fontWeight: 500, color: t.text3, letterSpacing: 3, fontFamily: fonts.mono }}>
+                                            PROMPT DATA
+                                        </span>
+                                        <button
                                             onClick={handleCopyText}
-                                            className="text-stone-400 hover:text-white hover:bg-stone-800"
+                                            style={{
+                                                background: "none", border: "none",
+                                                color: copySuccess ? t.vermillion : t.text3,
+                                                fontSize: 10, cursor: "pointer",
+                                                fontFamily: fonts.mono,
+                                            }}
                                         >
                                             {copySuccess || 'Copy'}
-                                        </Button>
-                                    </CardHeader>
-                                    <CardContent className="p-0">
-                                        <pre className="bg-black/80 p-6 text-stone-300 text-xs font-mono whitespace-pre-wrap overflow-x-auto max-h-[300px] overflow-y-auto leading-relaxed">
-                                            {report.output_text}
-                                        </pre>
-                                    </CardContent>
-                                </Card>
-                            )}
+                                        </button>
+                                    </div>
+                                    <pre style={{
+                                        padding: 20,
+                                        color: t.text2,
+                                        fontSize: 10,
+                                        fontFamily: fonts.mono,
+                                        lineHeight: 1.8,
+                                        whiteSpace: "pre-wrap",
+                                        maxHeight: 300,
+                                        overflowY: "auto",
+                                        margin: 0,
+                                        background: t.promptBg,
+                                        transition: "all 0.3s",
+                                    }}>
+                                        {report.output_text}
+                                    </pre>
+                                </div>
+                            </div>
+                        )}
 
-                            {/* AI Strategist */}
+                        {/* AI Strategist */}
+                        <div style={{ padding: "12px 20px 0" }}>
                             <AiStrategist
                                 onConsult={handleAiConsultation}
                                 loading={isAiLoading}
                             />
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                        </div>
+                    </>
+                )}
+
+                {/* Footer */}
+                <div style={{ textAlign: "center", padding: "40px 0 0" }}>
+                    <div style={{ fontFamily: fonts.mono, fontSize: 8, color: t.text4, letterSpacing: 4 }}>
+                        THE ART OF SOVEREIGN WISDOM
+                    </div>
+                </div>
             </div>
         </div>
+    );
+}
+
+export default function Calculator() {
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) return null;
+
+    return (
+        <ThemeProvider>
+            <CalculatorInner />
+        </ThemeProvider>
     );
 }

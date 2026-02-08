@@ -55,7 +55,9 @@ def calculate(req: CalcRequest):
         
         # Generate text representation for AI context
         text_report = engine.format_as_text_report(report)
-        report["output_text"] = text_report
+        gender_label = "男性" if req.gender == "M" else "女性"
+        header = f"生年月日: {req.birthday} / 性別: {gender_label}\n\n"
+        report["output_text"] = header + text_report
         
         return {"report": report}
     except ValueError as e:

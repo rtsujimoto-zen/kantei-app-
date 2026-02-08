@@ -1,24 +1,31 @@
 import type { Metadata } from "next";
-import { Zen_Old_Mincho, Cinzel } from "next/font/google";
+import { Noto_Serif_JP, DM_Mono, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 
-const zenOldMincho = Zen_Old_Mincho({
-  weight: ["400", "500", "600", "700"],
+const notoSerifJP = Noto_Serif_JP({
+  weight: ["200", "300", "400", "500", "600", "700", "900"],
   subsets: ["latin"],
-  variable: "--font-zen",
+  variable: "--font-noto-serif-jp",
   display: "swap",
 });
 
-const cinzel = Cinzel({
-  weight: ["400", "500", "600", "700"],
+const dmMono = DM_Mono({
+  weight: ["300", "400", "500"],
   subsets: ["latin"],
-  variable: "--font-cinzel",
+  variable: "--font-dm-mono",
+  display: "swap",
+});
+
+const cormorant = Cormorant_Garamond({
+  weight: ["300", "400", "500", "600"],
+  subsets: ["latin"],
+  variable: "--font-cormorant",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "TEIOU LOGIC | 帝王学運命解析",
-  description: "Ancient wisdom for the modern era. Decode your destiny with Sanmei-gaku.",
+  title: "TEIŌ | 算命学鑑定",
+  description: "Imperial wisdom for the modern era. 算命学による宿命鑑定。",
 };
 
 export default function RootLayout({
@@ -29,7 +36,7 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body
-        className={`${zenOldMincho.variable} ${cinzel.variable} antialiased`}
+        className={`${notoSerifJP.variable} ${dmMono.variable} ${cormorant.variable} antialiased`}
       >
         {children}
       </body>

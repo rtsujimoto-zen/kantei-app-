@@ -2,7 +2,6 @@
 
 @plugin "tailwindcss-animate";
 
-/* Keeping variables for reference/future use, but hardcoding in @apply for now */
 :root {
   --background: #fafaf9;
   --foreground: #44403c;
@@ -10,15 +9,8 @@
 
 @layer base {
   body {
-    /* Using hardcoded hex to avoid 'unknown utility class' errors */
     @apply bg-[#fafaf9] text-[#44403c] font-sans antialiased;
-
-    /* Soft mesh gradient background */
-    background-image:
-      radial-gradient(at 0% 0%, hsla(253, 16%, 95%, 1) 0, transparent 50%),
-      radial-gradient(at 50% 0%, hsla(22, 100%, 96%, 1) 0, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(339, 100%, 96%, 1) 0, transparent 50%);
-    background-attachment: fixed;
+    transition: background-color 0.4s ease, color 0.4s ease;
   }
 }
 
