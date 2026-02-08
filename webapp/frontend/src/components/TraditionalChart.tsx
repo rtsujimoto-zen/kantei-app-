@@ -518,11 +518,13 @@ export function TraditionalChart({ report, birthYear }: TraditionalChartProps) {
                 />
             </div>
 
-            {/* Row 2: 天中殺, 大運, 年運 */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 8 }}>
-                {report.天中殺 && (
-                    <TenchuSection data={report.天中殺} ijokanshi={report.異常干支 || []} />
-                )}
+            {/* Row 2: 天中殺 — フルワイド */}
+            {report.天中殺 && (
+                <TenchuSection data={report.天中殺} ijokanshi={report.異常干支 || []} />
+            )}
+
+            {/* Row 3: 大運・年運 — 横並び */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: 8 }}>
                 <DaiunSection data={report.大運} birthYear={birthYear} />
                 <NenunSection data={report.年運} />
             </div>
