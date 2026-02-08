@@ -269,8 +269,8 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                                         className={cn(
                                             "relative group rounded-2xl p-4",
                                             msg.role === 'user'
-                                                ? "bg-orange-50 ml-8"
-                                                : "bg-secondary/30 border border-secondary mr-8"
+                                                ? "bg-orange-50 md:ml-8"
+                                                : "bg-secondary/30 border border-secondary md:mr-8"
                                         )}
                                     >
                                         <div className="flex items-start gap-3">
