@@ -20,7 +20,7 @@ export type AiPersona = 'jiya' | 'master' | 'tokyo_mother' | 'onmyoji';
 interface AiStrategistProps {
     onConsult: (
         persona: AiPersona,
-        depth: 'professional' | 'beginner',
+        depth: 'professional' | 'intermediate' | 'beginner',
         model: AiModel,
         message?: string,
         history?: ChatMessage[]
@@ -45,7 +45,7 @@ const models: { id: AiModel; label: string; sub: string }[] = [
 export function AiStrategist({ onConsult, loading, className }: AiStrategistProps) {
     const { t, isDark } = useTheme();
     const [persona, setPersona] = useState<AiPersona>('onmyoji');
-    const [depth, setDepth] = useState<'professional' | 'beginner'>('professional');
+    const [depth, setDepth] = useState<'professional' | 'intermediate' | 'beginner'>('professional');
     const [model, setModel] = useState<AiModel>('gemini-3.0-pro-high');
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputValue, setInputValue] = useState('');
@@ -159,9 +159,10 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                     <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 500, color: t.text3, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 8 }}>
                         📖 解説レベル
                     </label>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>
                         {([
                             { id: "professional" as const, label: "専門的" },
+                            { id: "intermediate" as const, label: "中級者向け" },
                             { id: "beginner" as const, label: "初心者向け" },
                         ]).map((d) => (
                             <button
