@@ -115,13 +115,13 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
             <div style={{ padding: "20px 24px 16px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
                     <div style={{ width: 3, height: 14, background: t.text1, borderRadius: 1, opacity: 0.4 }} />
-                    <span style={{ fontSize: 13, fontWeight: 600, color: t.text1, fontFamily: fonts.serif, letterSpacing: 2 }}>AI軍師</span>
-                    <span style={{ fontSize: 8, color: t.text4, fontFamily: fonts.mono, marginLeft: "auto", letterSpacing: 2 }}>IMPERIAL STRATEGIST</span>
+                    <span style={{ fontSize: 15, fontWeight: 600, color: t.text1, fontFamily: fonts.serif, letterSpacing: 2 }}>AI軍師</span>
+                    <span style={{ fontSize: 10, color: t.text4, fontFamily: fonts.mono, marginLeft: "auto", letterSpacing: 2 }}>IMPERIAL STRATEGIST</span>
                 </div>
 
                 {/* Persona Selection */}
                 <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 9, fontWeight: 500, color: t.text3, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 8 }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 500, color: t.text3, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 8 }}>
                         👤 相談相手
                     </label>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
@@ -144,7 +144,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                             >
                                 <img src={p.icon} alt={p.label} style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }} />
                                 <span style={{
-                                    fontSize: 9,
+                                    fontSize: 11,
                                     fontWeight: persona === p.id ? 600 : 300,
                                     color: persona === p.id ? t.text1 : t.text3,
                                     fontFamily: fonts.serif,
@@ -156,7 +156,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
 
                 {/* Depth Selection */}
                 <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 9, fontWeight: 500, color: t.text3, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 8 }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 500, color: t.text3, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 8 }}>
                         📖 解説レベル
                     </label>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
@@ -172,7 +172,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                                     border: `1px solid ${depth === d.id ? t.text1 + "40" : t.border}`,
                                     background: depth === d.id ? `${t.text1}08` : "transparent",
                                     cursor: "pointer",
-                                    fontSize: 12,
+                                    fontSize: 14,
                                     fontWeight: depth === d.id ? 600 : 300,
                                     color: depth === d.id ? t.text1 : t.text3,
                                     fontFamily: fonts.serif,
@@ -188,7 +188,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
 
                 {/* Model Selection */}
                 <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 9, fontWeight: 500, color: t.text3, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 8 }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 500, color: t.text3, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 8 }}>
                         🧠 AIモデル選択
                     </label>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
@@ -210,12 +210,12 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                                 }}
                             >
                                 <span style={{
-                                    fontSize: 11,
+                                    fontSize: 13,
                                     fontWeight: model === m.id ? 600 : 400,
                                     color: model === m.id ? t.text1 : t.text3,
                                     fontFamily: fonts.mono,
                                 }}>{m.label}</span>
-                                <span style={{ fontSize: 8, color: t.text4, fontFamily: fonts.mono }}>{m.sub}</span>
+                                <span style={{ fontSize: 10, color: t.text4, fontFamily: fonts.mono }}>{m.sub}</span>
                             </button>
                         ))}
                     </div>
@@ -231,7 +231,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                         border: `1.5px solid ${t.text1}`,
                         borderRadius: 0,
                         cursor: loading ? "wait" : "pointer",
-                        fontSize: 13,
+                        fontSize: 15,
                         fontWeight: 600,
                         fontFamily: fonts.serif,
                         letterSpacing: 3,
@@ -257,7 +257,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                     <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
                         <button
                             onClick={handleCopyAll}
-                            style={{ background: "none", border: "none", color: copiedAll ? t.vermillion : t.text3, fontSize: 10, cursor: "pointer", fontFamily: fonts.mono }}
+                            style={{ background: "none", border: "none", color: copiedAll ? t.vermillion : t.text3, fontSize: 12, cursor: "pointer", fontFamily: fonts.mono }}
                         >
                             {copiedAll ? '✓ コピーしました' : '全体をコピー'}
                         </button>
@@ -281,12 +281,12 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                                     ) : (
                                         <img src={getPersonaDisplay().icon} alt={getPersonaDisplay().label} style={{ width: 24, height: 24, borderRadius: "50%", objectFit: "cover" }} />
                                     )}
-                                    <span style={{ fontSize: 10, fontWeight: 600, color: t.text3, fontFamily: fonts.mono }}>
+                                    <span style={{ fontSize: 12, fontWeight: 600, color: t.text3, fontFamily: fonts.mono }}>
                                         {msg.role === 'user' ? 'あなた' : getPersonaDisplay().label}
                                     </span>
                                     {msg.role !== 'user' && index === 0 && (
                                         <span style={{
-                                            fontSize: 8, padding: "1px 6px",
+                                            fontSize: 10, padding: "1px 6px",
                                             border: `1px solid ${t.border}`,
                                             color: t.text4,
                                             fontFamily: fonts.mono,
@@ -300,7 +300,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                                         style={{
                                             marginLeft: "auto", background: "none", border: "none",
                                             color: copiedIndex === index ? t.vermillion : t.text4,
-                                            fontSize: 10, cursor: "pointer", fontFamily: fonts.mono,
+                                            fontSize: 12, cursor: "pointer", fontFamily: fonts.mono,
                                         }}
                                     >
                                         {copiedIndex === index ? '✓' : '⎘'}
@@ -309,7 +309,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                                 <div style={{
                                     color: t.text1,
                                     lineHeight: 2,
-                                    fontSize: 13,
+                                    fontSize: 15,
                                     fontFamily: fonts.serif,
                                     fontWeight: 300,
                                     whiteSpace: "pre-wrap",
@@ -327,7 +327,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                     <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 16, marginTop: 16 }}>
                         {/* テーマ */}
                         <div style={{ marginBottom: 12 }}>
-                            <div style={{ fontSize: 8, fontWeight: 600, color: t.text4, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 6, textTransform: "uppercase" as const }}>テーマ</div>
+                            <div style={{ fontSize: 10, fontWeight: 600, color: t.text4, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 6, textTransform: "uppercase" as const }}>テーマ</div>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
                                 {[
                                     { label: '💕 恋愛', text: '恋愛運について詳しく教えてください。私の宿命から見える恋愛の傾向、理想のパートナー像、気をつけるべき点などを解説してください。' },
@@ -342,7 +342,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                                         onClick={() => setInputValue(item.text)}
                                         style={{
                                             padding: "3px 10px",
-                                            fontSize: 9,
+                                            fontSize: 11,
                                             border: `1px solid ${t.border}`,
                                             background: `${t.text1}04`,
                                             color: t.text2,
@@ -359,7 +359,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                         </div>
                         {/* 各ポイント */}
                         <div>
-                            <div style={{ fontSize: 8, fontWeight: 600, color: t.text4, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 6, textTransform: "uppercase" as const }}>各ポイント</div>
+                            <div style={{ fontSize: 10, fontWeight: 600, color: t.text4, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 6, textTransform: "uppercase" as const }}>各ポイント</div>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
                                 {[
                                     { label: '陰占と陽占', text: '陰占と陽占について詳しく解説してください。それぞれの読み方と、私の命式ではどのような意味を持つか教えてください。' },
@@ -373,7 +373,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                                         onClick={() => setInputValue(item.text)}
                                         style={{
                                             padding: "3px 10px",
-                                            fontSize: 9,
+                                            fontSize: 11,
                                             border: `1px solid ${t.border}`,
                                             background: "transparent",
                                             color: t.text3,
@@ -400,7 +400,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                             rows={1}
                             style={{
                                 flex: 1, background: "none", border: "none",
-                                color: t.text1, fontFamily: fonts.serif, fontSize: 12,
+                                color: t.text1, fontFamily: fonts.serif, fontSize: 14,
                                 outline: "none", resize: "none",
                                 minHeight: 36, maxHeight: 120,
                                 padding: "8px 0",
@@ -415,7 +415,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                                 background: "transparent",
                                 color: loading ? t.text4 : t.text1,
                                 cursor: loading || !inputValue.trim() ? "default" : "pointer",
-                                fontSize: 14,
+                                fontSize: 16,
                                 display: "flex", alignItems: "center", justifyContent: "center",
                                 opacity: loading || !inputValue.trim() ? 0.3 : 1,
                                 transition: "all 0.2s",

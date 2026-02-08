@@ -45,15 +45,15 @@ export function InsenSection({ data }: { data: InsenData }) {
 
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 20, transition: "all 0.3s", boxShadow: t.shadowCard }}>
-            <div style={{ fontFamily: fonts.mono, fontSize: 9, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const, marginBottom: 14 }}>陰占</div>
+            <div style={{ fontFamily: fonts.mono, fontSize: 11, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const, marginBottom: 14 }}>陰占</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, textAlign: "center" }}>
                 {cols.map((c) => (
                     <div key={c.label}>
-                        <div style={{ fontSize: 9, color: t.text3, fontFamily: fonts.mono, marginBottom: 4 }}>{c.label}({c.num})</div>
-                        <div style={{ fontSize: 28, fontWeight: 200, color: t.text1, fontFamily: fonts.serif, lineHeight: 1.2 }}>{c.kan}</div>
-                        <div style={{ fontSize: 16, color: t.text2, fontFamily: fonts.serif }}>{c.shi}</div>
-                        <div style={{ fontSize: 9, color: t.text3, marginTop: 6, fontFamily: fonts.serif }}>{c.zo}</div>
-                        <div style={{ fontSize: 8, color: t.text4 }}>→ {c.sen}</div>
+                        <div style={{ fontSize: 11, color: t.text3, fontFamily: fonts.mono, marginBottom: 4 }}>{c.label}({c.num})</div>
+                        <div style={{ fontSize: 32, fontWeight: 200, color: t.text1, fontFamily: fonts.serif, lineHeight: 1.2 }}>{c.kan}</div>
+                        <div style={{ fontSize: 18, color: t.text2, fontFamily: fonts.serif }}>{c.shi}</div>
+                        <div style={{ fontSize: 11, color: t.text3, marginTop: 6, fontFamily: fonts.serif }}>{c.zo}</div>
+                        <div style={{ fontSize: 10, color: t.text4 }}>→ {c.sen}</div>
                     </div>
                 ))}
             </div>
@@ -89,7 +89,7 @@ export function YosenSection({ data }: { data: YosenData }) {
 
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 20, transition: "all 0.3s", boxShadow: t.shadowCard }}>
-            <div style={{ fontFamily: fonts.mono, fontSize: 9, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const, marginBottom: 14 }}>陽占</div>
+            <div style={{ fontFamily: fonts.mono, fontSize: 11, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const, marginBottom: 14 }}>陽占</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4 }}>
                 {grid.map((item, i) => {
                     if (!item) return <div key={i} />;
@@ -99,7 +99,7 @@ export function YosenSection({ data }: { data: YosenData }) {
                             border: item.main ? `1px solid ${t.text1}20` : `1px solid ${t.border}`,
                             padding: "7px 3px",
                             textAlign: "center",
-                            fontSize: item.main ? 11 : 10,
+                            fontSize: item.main ? 13 : 12,
                             fontWeight: item.main ? 600 : 300,
                             color: item.main ? t.text1 : t.text2,
                             fontFamily: fonts.serif,
@@ -136,21 +136,21 @@ export function IsohouSection({ data, shis }: { data: string[]; shis: { 年: str
 
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 20, transition: "all 0.3s", boxShadow: t.shadowCard }}>
-            <div style={{ fontFamily: fonts.mono, fontSize: 9, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const, marginBottom: 14 }}>位相法</div>
+            <div style={{ fontFamily: fonts.mono, fontSize: 11, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const, marginBottom: 14 }}>位相法</div>
             <div style={{ position: "relative", width: "100%", height: 100, marginBottom: 10 }}>
                 <svg viewBox="0 0 120 90" style={{ width: "100%", height: "100%" }}>
                     <line x1="60" y1="12" x2="20" y2="72" stroke={`${t.text1}15`} strokeWidth="1" />
                     <line x1="60" y1="12" x2="100" y2="72" stroke={`${t.text1}15`} strokeWidth="1" />
                     <line x1="20" y1="72" x2="100" y2="72" stroke={`${t.text1}15`} strokeWidth="1" />
-                    <text x="60" y="10" textAnchor="middle" fill={t.text1} fontSize="10" fontFamily={fonts.serif}>{shiDay}</text>
-                    <text x="15" y="82" textAnchor="middle" fill={t.text2} fontSize="10" fontFamily={fonts.serif}>{shiMonth}</text>
-                    <text x="105" y="82" textAnchor="middle" fill={t.text2} fontSize="10" fontFamily={fonts.serif}>{shiYear}</text>
+                    <text x="60" y="10" textAnchor="middle" fill={t.text1} fontSize="12" fontFamily={fonts.serif}>{shiDay}</text>
+                    <text x="15" y="82" textAnchor="middle" fill={t.text2} fontSize="12" fontFamily={fonts.serif}>{shiMonth}</text>
+                    <text x="105" y="82" textAnchor="middle" fill={t.text2} fontSize="12" fontFamily={fonts.serif}>{shiYear}</text>
                 </svg>
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
                 {data.map((tag, i) => (
                     <span key={i} style={{
-                        fontSize: 9,
+                        fontSize: 11,
                         padding: "2px 8px",
                         border: `1px solid ${isSpecial(tag) ? t.text1 + "30" : t.border}`,
                         color: isSpecial(tag) ? t.text1 : t.text3,
@@ -179,38 +179,38 @@ export function TenchuSection({ data, ijokanshi }: { data: TenchuData; ijokanshi
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderColor: `${t.vermillion}20`, borderRadius: 2, padding: 16, transition: "all 0.3s", boxShadow: t.shadowCard }}>
             <div style={{
-                display: "inline-block", fontSize: 9, fontWeight: 600,
+                display: "inline-block", fontSize: 11, fontWeight: 600,
                 color: t.vermillion, background: t.vermillionBg,
                 padding: "2px 8px", fontFamily: fonts.serif, marginBottom: 10, letterSpacing: 1,
             }}>天中殺</div>
-            <div style={{ fontSize: 16, fontWeight: 600, color: t.text1, fontFamily: fonts.serif, marginBottom: 12 }}>
+            <div style={{ fontSize: 18, fontWeight: 600, color: t.text1, fontFamily: fonts.serif, marginBottom: 12 }}>
                 {data.グループ}天中殺
             </div>
             <div style={{ marginBottom: 8 }}>
-                <div style={{ fontSize: 9, color: t.text3, fontFamily: fonts.mono, marginBottom: 3, letterSpacing: 1 }}>宿命天中殺</div>
+                <div style={{ fontSize: 11, color: t.text3, fontFamily: fonts.mono, marginBottom: 3, letterSpacing: 1 }}>宿命天中殺</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                     {data.宿命天中殺 && data.宿命天中殺.length > 0 ? (
                         data.宿命天中殺.map((item, i) => (
-                            <span key={i} style={{ fontSize: 9, padding: "2px 6px", background: t.vermillionBg, color: t.vermillion, fontFamily: fonts.serif }}>
+                            <span key={i} style={{ fontSize: 11, padding: "2px 6px", background: t.vermillionBg, color: t.vermillion, fontFamily: fonts.serif }}>
                                 {item}
                             </span>
                         ))
                     ) : (
-                        <span style={{ color: t.text3, fontSize: 10 }}>なし</span>
+                        <span style={{ color: t.text3, fontSize: 12 }}>なし</span>
                     )}
                 </div>
             </div>
             <div>
-                <div style={{ fontSize: 9, color: t.text4, fontFamily: fonts.mono, marginBottom: 3, letterSpacing: 1 }}>異常干支</div>
+                <div style={{ fontSize: 11, color: t.text4, fontFamily: fonts.mono, marginBottom: 3, letterSpacing: 1 }}>異常干支</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                     {ijokanshi && ijokanshi.length > 0 ? (
                         ijokanshi.map((item, i) => (
-                            <span key={i} style={{ fontSize: 9, padding: "2px 6px", border: `1px solid ${t.warmAccent}30`, color: t.warmAccent, fontFamily: fonts.serif }}>
+                            <span key={i} style={{ fontSize: 11, padding: "2px 6px", border: `1px solid ${t.warmAccent}30`, color: t.warmAccent, fontFamily: fonts.serif }}>
                                 {item}
                             </span>
                         ))
                     ) : (
-                        <span style={{ color: t.text3, fontSize: 10 }}>なし</span>
+                        <span style={{ color: t.text3, fontSize: 12 }}>なし</span>
                     )}
                 </div>
             </div>
@@ -242,15 +242,15 @@ export function DaiunSection({ data, birthYear }: { data: DaiunData; birthYear: 
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 16, transition: "all 0.3s", boxShadow: t.shadowCard }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
-                <div style={{ fontFamily: fonts.mono, fontSize: 9, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const }}>大運</div>
-                <span style={{ fontSize: 9, color: t.text4, fontFamily: fonts.mono }}>開始{data.立運}歳{data.方向}</span>
+                <div style={{ fontFamily: fonts.mono, fontSize: 11, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const }}>大運</div>
+                <span style={{ fontSize: 11, color: t.text4, fontFamily: fonts.mono }}>開始{data.立運}歳{data.方向}</span>
             </div>
             <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", fontSize: 10, borderCollapse: "collapse", fontFamily: fonts.serif }}>
+                <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse", fontFamily: fonts.serif }}>
                     <thead>
                         <tr style={{ borderBottom: `1px solid ${t.border}` }}>
                             {["西暦", "歳", "干支", "主星", "従星", "位相法"].map(h => (
-                                <th key={h} style={{ padding: "5px 3px", textAlign: "left", fontWeight: 400, fontSize: 9, color: t.text3, fontFamily: fonts.mono, letterSpacing: 1 }}>{h}</th>
+                                <th key={h} style={{ padding: "5px 3px", textAlign: "left", fontWeight: 400, fontSize: 11, color: t.text3, fontFamily: fonts.mono, letterSpacing: 1 }}>{h}</th>
                             ))}
                         </tr>
                     </thead>
@@ -270,12 +270,12 @@ export function DaiunSection({ data, birthYear }: { data: DaiunData; birthYear: 
                                     <td style={{ padding: "6px 3px" }}>
                                         <div style={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
                                             {row.位相法.slice(0, 3).map((p, j) => (
-                                                <span key={j} style={{ fontSize: 8, padding: "1px 4px", background: isSpecial(p) ? `${t.text1}08` : "transparent", color: isSpecial(p) ? t.text1 : t.text3, border: `1px solid ${isSpecial(p) ? t.text1 + "20" : "transparent"}` }}>
+                                                <span key={j} style={{ fontSize: 10, padding: "1px 4px", background: isSpecial(p) ? `${t.text1}08` : "transparent", color: isSpecial(p) ? t.text1 : t.text3, border: `1px solid ${isSpecial(p) ? t.text1 + "20" : "transparent"}` }}>
                                                     {p}
                                                 </span>
                                             ))}
                                             {row.天中殺 && (
-                                                <span style={{ fontSize: 8, padding: "1px 4px", background: t.vermillionBg, color: t.vermillion }}>
+                                                <span style={{ fontSize: 10, padding: "1px 4px", background: t.vermillionBg, color: t.vermillion }}>
                                                     {row.天中殺}
                                                 </span>
                                             )}
@@ -310,15 +310,15 @@ export function NenunSection({ data, limit = 10 }: { data: NenunData[]; limit?: 
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 16, transition: "all 0.3s", boxShadow: t.shadowCard }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
-                <div style={{ fontFamily: fonts.mono, fontSize: 9, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const }}>年運</div>
-                <span style={{ fontSize: 9, color: t.text3, fontFamily: fonts.mono }}>直近{limit}年</span>
+                <div style={{ fontFamily: fonts.mono, fontSize: 11, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const }}>年運</div>
+                <span style={{ fontSize: 11, color: t.text3, fontFamily: fonts.mono }}>直近{limit}年</span>
             </div>
             <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", fontSize: 10, borderCollapse: "collapse", fontFamily: fonts.serif }}>
+                <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse", fontFamily: fonts.serif }}>
                     <thead>
                         <tr style={{ borderBottom: `1px solid ${t.border}` }}>
                             {["西暦", "歳", "干支", "主星", "従星", "位相法"].map(h => (
-                                <th key={h} style={{ padding: "5px 3px", textAlign: "left", fontWeight: 400, fontSize: 9, color: t.text3, fontFamily: fonts.mono, letterSpacing: 1 }}>{h}</th>
+                                <th key={h} style={{ padding: "5px 3px", textAlign: "left", fontWeight: 400, fontSize: 11, color: t.text3, fontFamily: fonts.mono, letterSpacing: 1 }}>{h}</th>
                             ))}
                         </tr>
                     </thead>
@@ -338,12 +338,12 @@ export function NenunSection({ data, limit = 10 }: { data: NenunData[]; limit?: 
                                     <td style={{ padding: "6px 3px" }}>
                                         <div style={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
                                             {row.位相法.slice(0, 3).map((p, j) => (
-                                                <span key={j} style={{ fontSize: 8, padding: "1px 4px", background: isSpecial(p) ? `${t.text1}08` : "transparent", color: isSpecial(p) ? t.text1 : t.text3, border: `1px solid ${isSpecial(p) ? t.text1 + "20" : "transparent"}` }}>
+                                                <span key={j} style={{ fontSize: 10, padding: "1px 4px", background: isSpecial(p) ? `${t.text1}08` : "transparent", color: isSpecial(p) ? t.text1 : t.text3, border: `1px solid ${isSpecial(p) ? t.text1 + "20" : "transparent"}` }}>
                                                     {p}
                                                 </span>
                                             ))}
                                             {row.天中殺 && (
-                                                <span style={{ fontSize: 8, padding: "1px 4px", background: t.vermillionBg, color: t.vermillion }}>
+                                                <span style={{ fontSize: 10, padding: "1px 4px", background: t.vermillionBg, color: t.vermillion }}>
                                                     {row.天中殺}
                                                 </span>
                                             )}
@@ -373,7 +373,7 @@ export function UchubanSection({ data }: { data: { 干支番号: number[] } }) {
 
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 20, transition: "all 0.3s", boxShadow: t.shadowCard }}>
-            <div style={{ fontFamily: fonts.mono, fontSize: 9, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const, marginBottom: 14 }}>宇宙盤</div>
+            <div style={{ fontFamily: fonts.mono, fontSize: 11, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const, marginBottom: 14 }}>宇宙盤</div>
             <div style={{ display: "flex", justifyContent: "center" }}>
                 <svg viewBox="0 0 100 100" style={{ width: 100, height: 100 }}>
                     <circle cx="50" cy="50" r="40" fill="none" stroke={`${t.text1}10`} strokeWidth="0.8" />
@@ -422,13 +422,13 @@ export function HachimonSection({ data }: { data: HachimonData }) {
 
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 20, transition: "all 0.3s", boxShadow: t.shadowCard }}>
-            <div style={{ fontFamily: fonts.mono, fontSize: 9, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const, marginBottom: 14 }}>八門法</div>
+            <div style={{ fontFamily: fonts.mono, fontSize: 11, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const, marginBottom: 14 }}>八門法</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, textAlign: "center" }}>
                 {layout.map((item, i) =>
                     item ? (
                         <div key={i} style={{ background: `${item.color}10`, border: `1px solid ${item.color}20`, padding: "6px 2px", transition: "all 0.3s" }}>
-                            <div style={{ fontSize: 9, color: `${item.color}99`, fontFamily: fonts.serif }}>{item.el}</div>
-                            <div style={{ fontSize: 16, fontWeight: 600, color: item.color, fontFamily: fonts.mono }}>{item.val}</div>
+                            <div style={{ fontSize: 11, color: `${item.color}99`, fontFamily: fonts.serif }}>{item.el}</div>
+                            <div style={{ fontSize: 18, fontWeight: 600, color: item.color, fontFamily: fonts.mono }}>{item.val}</div>
                         </div>
                     ) : <div key={i} />
                 )}
@@ -456,25 +456,25 @@ export function SurihouSection({ data }: { data: SurihouData }) {
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 20, transition: "all 0.3s", boxShadow: t.shadowCard }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
-                <div style={{ fontFamily: fonts.mono, fontSize: 9, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const }}>数理法</div>
-                <span style={{ fontSize: 12, fontWeight: 600, color: t.text1, fontFamily: fonts.mono }}>合計 {data.総エネルギー}</span>
+                <div style={{ fontFamily: fonts.mono, fontSize: 11, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const }}>数理法</div>
+                <span style={{ fontSize: 14, fontWeight: 600, color: t.text1, fontFamily: fonts.mono }}>合計 {data.総エネルギー}</span>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 3 }}>
                 {gogyo.map((g) => (
                     <div key={g.label} style={{ textAlign: "center" }}>
                         {/* 五行ヘッダー */}
-                        <div style={{ fontSize: 10, fontWeight: 600, color: g.color, fontFamily: fonts.serif, marginBottom: 4 }}>{g.label}</div>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: g.color, fontFamily: fonts.serif, marginBottom: 4 }}>{g.label}</div>
                         {/* 陽(+) */}
                         <div style={{ marginBottom: 2 }}>
-                            <div style={{ fontSize: 9, color: t.text3, fontFamily: fonts.serif, marginBottom: 1 }}>{g.yang}</div>
-                            <div style={{ fontSize: 14, fontWeight: 600, color: t.text1, fontFamily: fonts.mono, background: t.inputBg, padding: "3px 0", transition: "all 0.3s" }}>
+                            <div style={{ fontSize: 11, color: t.text3, fontFamily: fonts.serif, marginBottom: 1 }}>{g.yang}</div>
+                            <div style={{ fontSize: 16, fontWeight: 600, color: t.text1, fontFamily: fonts.mono, background: t.inputBg, padding: "3px 0", transition: "all 0.3s" }}>
                                 {data.十干内訳[g.yang] || 0}
                             </div>
                         </div>
                         {/* 陰(-) */}
                         <div>
-                            <div style={{ fontSize: 9, color: t.text3, fontFamily: fonts.serif, marginBottom: 1 }}>{g.yin}</div>
-                            <div style={{ fontSize: 14, fontWeight: 600, color: t.text1, fontFamily: fonts.mono, background: t.inputBg, padding: "3px 0", transition: "all 0.3s" }}>
+                            <div style={{ fontSize: 11, color: t.text3, fontFamily: fonts.serif, marginBottom: 1 }}>{g.yin}</div>
+                            <div style={{ fontSize: 16, fontWeight: 600, color: t.text1, fontFamily: fonts.mono, background: t.inputBg, padding: "3px 0", transition: "all 0.3s" }}>
                                 {data.十干内訳[g.yin] || 0}
                             </div>
                         </div>
