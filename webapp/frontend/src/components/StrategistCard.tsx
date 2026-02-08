@@ -142,7 +142,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                                     borderRadius: 0,
                                 }}
                             >
-                                <img src={p.icon} alt={p.label} style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }} />
+                                <img src={p.icon} alt={p.label} style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover", ...(p.id === 'tokyo_mother' ? { objectPosition: 'top', transform: 'scale(1.15)' } : {}) }} />
                                 <span style={{
                                     fontSize: 11,
                                     fontWeight: persona === p.id ? 600 : 300,
@@ -280,7 +280,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
                                     {msg.role === 'user' ? (
                                         <span style={{ fontSize: 16 }}>👤</span>
                                     ) : (
-                                        <img src={getPersonaDisplay().icon} alt={getPersonaDisplay().label} style={{ width: 24, height: 24, borderRadius: "50%", objectFit: "cover" }} />
+                                        <img src={getPersonaDisplay().icon} alt={getPersonaDisplay().label} style={{ width: 24, height: 24, borderRadius: "50%", objectFit: "cover", ...(persona === 'tokyo_mother' ? { objectPosition: 'top', transform: 'scale(1.15)' } : {}) }} />
                                     )}
                                     <span style={{ fontSize: 12, fontWeight: 600, color: t.text3, fontFamily: fonts.mono }}>
                                         {msg.role === 'user' ? 'あなた' : getPersonaDisplay().label}
