@@ -71,20 +71,20 @@ interface YosenData {
 
 export function YosenSection({ data }: { data: YosenData }) {
     const { t } = useTheme();
-    // Grid layout: 陽占の人体星図配置
-    // [頭,  初年, (empty)]
+    // Grid layout: 正しい人体星図配置（頭・腹は中央列）
+    // [空,   頭,      初年]
     // [右手, 胸(中心), 左手]
-    // [腹,  晩年, 中年]
+    // [晩年, 腹,      中年]
     const grid = [
-        { v: data.十大主星.頭, main: false },
-        { v: data.十二大従星.初年, main: false },
         null,
-        { v: data.十大主星.右手, main: false },
-        { v: data.十大主星.胸, main: true },
-        { v: data.十大主星.左手, main: false },
-        { v: data.十大主星.腹, main: false },
-        { v: data.十二大従星.晩年, main: false },
-        { v: data.十二大従星.中年, main: false },
+        { v: data.十大主星.頭, main: false, label: '北' },
+        { v: data.十二大従星.初年, main: false, label: '初年' },
+        { v: data.十大主星.右手, main: false, label: '西' },
+        { v: data.十大主星.胸, main: true, label: '中心' },
+        { v: data.十大主星.左手, main: false, label: '東' },
+        { v: data.十二大従星.晩年, main: false, label: '晩年' },
+        { v: data.十大主星.腹, main: false, label: '南' },
+        { v: data.十二大従星.中年, main: false, label: '中年' },
     ];
 
     return (
@@ -443,9 +443,15 @@ export function HachimonSection({ data }: { data: HachimonData }) {
 interface SurihouData { 総エネルギー: number; 十干内訳: { [key: string]: number }; }
 
 export function SurihouSection({ data }: { data: SurihouData }) {
-    const { t } = useTheme();
-    const row1 = ['甲', '乙', '丙', '丁', '戊'];
-    const row2 = ['己', '庚', '辛', '壬', '癸'];
+    const { t, isDark } = useTheme();
+    // 五行ごとに縦配列: 上=陽(+) / 下=陰(-)
+    const gogyo: { label: string; yang: string; yin: string; color: string }[] = [
+        { label: '木', yang: '甲', yin: '乙', color: isDark ? '#7AB87A' : '#6A9E6A' },
+        { label: '火', yang: '丙', yin: '丁', color: isDark ? '#E07050' : '#C75B39' },
+        { label: '土', yang: '戊', yin: '己', color: isDark ? '#A08B6D' : '#8B7355' },
+        { label: '金', yang: '庚', yin: '辛', color: t.text2 },
+        { label: '水', yang: '壬', yin: '癸', color: isDark ? '#6AADE4' : '#5A8EAA' },
+    ];
 
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 20, transition: "all 0.3s", boxShadow: t.shadowCard }}>
@@ -453,18 +459,28 @@ export function SurihouSection({ data }: { data: SurihouData }) {
                 <div style={{ fontFamily: fonts.mono, fontSize: 9, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const }}>数理法</div>
                 <span style={{ fontSize: 12, fontWeight: 600, color: t.text1, fontFamily: fonts.mono }}>合計 {data.総エネルギー}</span>
             </div>
-            {[row1, row2].map((row, ri) => (
-                <div key={ri} style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 3, marginBottom: ri === 0 ? 4 : 0 }}>
-                    {row.map((k) => (
-                        <div key={k} style={{ textAlign: "center" }}>
-                            <div style={{ fontSize: 9, color: t.text3, fontFamily: fonts.serif, marginBottom: 2 }}>{k}</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 3 }}>
+                {gogyo.map((g) => (
+                    <div key={g.label} style={{ textAlign: "center" }}>
+                        {/* 五行ヘッダー */}
+                        <div style={{ fontSize: 10, fontWeight: 600, color: g.color, fontFamily: fonts.serif, marginBottom: 4 }}>{g.label}</div>
+                        {/* 陽(+) */}
+                        <div style={{ marginBottom: 2 }}>
+                            <div style={{ fontSize: 9, color: t.text3, fontFamily: fonts.serif, marginBottom: 1 }}>{g.yang}</div>
                             <div style={{ fontSize: 14, fontWeight: 600, color: t.text1, fontFamily: fonts.mono, background: t.inputBg, padding: "3px 0", transition: "all 0.3s" }}>
-                                {data.十干内訳[k] || 0}
+                                {data.十干内訳[g.yang] || 0}
                             </div>
                         </div>
-                    ))}
-                </div>
-            ))}
+                        {/* 陰(-) */}
+                        <div>
+                            <div style={{ fontSize: 9, color: t.text3, fontFamily: fonts.serif, marginBottom: 1 }}>{g.yin}</div>
+                            <div style={{ fontSize: 14, fontWeight: 600, color: t.text1, fontFamily: fonts.mono, background: t.inputBg, padding: "3px 0", transition: "all 0.3s" }}>
+                                {data.十干内訳[g.yin] || 0}
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }
