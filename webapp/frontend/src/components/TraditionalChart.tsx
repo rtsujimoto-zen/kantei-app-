@@ -546,31 +546,111 @@ export function NenunSection({ data, limit = 10 }: { data: NenunData[]; limit?: 
 export function UchubanSection({ data }: { data: { 干支番号: number[] } }) {
     const { t } = useTheme();
     const nums = data.干支番号;
-    const getPosition = (num: number, radius: number = 35) => {
+    const cx = 150, cy = 150;
+    const outerR = 138, numberR = 122, tickR = 132, innerR = 110, dotR = 100;
+
+    const getPos = (num: number, r: number) => {
         const angle = ((num - 1) / 60) * 2 * Math.PI - Math.PI / 2;
-        return { x: 50 + radius * Math.cos(angle), y: 50 + radius * Math.sin(angle) };
+        return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
     };
-    const positions = nums.map(n => getPosition(n));
+
+    const positions = nums.map(n => getPos(n, dotR));
+
+    // 区切り線の位置（1, 16, 31, 46番の位置で4分割）
+    const dividers = [1, 16, 31, 46].map(n => {
+        const inner = getPos(n, 40);
+        const outer = getPos(n, innerR);
+        return { x1: inner.x, y1: inner.y, x2: outer.x, y2: outer.y };
+    });
 
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 20, transition: "all 0.3s", boxShadow: t.shadowCard }}>
             <div style={{ fontFamily: fonts.mono, fontSize: 11, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const, marginBottom: 14 }}>宇宙盤</div>
             <div style={{ display: "flex", justifyContent: "center" }}>
-                <svg viewBox="0 0 100 100" style={{ width: 100, height: 100 }}>
-                    <circle cx="50" cy="50" r="40" fill="none" stroke={`${t.text1}10`} strokeWidth="0.8" />
-                    <circle cx="50" cy="50" r="28" fill="none" stroke={`${t.text1}06`} strokeWidth="0.5" />
+                <svg viewBox="0 0 300 300" style={{ width: 280, height: 280, maxWidth: "100%" }}>
+                    {/* 外周円 */}
+                    <circle cx={cx} cy={cy} r={outerR} fill="none" stroke={`${t.text1}18`} strokeWidth="0.8" />
+                    <circle cx={cx} cy={cy} r={innerR} fill="none" stroke={`${t.text1}12`} strokeWidth="0.5" />
+
+                    {/* 1-60の目盛りと番号 */}
+                    {Array.from({ length: 60 }, (_, i) => {
+                        const num = i + 1;
+                        const tickStart = getPos(num, tickR);
+                        const tickEnd = getPos(num, outerR);
+                        const labelPos = getPos(num, numberR);
+                        const angle = ((num - 1) / 60) * 360 - 90;
+                        const isHighlighted = nums.includes(num);
+                        return (
+                            <g key={num}>
+                                {/* 目盛り線 */}
+                                <line
+                                    x1={tickStart.x} y1={tickStart.y}
+                                    x2={tickEnd.x} y2={tickEnd.y}
+                                    stroke={`${t.text1}${isHighlighted ? '60' : '20'}`}
+                                    strokeWidth={num % 5 === 0 ? 1 : 0.5}
+                                />
+                                {/* 番号 */}
+                                <text
+                                    x={labelPos.x} y={labelPos.y}
+                                    textAnchor="middle"
+                                    dominantBaseline="central"
+                                    fontSize={num % 5 === 0 ? 7 : 5.5}
+                                    fontFamily={fonts.mono}
+                                    fill={isHighlighted ? t.text1 : `${t.text1}40`}
+                                    fontWeight={isHighlighted ? 700 : 400}
+                                    transform={`rotate(${angle + 90}, ${labelPos.x}, ${labelPos.y})`}
+                                >
+                                    {num}
+                                </text>
+                            </g>
+                        );
+                    })}
+
+                    {/* 4分割の区切り線 */}
+                    {dividers.map((d, i) => (
+                        <line
+                            key={`div-${i}`}
+                            x1={d.x1} y1={d.y1} x2={d.x2} y2={d.y2}
+                            stroke={`${t.text1}20`}
+                            strokeWidth="0.8"
+                        />
+                    ))}
+
+                    {/* 三角形ポリゴン */}
                     {positions.length >= 3 && (
                         <polygon
-                            points={`${positions[0].x},${positions[0].y} ${positions[1].x},${positions[1].y} ${positions[2].x},${positions[2].y}`}
-                            fill={`${t.text1}05`}
+                            points={positions.map(p => `${p.x},${p.y}`).join(' ')}
+                            fill={`${t.text1}08`}
                             stroke={t.text1}
-                            strokeWidth="1"
-                            opacity="0.4"
+                            strokeWidth="1.2"
+                            opacity="0.5"
                         />
                     )}
+
+                    {/* ハイライトされた点 */}
                     {positions.map((p, i) => (
-                        <circle key={i} cx={p.x} cy={p.y} r="3" fill={t.text1} opacity="0.6" />
+                        <circle key={i} cx={p.x} cy={p.y} r="4" fill={t.text1} opacity="0.7" />
                     ))}
+
+                    {/* 干支番号のラベル（点の横） */}
+                    {positions.map((p, i) => {
+                        const labelR = dotR - 12;
+                        const lp = getPos(nums[i], labelR);
+                        return (
+                            <text
+                                key={`label-${i}`}
+                                x={lp.x} y={lp.y}
+                                textAnchor="middle"
+                                dominantBaseline="central"
+                                fontSize="8"
+                                fontFamily={fonts.mono}
+                                fontWeight={700}
+                                fill={t.text1}
+                            >
+                                {nums[i]}
+                            </text>
+                        );
+                    })}
                 </svg>
             </div>
         </div>
