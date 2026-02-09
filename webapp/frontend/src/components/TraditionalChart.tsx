@@ -126,7 +126,7 @@ interface YosenData {
 }
 
 export function YosenSection({ data }: { data: YosenData }) {
-    const { t } = useTheme();
+    const { t, isDark } = useTheme();
     // Grid layout: 正しい人体星図配置（頭・腹は中央列）
     // [空,   頭,      初年]
     // [右手, 胸(中心), 左手]
@@ -147,80 +147,24 @@ export function YosenSection({ data }: { data: YosenData }) {
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 20, transition: "all 0.3s", boxShadow: t.shadowCard }}>
             <div style={{ fontFamily: fonts.serif, fontSize: 12, fontWeight: 600, color: t.text3, letterSpacing: 6, marginBottom: 14 }}>陽占</div>
             <div style={{ position: "relative" }}>
-                {/* 人体図SVG背景 */}
-                <svg viewBox="0 0 260 280" style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    width: "90%",
-                    height: "100%",
-                    opacity: 0.06,
-                    pointerEvents: "none",
-                    zIndex: 0,
-                }}>
-                    {/* 頭部 */}
-                    <ellipse cx="130" cy="26" rx="15" ry="19" fill={t.text1} />
-                    {/* 人体シルエット - 墨絵調 */}
-                    <path
-                        d={`
-                            M 122 44
-                            C 120 46, 118 48, 116 50
-                            C 112 52, 106 55, 98 58
-                            C 86 62, 70 66, 54 72
-                            C 40 77, 26 84, 16 90
-                            C 10 94, 6 98, 4 102
-                            C 2 106, 4 108, 8 108
-                            C 12 108, 18 104, 26 100
-                            C 36 94, 48 88, 62 82
-                            C 72 78, 82 74, 90 72
-                            C 96 70, 100 68, 104 66
-                            L 106 64
-                            C 106 68, 104 76, 102 86
-                            C 100 98, 98 112, 98 122
-                            C 98 130, 98 136, 100 142
-                            C 100 148, 100 154, 98 160
-                            C 96 168, 92 178, 88 190
-                            C 84 200, 80 212, 78 222
-                            C 76 232, 74 240, 74 248
-                            C 74 254, 76 258, 80 260
-                            C 84 262, 88 260, 90 256
-                            C 92 252, 92 246, 94 238
-                            C 96 228, 100 216, 104 204
-                            C 108 194, 112 184, 116 176
-                            C 120 168, 124 162, 128 158
-                            L 130 156
-                            L 132 158
-                            C 136 162, 140 168, 144 176
-                            C 148 184, 152 194, 156 204
-                            C 160 216, 164 228, 166 238
-                            C 168 246, 168 252, 170 256
-                            C 172 260, 176 262, 180 260
-                            C 184 258, 186 254, 186 248
-                            C 186 240, 184 232, 182 222
-                            C 180 212, 176 200, 172 190
-                            C 168 178, 164 168, 162 160
-                            C 160 154, 160 148, 160 142
-                            C 162 136, 162 130, 162 122
-                            C 162 112, 160 98, 158 86
-                            C 156 76, 154 68, 154 64
-                            L 156 66
-                            C 160 68, 164 70, 170 72
-                            C 178 74, 188 78, 198 82
-                            C 212 88, 224 94, 234 100
-                            C 242 104, 248 108, 252 108
-                            C 256 108, 258 106, 256 102
-                            C 254 98, 250 94, 244 90
-                            C 234 84, 220 77, 206 72
-                            C 190 66, 174 62, 162 58
-                            C 154 55, 148 52, 144 50
-                            C 142 48, 140 46, 138 44
-                            Z
-                        `}
-                        fill={t.text1}
-                        stroke="none"
-                    />
-                </svg>
+                {/* 人体図 背景画像 */}
+                <img
+                    src="/body-silhouette.png"
+                    alt=""
+                    style={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        width: "85%",
+                        height: "95%",
+                        objectFit: "contain",
+                        opacity: isDark ? 0.06 : 0.08,
+                        pointerEvents: "none",
+                        zIndex: 0,
+                        filter: isDark ? "invert(1)" : "none",
+                    }}
+                />
                 {/* 星の配置グリッド */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, position: "relative", zIndex: 1 }}>
                     {grid.map((item, i) => {
