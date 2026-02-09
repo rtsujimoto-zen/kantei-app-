@@ -366,8 +366,8 @@ function CalculatorInner() {
                             }}>
                                 Teō
                             </h1>
-                            <div style={{ fontFamily: fonts.mono, fontSize: 9, color: t.text4, letterSpacing: 3, marginTop: 2 }}>
-                                算命学鑑定
+                            <div style={{ fontFamily: fonts.serif, fontSize: 9, color: t.text4, letterSpacing: 3, marginTop: 2 }}>
+                                帝王学鑑定
                             </div>
                         </div>
                     </div>

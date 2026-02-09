@@ -52,7 +52,7 @@ export function InsenSection({ data }: { data: InsenData }) {
 
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 20, transition: "all 0.3s", boxShadow: t.shadowCard }}>
-            <div style={{ fontFamily: fonts.mono, fontSize: 11, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const, marginBottom: 14 }}>陰占</div>
+            <div style={{ fontFamily: fonts.serif, fontSize: 12, fontWeight: 600, color: t.text3, letterSpacing: 6, marginBottom: 14 }}>陰占</div>
 
             {/* テーブル形式で表示 */}
             <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
@@ -145,7 +145,7 @@ export function YosenSection({ data }: { data: YosenData }) {
 
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 20, transition: "all 0.3s", boxShadow: t.shadowCard }}>
-            <div style={{ fontFamily: fonts.mono, fontSize: 11, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const, marginBottom: 14 }}>陽占</div>
+            <div style={{ fontFamily: fonts.serif, fontSize: 12, fontWeight: 600, color: t.text3, letterSpacing: 6, marginBottom: 14 }}>陽占</div>
             <div style={{ position: "relative" }}>
                 {/* 人体図SVG背景 */}
                 <svg viewBox="0 0 200 220" style={{
@@ -270,7 +270,7 @@ export function IsohouSection({ data, shis }: { data: string[]; shis: { 年: str
 
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 20, transition: "all 0.3s", boxShadow: t.shadowCard }}>
-            <div style={{ fontFamily: fonts.mono, fontSize: 11, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const, marginBottom: 14 }}>位相法</div>
+            <div style={{ fontFamily: fonts.serif, fontSize: 12, fontWeight: 600, color: t.text3, letterSpacing: 6, marginBottom: 14 }}>位相法</div>
 
             {/* 地支を横一列に表示 */}
             <div style={{ display: "flex", justifyContent: "space-around", marginBottom: 4 }}>
@@ -423,7 +423,7 @@ export function DaiunSection({ data, birthYear }: { data: DaiunData; birthYear: 
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 16, transition: "all 0.3s", boxShadow: t.shadowCard }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
-                <div style={{ fontFamily: fonts.mono, fontSize: 11, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const }}>大運</div>
+                <div style={{ fontFamily: fonts.serif, fontSize: 12, fontWeight: 600, color: t.text3, letterSpacing: 6 }}>大運</div>
                 <span style={{ fontSize: 11, color: t.text4, fontFamily: fonts.mono }}>開始{data.立運}歳{data.方向}</span>
             </div>
             <div style={{ overflowX: "auto" }}>
@@ -491,7 +491,7 @@ export function NenunSection({ data, limit = 10 }: { data: NenunData[]; limit?: 
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 16, transition: "all 0.3s", boxShadow: t.shadowCard }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
-                <div style={{ fontFamily: fonts.mono, fontSize: 11, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const }}>年運</div>
+                <div style={{ fontFamily: fonts.serif, fontSize: 12, fontWeight: 600, color: t.text3, letterSpacing: 6 }}>年運</div>
                 <span style={{ fontSize: 11, color: t.text3, fontFamily: fonts.mono }}>直近{limit}年</span>
             </div>
             <div style={{ overflowX: "auto" }}>
@@ -565,7 +565,7 @@ export function UchubanSection({ data }: { data: { 干支番号: number[] } }) {
 
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 20, transition: "all 0.3s", boxShadow: t.shadowCard }}>
-            <div style={{ fontFamily: fonts.mono, fontSize: 11, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const, marginBottom: 14 }}>宇宙盤</div>
+            <div style={{ fontFamily: fonts.serif, fontSize: 12, fontWeight: 600, color: t.text3, letterSpacing: 6, marginBottom: 14 }}>宇宙盤</div>
             <div style={{ display: "flex", justifyContent: "center" }}>
                 <svg viewBox="0 0 300 300" style={{ width: 280, height: 280, maxWidth: "100%" }}>
                     {/* 外周円 */}
@@ -683,7 +683,7 @@ export function HachimonSection({ data }: { data: HachimonData }) {
 
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 20, transition: "all 0.3s", boxShadow: t.shadowCard }}>
-            <div style={{ fontFamily: fonts.mono, fontSize: 11, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const, marginBottom: 14 }}>八門法</div>
+            <div style={{ fontFamily: fonts.serif, fontSize: 12, fontWeight: 600, color: t.text3, letterSpacing: 6, marginBottom: 14 }}>八門法</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, textAlign: "center" }}>
                 {layout.map((item, i) =>
                     item ? (
@@ -717,7 +717,7 @@ export function SurihouSection({ data }: { data: SurihouData }) {
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 20, transition: "all 0.3s", boxShadow: t.shadowCard }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
-                <div style={{ fontFamily: fonts.mono, fontSize: 11, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const }}>数理法</div>
+                <div style={{ fontFamily: fonts.serif, fontSize: 12, fontWeight: 600, color: t.text3, letterSpacing: 6 }}>数理法</div>
                 <span style={{ fontSize: 14, fontWeight: 600, color: t.text1, fontFamily: fonts.serif }}>合計 {data.総エネルギー}</span>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 3 }}>

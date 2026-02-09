@@ -46,8 +46,8 @@ const models: { id: AiModel; label: string; sub: string }[] = [
 export function AiStrategist({ onConsult, loading, className, layout = 'panel' }: AiStrategistProps) {
     const { t, isDark } = useTheme();
     const [persona, setPersona] = useState<AiPersona>('onmyoji');
-    const [depth, setDepth] = useState<'professional' | 'intermediate' | 'beginner'>('professional');
-    const [model, setModel] = useState<AiModel>('gemini-3.0-pro-high');
+    const [depth, setDepth] = useState<'professional' | 'intermediate' | 'beginner'>('beginner');
+    const [model, setModel] = useState<AiModel>('gemini-flash');
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputValue, setInputValue] = useState('');
     const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -134,7 +134,18 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                             borderRadius: 0,
                         }}
                     >
-                        <img src={p.icon} alt={p.label} style={{ width: 36, height: 36, objectFit: "contain" }} />
+                        <div style={{
+                            width: 36, height: 36, borderRadius: "50%", overflow: "hidden",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                        }}>
+                            <img src={p.icon} alt={p.label} style={{
+                                width: p.id === 'tokyo_mother' ? 52 : 36,
+                                height: p.id === 'tokyo_mother' ? 52 : 36,
+                                objectFit: "cover",
+                                objectPosition: p.id === 'tokyo_mother' ? "center 20%" : "center",
+                            }} />
+                        </div>
+                        <span style={{ fontSize: 9, color: persona === p.id ? t.text1 : t.text4, fontFamily: fonts.serif, lineHeight: 1.2, textAlign: "center" }}>{p.label}</span>
                     </button>
                 ))}
             </div>
