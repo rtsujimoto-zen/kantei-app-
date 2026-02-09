@@ -91,7 +91,7 @@ function CalculatorInner() {
 
     const handleAiConsultation = async (
         persona: AiPersona,
-        depth: 'professional' | 'beginner',
+        depth: 'professional' | 'intermediate' | 'beginner',
         model: AiModel,
         message?: string,
         history?: ChatMessage[]
@@ -155,7 +155,7 @@ function CalculatorInner() {
                                 lineHeight: 1,
                                 margin: "8px 0 4px",
                             }}>
-                                TEIŌ
+                                Teō
                             </h1>
                             <div style={{ fontFamily: fonts.mono, fontSize: 10, color: t.text4, letterSpacing: 4 }}>
                                 IMPERIAL STUDIES

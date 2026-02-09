@@ -24,7 +24,7 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "TEIŌ | 算命学鑑定",
+  title: "Teō テオ | 算命学鑑定",
   description: "Imperial wisdom for the modern era. 算命学による宿命鑑定。",
 };
 
