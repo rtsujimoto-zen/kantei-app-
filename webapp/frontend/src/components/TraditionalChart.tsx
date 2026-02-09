@@ -148,33 +148,62 @@ export function YosenSection({ data }: { data: YosenData }) {
             <div style={{ fontFamily: fonts.serif, fontSize: 12, fontWeight: 600, color: t.text3, letterSpacing: 6, marginBottom: 14 }}>陽占</div>
             <div style={{ position: "relative" }}>
                 {/* 人体図SVG背景 */}
-                <svg viewBox="0 0 200 220" style={{
+                <svg viewBox="0 0 200 240" style={{
                     position: "absolute",
                     top: "50%",
                     left: "50%",
                     transform: "translate(-50%, -50%)",
-                    width: "70%",
-                    height: "90%",
-                    opacity: 0.06,
+                    width: "75%",
+                    height: "95%",
+                    opacity: 0.07,
                     pointerEvents: "none",
                     zIndex: 0,
                 }}>
-                    {/* 頭 */}
-                    <circle cx="100" cy="28" r="20" fill="none" stroke={t.text1} strokeWidth="2" />
-                    {/* 首 */}
-                    <line x1="100" y1="48" x2="100" y2="60" stroke={t.text1} strokeWidth="2" />
-                    {/* 胴体 */}
-                    <line x1="100" y1="60" x2="100" y2="140" stroke={t.text1} strokeWidth="2" />
-                    {/* 肩ライン */}
-                    <line x1="50" y1="72" x2="150" y2="72" stroke={t.text1} strokeWidth="2" />
-                    {/* 左腕 */}
-                    <line x1="50" y1="72" x2="25" y2="120" stroke={t.text1} strokeWidth="2" />
-                    {/* 右腕 */}
-                    <line x1="150" y1="72" x2="175" y2="120" stroke={t.text1} strokeWidth="2" />
-                    {/* 左脚 */}
-                    <line x1="100" y1="140" x2="65" y2="210" stroke={t.text1} strokeWidth="2" />
-                    {/* 右脚 */}
-                    <line x1="100" y1="140" x2="135" y2="210" stroke={t.text1} strokeWidth="2" />
+                    {/* 人体シルエット - 両手を広げたポーズ */}
+                    <path
+                        d={`
+                            M 100 8
+                            C 88 8, 80 16, 80 28
+                            C 80 40, 88 48, 100 48
+                            C 112 48, 120 40, 120 28
+                            C 120 16, 112 8, 100 8
+                            Z
+                            M 92 48 L 92 52 C 90 54, 88 56, 88 58
+                            L 88 60 C 76 62, 58 64, 40 68
+                            C 28 71, 16 76, 8 82
+                            C 4 85, 2 88, 4 90
+                            C 6 92, 10 92, 16 90
+                            C 24 86, 36 82, 48 78
+                            L 56 76 C 60 75, 66 72, 72 70
+                            L 80 66 L 80 100
+                            C 80 108, 78 120, 78 130
+                            L 76 140 L 68 170
+                            C 64 182, 60 194, 58 206
+                            C 56 214, 56 220, 60 224
+                            C 62 226, 66 226, 68 224
+                            C 72 220, 76 210, 80 198
+                            L 88 170 L 96 142
+                            L 100 138
+                            L 104 142 L 112 170
+                            L 120 198 C 124 210, 128 220, 132 224
+                            C 134 226, 138 226, 140 224
+                            C 144 220, 144 214, 142 206
+                            C 140 194, 136 182, 132 170
+                            L 124 140 L 122 130
+                            C 122 120, 120 108, 120 100
+                            L 120 66 L 128 70
+                            C 134 72, 140 75, 144 76
+                            L 152 78 C 164 82, 176 86, 184 90
+                            C 190 92, 194 92, 196 90
+                            C 198 88, 196 85, 192 82
+                            C 184 76, 172 71, 160 68
+                            C 142 64, 124 62, 112 60
+                            L 112 58 C 112 56, 110 54, 108 52
+                            L 108 48 Z
+                        `}
+                        fill={t.text1}
+                        stroke="none"
+                    />
                 </svg>
                 {/* 星の配置グリッド */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, position: "relative", zIndex: 1 }}>
