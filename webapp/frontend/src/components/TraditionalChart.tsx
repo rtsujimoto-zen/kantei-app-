@@ -146,7 +146,7 @@ export function YosenSection({ data }: { data: YosenData }) {
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 20, transition: "all 0.3s", boxShadow: t.shadowCard }}>
             <div style={{ fontFamily: fonts.serif, fontSize: 12, fontWeight: 600, color: t.text3, letterSpacing: 6, marginBottom: 14 }}>陽占</div>
-            <div style={{ position: "relative" }}>
+            <div style={{ position: "relative", overflow: "hidden" }}>
                 {/* 人体図 背景画像 */}
                 <img
                     src="/body-silhouette.png"
@@ -155,10 +155,11 @@ export function YosenSection({ data }: { data: YosenData }) {
                         position: "absolute",
                         top: "50%",
                         left: "50%",
-                        transform: "translate(-50%, -50%)",
-                        width: "85%",
-                        height: "95%",
-                        objectFit: "contain",
+                        transform: "translate(-50%, -46%)",
+                        width: "170%",
+                        height: "120%",
+                        objectFit: "cover",
+                        objectPosition: "center 28%",
                         opacity: isDark ? 0.06 : 0.08,
                         pointerEvents: "none",
                         zIndex: 0,
