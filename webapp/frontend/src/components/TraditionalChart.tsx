@@ -689,7 +689,7 @@ export function HachimonSection({ data }: { data: HachimonData }) {
                     item ? (
                         <div key={i} style={{ background: `${item.color}10`, border: `1px solid ${item.color}20`, padding: "6px 2px", transition: "all 0.3s" }}>
                             <div style={{ fontSize: 11, color: `${item.color}99`, fontFamily: fonts.serif }}>{item.el}</div>
-                            <div style={{ fontSize: 18, fontWeight: 600, color: item.color, fontFamily: fonts.mono }}>{item.val}</div>
+                            <div style={{ fontSize: 18, fontWeight: 600, color: item.color, fontFamily: fonts.serif }}>{item.val}</div>
                         </div>
                     ) : <div key={i} />
                 )}
@@ -718,7 +718,7 @@ export function SurihouSection({ data }: { data: SurihouData }) {
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 20, transition: "all 0.3s", boxShadow: t.shadowCard }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
                 <div style={{ fontFamily: fonts.mono, fontSize: 11, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const }}>数理法</div>
-                <span style={{ fontSize: 14, fontWeight: 600, color: t.text1, fontFamily: fonts.mono }}>合計 {data.総エネルギー}</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: t.text1, fontFamily: fonts.serif }}>合計 {data.総エネルギー}</span>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 3 }}>
                 {gogyo.map((g) => (
@@ -728,14 +728,14 @@ export function SurihouSection({ data }: { data: SurihouData }) {
                         {/* 陽(+) */}
                         <div style={{ marginBottom: 2 }}>
                             <div style={{ fontSize: 11, color: t.text3, fontFamily: fonts.serif, marginBottom: 1 }}>{g.yang}</div>
-                            <div style={{ fontSize: 16, fontWeight: 600, color: t.text1, fontFamily: fonts.mono, background: t.inputBg, padding: "3px 0", transition: "all 0.3s" }}>
+                            <div style={{ fontSize: 16, fontWeight: 600, color: t.text1, fontFamily: fonts.serif, background: t.inputBg, padding: "3px 0", transition: "all 0.3s" }}>
                                 {data.十干内訳[g.yang] || 0}
                             </div>
                         </div>
                         {/* 陰(-) */}
                         <div>
                             <div style={{ fontSize: 11, color: t.text3, fontFamily: fonts.serif, marginBottom: 1 }}>{g.yin}</div>
-                            <div style={{ fontSize: 16, fontWeight: 600, color: t.text1, fontFamily: fonts.mono, background: t.inputBg, padding: "3px 0", transition: "all 0.3s" }}>
+                            <div style={{ fontSize: 16, fontWeight: 600, color: t.text1, fontFamily: fonts.serif, background: t.inputBg, padding: "3px 0", transition: "all 0.3s" }}>
                                 {data.十干内訳[g.yin] || 0}
                             </div>
                         </div>

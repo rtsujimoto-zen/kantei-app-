@@ -27,6 +27,7 @@ interface AiStrategistProps {
     ) => Promise<string | null>;
     loading: boolean;
     className?: string;
+    layout?: 'panel' | 'float';
 }
 
 const personas: { id: AiPersona; icon: string; label: string }[] = [
@@ -42,7 +43,7 @@ const models: { id: AiModel; label: string; sub: string }[] = [
     { id: "gemini-flash", label: "⚡ Flash", sub: "Gemini 3 Flash" },
 ];
 
-export function AiStrategist({ onConsult, loading, className }: AiStrategistProps) {
+export function AiStrategist({ onConsult, loading, className, layout = 'panel' }: AiStrategistProps) {
     const { t, isDark } = useTheme();
     const [persona, setPersona] = useState<AiPersona>('onmyoji');
     const [depth, setDepth] = useState<'professional' | 'intermediate' | 'beginner'>('professional');
@@ -51,11 +52,18 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
     const [inputValue, setInputValue] = useState('');
     const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
     const [copiedAll, setCopiedAll] = useState(false);
+    const [floatOpen, setFloatOpen] = useState(false);
+    const [showPersonaPopup, setShowPersonaPopup] = useState(false);
     const chatEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
+
+    // Open float when first message arrives
+    useEffect(() => {
+        if (messages.length > 0 && layout === 'float') setFloatOpen(true);
+    }, [messages, layout]);
 
     const handleInitialConsult = async () => {
         const response = await onConsult(persona, depth, model, undefined, []);
@@ -92,10 +100,7 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            handleFollowUp();
-        }
+        // Enterは改行を許可。送信はボタンのみ
     };
 
     const getPersonaDisplay = () => {
@@ -103,332 +108,576 @@ export function AiStrategist({ onConsult, loading, className }: AiStrategistProp
         return p || personas[0];
     };
 
-    return (
-        <div style={{
-            background: t.card,
-            border: `1px solid ${t.border}`,
-            borderRadius: 2,
-            overflow: "hidden",
-            transition: "all 0.3s",
-        }}>
-            {/* Header */}
-            <div style={{ padding: "20px 24px 16px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                    <div style={{ width: 3, height: 14, background: t.text1, borderRadius: 1, opacity: 0.4 }} />
-                    <span style={{ fontSize: 15, fontWeight: 600, color: t.text1, fontFamily: fonts.serif, letterSpacing: 2 }}>AI軍師</span>
-                    <span style={{ fontSize: 10, color: t.text4, fontFamily: fonts.mono, marginLeft: "auto", letterSpacing: 2 }}>IMPERIAL STRATEGIST</span>
-                </div>
-
-                {/* Persona Selection */}
-                <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 500, color: t.text3, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 8 }}>
-                        👤 相談相手
-                    </label>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
-                        {personas.map((p) => (
-                            <button
-                                key={p.id}
-                                onClick={() => setPersona(p.id)}
-                                style={{
-                                    padding: "8px 4px",
-                                    border: `1px solid ${persona === p.id ? t.text1 + "40" : t.border}`,
-                                    background: persona === p.id ? `${t.text1}08` : "transparent",
-                                    cursor: "pointer",
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    gap: 4,
-                                    transition: "all 0.2s",
-                                    borderRadius: 0,
-                                }}
-                            >
-                                <img src={p.icon} alt={p.label} style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover", ...(p.id === 'tokyo_mother' ? { objectPosition: 'top', transform: 'scale(1.15)' } : {}) }} />
-                                <span style={{
-                                    fontSize: 11,
-                                    fontWeight: persona === p.id ? 600 : 300,
-                                    color: persona === p.id ? t.text1 : t.text3,
-                                    fontFamily: fonts.serif,
-                                }}>{p.label}</span>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Depth Selection */}
-                <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 500, color: t.text3, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 8 }}>
-                        📖 解説レベル
-                    </label>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>
-                        {([
-                            { id: "professional" as const, label: "専門的" },
-                            { id: "intermediate" as const, label: "中級者向け" },
-                            { id: "beginner" as const, label: "初心者向け" },
-                        ]).map((d) => (
-                            <button
-                                key={d.id}
-                                onClick={() => setDepth(d.id)}
-                                style={{
-                                    padding: "10px 0",
-                                    border: `1px solid ${depth === d.id ? t.text1 + "40" : t.border}`,
-                                    background: depth === d.id ? `${t.text1}08` : "transparent",
-                                    cursor: "pointer",
-                                    fontSize: 14,
-                                    fontWeight: depth === d.id ? 600 : 300,
-                                    color: depth === d.id ? t.text1 : t.text3,
-                                    fontFamily: fonts.serif,
-                                    transition: "all 0.2s",
-                                    borderRadius: 0,
-                                }}
-                            >
-                                {d.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Model Selection */}
-                <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 500, color: t.text3, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 8 }}>
-                        🧠 AIモデル選択
-                    </label>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
-                        {models.map((m) => (
-                            <button
-                                key={m.id}
-                                onClick={() => setModel(m.id)}
-                                style={{
-                                    padding: "10px 4px",
-                                    border: `1px solid ${model === m.id ? t.text1 + "40" : t.border}`,
-                                    background: model === m.id ? `${t.text1}08` : "transparent",
-                                    cursor: "pointer",
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    gap: 2,
-                                    transition: "all 0.2s",
-                                    borderRadius: 0,
-                                }}
-                            >
-                                <span style={{
-                                    fontSize: 13,
-                                    fontWeight: model === m.id ? 600 : 400,
-                                    color: model === m.id ? t.text1 : t.text3,
-                                    fontFamily: fonts.mono,
-                                }}>{m.label}</span>
-                                <span style={{ fontSize: 10, color: t.text4, fontFamily: fonts.mono }}>{m.sub}</span>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Consult Button */}
-                <button
-                    onClick={handleInitialConsult}
-                    disabled={loading}
-                    style={{
-                        width: "100%",
-                        padding: "13px 0",
-                        border: `1.5px solid ${t.text1}`,
-                        borderRadius: 0,
-                        cursor: loading ? "wait" : "pointer",
-                        fontSize: 15,
-                        fontWeight: 600,
-                        fontFamily: fonts.serif,
-                        letterSpacing: 3,
-                        color: t.text1,
-                        background: "transparent",
-                        transition: "all 0.2s",
-                        opacity: loading ? 0.5 : 1,
-                    }}
-                >
-                    {loading && messages.length === 0 ? (
-                        <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                            <span style={{ width: 6, height: 6, borderRadius: "50%", background: t.vermillion, animation: "pulse 1s infinite" }} />
-                            思考中...
-                        </span>
-                    ) : "鑑定結果を読み解く"}
-                </button>
+    // ============================================
+    // Shared UI fragments
+    // ============================================
+    const personaSelector = (
+        <div style={{ marginBottom: 16 }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 500, color: t.text3, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 8 }}>
+                👤 相談相手
+            </label>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
+                {personas.map((p) => (
+                    <button
+                        key={p.id}
+                        onClick={() => { setPersona(p.id); setShowPersonaPopup(false); }}
+                        style={{
+                            padding: "8px 4px",
+                            border: `1px solid ${persona === p.id ? t.text1 + "40" : t.border}`,
+                            background: persona === p.id ? `${t.text1}08` : "transparent",
+                            cursor: "pointer",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            gap: 4,
+                            transition: "all 0.2s",
+                            borderRadius: 0,
+                        }}
+                    >
+                        <img src={p.icon} alt={p.label} style={{ width: 36, height: 36, objectFit: "contain" }} />
+                    </button>
+                ))}
             </div>
+        </div>
+    );
 
-            {/* Chat Messages */}
+    const depthSelector = (
+        <div style={{ marginBottom: 16 }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 500, color: t.text3, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 8 }}>
+                📖 解説レベル
+            </label>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>
+                {([
+                    { id: 'professional' as const, label: '専門的', desc: '算命学用語で深く' },
+                    { id: 'intermediate' as const, label: '中級者向け', desc: 'わかりやすく丁寧に' },
+                    { id: 'beginner' as const, label: '初心者向け', desc: '結論ファースト' },
+                ]).map((d) => (
+                    <button
+                        key={d.id}
+                        onClick={() => setDepth(d.id)}
+                        style={{
+                            padding: "10px 4px",
+                            border: `1px solid ${depth === d.id ? t.text1 + "40" : t.border}`,
+                            background: depth === d.id ? `${t.text1}08` : "transparent",
+                            cursor: "pointer",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            gap: 2,
+                            transition: "all 0.2s",
+                            borderRadius: 0,
+                        }}
+                    >
+                        <span style={{ fontSize: 13, fontWeight: depth === d.id ? 600 : 400, color: depth === d.id ? t.text1 : t.text3, fontFamily: fonts.serif }}>{d.label}</span>
+                        <span style={{ fontSize: 9, color: t.text4, fontFamily: fonts.mono }}>{d.desc}</span>
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+
+    const modelSelector = (
+        <div style={{ marginBottom: 16 }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 500, color: t.text3, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 8 }}>
+                🤖 AIモデル
+            </label>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>
+                {models.map((m) => (
+                    <button
+                        key={m.id}
+                        onClick={() => setModel(m.id)}
+                        style={{
+                            padding: "10px 4px",
+                            border: `1px solid ${model === m.id ? t.text1 + "40" : t.border}`,
+                            background: model === m.id ? `${t.text1}08` : "transparent",
+                            cursor: "pointer",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            gap: 2,
+                            transition: "all 0.2s",
+                            borderRadius: 0,
+                        }}
+                    >
+                        <span style={{ fontSize: 13, fontWeight: model === m.id ? 600 : 400, color: model === m.id ? t.text1 : t.text3, fontFamily: fonts.mono }}>{m.label}</span>
+                        <span style={{ fontSize: 10, color: t.text4, fontFamily: fonts.mono }}>{m.sub}</span>
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+
+    const chatMessages = (
+        <div style={{ flex: 1, overflowY: "auto", padding: "16px 16px" }}>
             {messages.length > 0 && (
-                <div style={{ borderTop: `1px solid ${t.border}`, padding: "20px 24px" }}>
-                    {/* Copy All */}
-                    <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
-                        <button
-                            onClick={handleCopyAll}
-                            style={{ background: "none", border: "none", color: copiedAll ? t.vermillion : t.text3, fontSize: 12, cursor: "pointer", fontFamily: fonts.mono }}
-                        >
-                            {copiedAll ? '✓ コピーしました' : '全体をコピー'}
-                        </button>
-                    </div>
-
-                    {/* Message List */}
-                    <div style={{ maxHeight: 500, overflowY: "auto", display: "flex", flexDirection: "column", gap: 16 }}>
-                        {messages.map((msg, index) => (
-                            <div
-                                key={index}
+                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+                    <button onClick={handleCopyAll} style={{ background: "none", border: "none", fontSize: 11, color: copiedAll ? t.vermillion : t.text4, cursor: "pointer", fontFamily: fonts.mono }}>
+                        {copiedAll ? '✓ Copied' : '📋 全コピー'}
+                    </button>
+                </div>
+            )}
+            {messages.map((msg, i) => {
+                const isUser = msg.role === 'user';
+                return (
+                    <div key={i} style={{
+                        display: "flex",
+                        flexDirection: isUser ? "row-reverse" : "row",
+                        alignItems: "flex-start",
+                        gap: 10,
+                        marginBottom: 18,
+                    }}>
+                        {/* アイコン（軍師のみ） */}
+                        {!isUser && (
+                            <img
+                                src={getPersonaDisplay().icon}
+                                alt=""
+                                style={{ width: 40, height: 40, objectFit: "contain", flexShrink: 0, marginTop: 2 }}
+                            />
+                        )}
+                        {/* 吹き出し */}
+                        <div style={{ maxWidth: "80%", position: "relative" }}>
+                            {/* 名前 */}
+                            <div style={{
+                                fontSize: 10,
+                                color: t.text4,
+                                fontFamily: fonts.mono,
+                                marginBottom: 3,
+                                textAlign: isUser ? "right" : "left",
+                            }}>
+                                {isUser ? 'あなた' : getPersonaDisplay().label}
+                            </div>
+                            {/* メッセージ本体 */}
+                            <div style={{
+                                position: "relative",
+                                padding: "10px 14px",
+                                borderRadius: isUser ? "14px 2px 14px 14px" : "2px 14px 14px 14px",
+                                background: isUser
+                                    ? (isDark ? '#2a4a3a' : '#dcf8c6')
+                                    : (isDark ? `${t.text1}0a` : '#ffffff'),
+                                border: isUser ? 'none' : `1px solid ${t.border}`,
+                                boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
+                                fontSize: 14,
+                                lineHeight: 1.85,
+                                color: t.text1,
+                                fontFamily: isUser ? fonts.mono : fonts.serif,
+                                whiteSpace: "pre-wrap",
+                            }}>
+                                {msg.content}
+                            </div>
+                            {/* コピーボタン */}
+                            <button
+                                onClick={() => handleCopyMessage(i)}
                                 style={{
-                                    padding: 16,
-                                    borderLeft: msg.role === 'assistant' ? `2px solid ${t.text1}20` : "none",
-                                    background: msg.role === 'user' ? `${t.text1}04` : "transparent",
-                                    position: "relative",
+                                    background: "none", border: "none",
+                                    fontSize: 10, color: copiedIndex === i ? t.vermillion : t.text4,
+                                    cursor: "pointer", fontFamily: fonts.mono,
+                                    marginTop: 2,
+                                    float: isUser ? "right" : "left",
                                 }}
                             >
-                                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                                    {msg.role === 'user' ? (
-                                        <span style={{ fontSize: 16 }}>👤</span>
-                                    ) : (
-                                        <img src={getPersonaDisplay().icon} alt={getPersonaDisplay().label} style={{ width: 24, height: 24, borderRadius: "50%", objectFit: "cover", ...(persona === 'tokyo_mother' ? { objectPosition: 'top', transform: 'scale(1.15)' } : {}) }} />
-                                    )}
-                                    <span style={{ fontSize: 12, fontWeight: 600, color: t.text3, fontFamily: fonts.mono }}>
-                                        {msg.role === 'user' ? 'あなた' : getPersonaDisplay().label}
-                                    </span>
-                                    {msg.role !== 'user' && index === 0 && (
-                                        <span style={{
-                                            fontSize: 10, padding: "1px 6px",
-                                            border: `1px solid ${t.border}`,
-                                            color: t.text4,
-                                            fontFamily: fonts.mono,
-                                        }}>
-                                            {model === 'gemini-3.0-pro-high' ? 'Gemini 3.0 Pro High' :
-                                                model === 'gemini-3.0-pro-low' ? 'Gemini 3.0 Pro' : 'Gemini Flash'}
-                                        </span>
-                                    )}
-                                    <button
-                                        onClick={() => handleCopyMessage(index)}
-                                        style={{
-                                            marginLeft: "auto", background: "none", border: "none",
-                                            color: copiedIndex === index ? t.vermillion : t.text4,
-                                            fontSize: 12, cursor: "pointer", fontFamily: fonts.mono,
-                                        }}
-                                    >
-                                        {copiedIndex === index ? '✓' : '⎘'}
-                                    </button>
-                                </div>
-                                <div style={{
-                                    color: t.text1,
-                                    lineHeight: 2,
-                                    fontSize: 15,
-                                    fontFamily: fonts.serif,
-                                    fontWeight: 300,
-                                    whiteSpace: "pre-wrap",
-                                    wordBreak: "break-word",
-                                    transition: "color 0.3s",
-                                }}>
-                                    {msg.content}
-                                </div>
-                            </div>
-                        ))}
-                        <div ref={chatEndRef} />
-                    </div>
-
-                    {/* Quick Question Buttons */}
-                    <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 16, marginTop: 16 }}>
-                        {/* テーマ */}
-                        <div style={{ marginBottom: 12 }}>
-                            <div style={{ fontSize: 10, fontWeight: 600, color: t.text4, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 6, textTransform: "uppercase" as const }}>テーマ</div>
-                            <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-                                {[
-                                    { label: '💕 恋愛', text: '恋愛運について詳しく教えてください。私の宿命から見える恋愛の傾向、理想のパートナー像、気をつけるべき点などを解説してください。' },
-                                    { label: '💼 仕事', text: '仕事運について詳しく教えてください。私の宿命に適した職業、働き方、成功へのポイントを解説してください。' },
-                                    { label: '💰 お金', text: 'お金・財運について詳しく教えてください。私の宿命から見える金運の傾向、お金との付き合い方を解説してください。' },
-                                    { label: '🏥 健康', text: '健康運について詳しく教えてください。私の宿命から見える健康面での注意点、体質の傾向を解説してください。' },
-                                    { label: '✨ 運氣UP', text: '運氣を開いた人生を送るためのポイントを教えてください。私の宿命を活かして開運するための具体的なアドバイスをお願いします。' },
-                                    { label: '📅 今年', text: '今年の運氣について詳しく教えてください。年運から見える今年のテーマ、チャンス、注意点を解説してください。' },
-                                ].map((item) => (
-                                    <button
-                                        key={item.label}
-                                        onClick={() => setInputValue(item.text)}
-                                        style={{
-                                            padding: "3px 10px",
-                                            fontSize: 11,
-                                            border: `1px solid ${t.border}`,
-                                            background: `${t.text1}04`,
-                                            color: t.text2,
-                                            fontFamily: fonts.serif,
-                                            cursor: "pointer",
-                                            transition: "all 0.2s",
-                                            borderRadius: 0,
-                                        }}
-                                    >
-                                        {item.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        {/* 各ポイント */}
-                        <div>
-                            <div style={{ fontSize: 10, fontWeight: 600, color: t.text4, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 6, textTransform: "uppercase" as const }}>各ポイント</div>
-                            <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-                                {[
-                                    { label: '陰占と陽占', text: '陰占と陽占について詳しく解説してください。それぞれの読み方と、私の命式ではどのような意味を持つか教えてください。' },
-                                    { label: '陽占', text: '陽占（人体星図）について詳しく解説してください。各星の配置と意味、精神構造の全体像を教えてください。' },
-                                    { label: '大運', text: '大運について詳しく解説してください。これまでの大運の流れと、今後の大運のテーマを教えてください。' },
-                                    { label: '年運', text: '年運について詳しく解説してください。直近5年と今後5年の運気の流れを教えてください。' },
-                                    { label: '宇宙盤', text: '宇宙盤（八門法）について詳しく解説してください。私のエネルギー分布と、どの領域を意識すべきか教えてください。' },
-                                ].map((item) => (
-                                    <button
-                                        key={item.label}
-                                        onClick={() => setInputValue(item.text)}
-                                        style={{
-                                            padding: "3px 10px",
-                                            fontSize: 11,
-                                            border: `1px solid ${t.border}`,
-                                            background: "transparent",
-                                            color: t.text3,
-                                            fontFamily: fonts.serif,
-                                            cursor: "pointer",
-                                            transition: "all 0.2s",
-                                            borderRadius: 0,
-                                        }}
-                                    >
-                                        {item.label}
-                                    </button>
-                                ))}
-                            </div>
+                                {copiedIndex === i ? '✓ コピー済' : '📋'}
+                            </button>
                         </div>
                     </div>
-
-                    {/* Follow-up Input */}
-                    <div style={{ display: "flex", gap: 6, marginTop: 16, background: t.inputBg, padding: "3px 3px 3px 14px", border: `1px solid ${t.border}` }}>
-                        <textarea
-                            value={inputValue}
-                            onChange={(e) => setInputValue(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            placeholder="追加で質問する..."
-                            rows={1}
-                            style={{
-                                flex: 1, background: "none", border: "none",
-                                color: t.text1, fontFamily: fonts.serif, fontSize: 14,
-                                outline: "none", resize: "none",
-                                minHeight: 36, maxHeight: 120,
-                                padding: "8px 0",
-                            }}
-                        />
-                        <button
-                            onClick={handleFollowUp}
-                            disabled={loading || !inputValue.trim()}
-                            style={{
-                                width: 36, height: 36,
-                                border: `1px solid ${t.border}`,
-                                background: "transparent",
-                                color: loading ? t.text4 : t.text1,
-                                cursor: loading || !inputValue.trim() ? "default" : "pointer",
-                                fontSize: 16,
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                                opacity: loading || !inputValue.trim() ? 0.3 : 1,
-                                transition: "all 0.2s",
-                                alignSelf: "flex-end",
-                                flexShrink: 0,
-                            }}
-                        >
-                            {loading ? "…" : "↑"}
-                        </button>
+                );
+            })}
+            {loading && messages.length > 0 && (
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
+                    <img src={getPersonaDisplay().icon} alt="" style={{ width: 40, height: 40, objectFit: "contain" }} />
+                    <div style={{
+                        padding: "10px 14px",
+                        borderRadius: "2px 14px 14px 14px",
+                        background: isDark ? `${t.text1}0a` : '#ffffff',
+                        border: `1px solid ${t.border}`,
+                        fontSize: 13,
+                        color: t.text3,
+                        fontFamily: fonts.mono,
+                    }}>
+                        <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: t.vermillion, animation: "pulse 1s infinite", marginRight: 8, verticalAlign: "middle" }} />
+                        思考中...
                     </div>
                 </div>
             )}
+            <div ref={chatEndRef} />
         </div>
+    );
+
+    const themeTopics = [
+        { label: '恋愛', text: '恋愛運について詳しく教えてください。私の宿命から見える恋愛の傾向、理想のパートナー像、気をつけるべき点などを解説してください。' },
+        { label: '仕事', text: '仕事運について詳しく教えてください。私の宿命に適した職業、働き方、成功へのポイントを解説してください。' },
+        { label: 'お金', text: 'お金・財運について詳しく教えてください。私の宿命から見える金運の傾向、お金との付き合い方を解説してください。' },
+        { label: '健康', text: '健康運について詳しく教えてください。私の宿命から見える健康面での注意点、体質の傾向を解説してください。' },
+        { label: '運氣UP', text: '運氣を開いた人生を送るためのポイントを教えてください。私の宿命を活かして開運するための具体的なアドバイスをお願いします。' },
+        { label: '今年', text: '今年の運氣について詳しく教えてください。年運から見える今年のテーマ、チャンス、注意点を解説してください。' },
+    ];
+
+    const pointTopics = [
+        { label: '陰占と陽占', text: '陰占と陽占について詳しく解説してください。それぞれの読み方と、私の命式ではどのような意味を持つか教えてください。' },
+        { label: '陽占', text: '陽占（人体星図）について詳しく解説してください。各星の配置と意味、精神構造の全体像を教えてください。' },
+        { label: '大運', text: '大運について詳しく解説してください。これまでの大運の流れと、今後の大運のテーマを教えてください。' },
+        { label: '年運', text: '年運について詳しく解説してください。直近5年と今後5年の運気の流れを教えてください。' },
+        { label: '宇宙盤', text: '宇宙盤（八門法）について詳しく解説してください。私のエネルギー分布と、どの領域を意識すべきか教えてください。' },
+    ];
+
+    const chatInput = (
+        <div style={{ display: "flex", gap: 6, background: t.inputBg, padding: "3px 3px 3px 14px", border: `1px solid ${t.border}` }}>
+            <textarea
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="追加で質問する..."
+                rows={1}
+                style={{
+                    flex: 1, background: "none", border: "none",
+                    color: t.text1, fontFamily: fonts.serif, fontSize: 14,
+                    outline: "none", resize: "none",
+                    minHeight: 36, maxHeight: 120,
+                    padding: "8px 0",
+                }}
+            />
+            <button
+                onClick={handleFollowUp}
+                disabled={loading || !inputValue.trim()}
+                style={{
+                    width: 36, height: 36,
+                    border: `1px solid ${t.border}`,
+                    background: "transparent",
+                    color: loading ? t.text4 : t.text1,
+                    cursor: loading || !inputValue.trim() ? "default" : "pointer",
+                    fontSize: 16,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    opacity: loading || !inputValue.trim() ? 0.3 : 1,
+                    transition: "all 0.2s",
+                    alignSelf: "flex-end",
+                    flexShrink: 0,
+                }}
+            >
+                {loading ? "…" : "↑"}
+            </button>
+        </div>
+    );
+
+    // ============================================
+    // PANEL MODE (PC Right Pane)
+    // ============================================
+    if (layout === 'panel') {
+        return (
+            <div style={{
+                display: "flex",
+                flexDirection: "column",
+                height: "100%",
+                background: t.card,
+            }}>
+                {/* Panel Header */}
+                <div style={{ padding: "16px 20px 12px", borderBottom: `1px solid ${t.border}` }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                        <img src={getPersonaDisplay().icon} alt="" style={{ width: 28, height: 28, objectFit: "contain" }} />
+                        <span style={{ fontSize: 15, fontWeight: 600, color: t.text1, fontFamily: fonts.serif, letterSpacing: 2 }}>AI軍師</span>
+                        <span style={{ fontSize: 10, color: t.text4, fontFamily: fonts.mono, marginLeft: "auto", letterSpacing: 1 }}>{getPersonaDisplay().label}</span>
+                    </div>
+                    {personaSelector}
+                    {depthSelector}
+                    {modelSelector}
+                    {messages.length === 0 && (
+                        <button
+                            onClick={handleInitialConsult}
+                            disabled={loading}
+                            style={{
+                                width: "100%",
+                                padding: "12px 0",
+                                border: `1.5px solid ${t.text1}`,
+                                borderRadius: 0,
+                                cursor: loading ? "wait" : "pointer",
+                                fontSize: 14,
+                                fontWeight: 600,
+                                fontFamily: fonts.serif,
+                                letterSpacing: 3,
+                                color: t.text1,
+                                background: "transparent",
+                                transition: "all 0.2s",
+                                opacity: loading ? 0.5 : 1,
+                            }}
+                        >
+                            {loading ? '思考中...' : '鑑定結果を読み解く'}
+                        </button>
+                    )}
+                </div>
+
+                {/* Chat area */}
+                {messages.length > 0 && (
+                    <>
+                        {chatMessages}
+
+                        {/* Quick topics */}
+                        {!loading && (
+                            <div style={{ padding: "0 20px 8px" }}>
+                                <div style={{ marginBottom: 10 }}>
+                                    <div style={{ fontSize: 10, fontWeight: 600, color: t.text4, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 5, textTransform: "uppercase" as const }}>テーマ</div>
+                                    <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                                        {themeTopics.map((item, idx) => (
+                                            <button
+                                                key={idx}
+                                                onClick={() => { setInputValue(item.text); }}
+                                                style={{
+                                                    padding: "3px 10px",
+                                                    border: `1px solid ${t.border}`,
+                                                    background: `${t.text1}04`,
+                                                    fontSize: 11,
+                                                    color: t.text2,
+                                                    fontFamily: fonts.serif,
+                                                    cursor: "pointer",
+                                                    transition: "all 0.2s",
+                                                    borderRadius: 0,
+                                                }}
+                                            >
+                                                {item.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style={{ fontSize: 10, fontWeight: 600, color: t.text4, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 5, textTransform: "uppercase" as const }}>各ポイント</div>
+                                    <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                                        {pointTopics.map((item, idx) => (
+                                            <button
+                                                key={idx}
+                                                onClick={() => { setInputValue(item.text); }}
+                                                style={{
+                                                    padding: "3px 10px",
+                                                    border: `1px solid ${t.border}`,
+                                                    background: `${t.text1}04`,
+                                                    fontSize: 11,
+                                                    color: t.text2,
+                                                    fontFamily: fonts.serif,
+                                                    cursor: "pointer",
+                                                    transition: "all 0.2s",
+                                                    borderRadius: 0,
+                                                }}
+                                            >
+                                                {item.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Input */}
+                        <div style={{ padding: "0 20px 16px" }}>
+                            {chatInput}
+                        </div>
+                    </>
+                )}
+            </div>
+        );
+    }
+
+    // ============================================
+    // FLOAT MODE (Mobile Bottom Bar)
+    // ============================================
+    return (
+        <>
+            {/* Persona Popup */}
+            {showPersonaPopup && (
+                <div
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        zIndex: 998,
+                        background: "rgba(0,0,0,0.3)",
+                    }}
+                    onClick={() => setShowPersonaPopup(false)}
+                />
+            )}
+            {showPersonaPopup && (
+                <div style={{
+                    position: "fixed",
+                    bottom: 70,
+                    left: 16,
+                    zIndex: 999,
+                    background: t.card,
+                    border: `1px solid ${t.border}`,
+                    boxShadow: "0 -4px 24px rgba(0,0,0,0.15)",
+                    padding: 16,
+                    width: 280,
+                    borderRadius: 4,
+                }}>
+                    {personaSelector}
+                    {depthSelector}
+                    {modelSelector}
+                </div>
+            )}
+
+            {/* Expanded Chat Sheet */}
+            {floatOpen && (
+                <div style={{
+                    position: "fixed",
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 900,
+                    background: t.card,
+                    borderTop: `1px solid ${t.border}`,
+                    boxShadow: "0 -4px 24px rgba(0,0,0,0.12)",
+                    height: "60vh",
+                    display: "flex",
+                    flexDirection: "column",
+                    transition: "transform 0.3s ease",
+                }}>
+                    {/* Drag handle + close */}
+                    <div style={{ display: "flex", justifyContent: "center", padding: "8px 0 4px", position: "relative" }}>
+                        <div style={{ width: 40, height: 4, background: `${t.text1}20`, borderRadius: 2 }} />
+                        <button
+                            onClick={() => setFloatOpen(false)}
+                            style={{ position: "absolute", right: 16, top: 8, background: "none", border: "none", color: t.text3, fontSize: 18, cursor: "pointer" }}
+                        >
+                            ✕
+                        </button>
+                    </div>
+
+                    {/* Chat header */}
+                    <div style={{ padding: "4px 16px 8px", display: "flex", alignItems: "center", gap: 8, borderBottom: `1px solid ${t.border}` }}>
+                        <img src={getPersonaDisplay().icon} alt="" style={{ width: 24, height: 24, objectFit: "contain" }} />
+                        <span style={{ fontSize: 14, fontWeight: 600, color: t.text1, fontFamily: fonts.serif }}>{getPersonaDisplay().label}</span>
+                    </div>
+
+                    {chatMessages}
+
+                    {/* Quick topics */}
+                    {messages.length > 0 && !loading && (
+                        <div style={{ padding: "0 16px 6px" }}>
+                            <div style={{ marginBottom: 8 }}>
+                                <div style={{ fontSize: 10, fontWeight: 600, color: t.text4, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 4, textTransform: "uppercase" as const }}>テーマ</div>
+                                <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                                    {themeTopics.map((item, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setInputValue(item.text)}
+                                            style={{
+                                                padding: "3px 10px",
+                                                border: `1px solid ${t.border}`,
+                                                background: `${t.text1}04`,
+                                                fontSize: 11,
+                                                color: t.text2,
+                                                fontFamily: fonts.serif,
+                                                cursor: "pointer",
+                                                borderRadius: 0,
+                                            }}
+                                        >
+                                            {item.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: 10, fontWeight: 600, color: t.text4, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 4, textTransform: "uppercase" as const }}>各ポイント</div>
+                                <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                                    {pointTopics.map((item, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setInputValue(item.text)}
+                                            style={{
+                                                padding: "3px 10px",
+                                                border: `1px solid ${t.border}`,
+                                                background: `${t.text1}04`,
+                                                fontSize: 11,
+                                                color: t.text2,
+                                                fontFamily: fonts.serif,
+                                                cursor: "pointer",
+                                                borderRadius: 0,
+                                            }}
+                                        >
+                                            {item.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Input */}
+                    <div style={{ padding: "0 16px 12px" }}>
+                        {chatInput}
+                    </div>
+                </div>
+            )}
+
+            {/* Floating Bottom Bar (always visible when not expanded) */}
+            {!floatOpen && (
+                <div style={{
+                    position: "fixed",
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 800,
+                    background: t.card,
+                    borderTop: `1px solid ${t.border}`,
+                    boxShadow: "0 -2px 12px rgba(0,0,0,0.08)",
+                    padding: "10px 16px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                }}>
+                    {/* + Button for persona popup */}
+                    <button
+                        onClick={() => setShowPersonaPopup(!showPersonaPopup)}
+                        style={{
+                            width: 40, height: 40,
+                            border: `1px solid ${t.border}`,
+                            borderRadius: "50%",
+                            background: "transparent",
+                            color: t.text1,
+                            fontSize: 20,
+                            cursor: "pointer",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            flexShrink: 0,
+                        }}
+                    >
+                        <img src={getPersonaDisplay().icon} alt="" style={{ width: 24, height: 24, objectFit: "contain" }} />
+                    </button>
+
+                    {messages.length === 0 ? (
+                        /* Initial consult button */
+                        <button
+                            onClick={() => { handleInitialConsult(); }}
+                            disabled={loading}
+                            style={{
+                                flex: 1,
+                                padding: "10px 0",
+                                border: `1.5px solid ${t.text1}`,
+                                borderRadius: 0,
+                                cursor: loading ? "wait" : "pointer",
+                                fontSize: 14,
+                                fontWeight: 600,
+                                fontFamily: fonts.serif,
+                                letterSpacing: 2,
+                                color: t.text1,
+                                background: "transparent",
+                                opacity: loading ? 0.5 : 1,
+                            }}
+                        >
+                            {loading ? '思考中...' : '鑑定結果を読み解く'}
+                        </button>
+                    ) : (
+                        /* Show chat / input */
+                        <div
+                            onClick={() => setFloatOpen(true)}
+                            style={{
+                                flex: 1,
+                                padding: "10px 14px",
+                                background: t.inputBg,
+                                border: `1px solid ${t.border}`,
+                                color: t.text3,
+                                fontSize: 14,
+                                fontFamily: fonts.serif,
+                                cursor: "pointer",
+                            }}
+                        >
+                            タップしてチャットを開く...
+                        </div>
+                    )}
+                </div>
+            )}
+        </>
     );
 }
