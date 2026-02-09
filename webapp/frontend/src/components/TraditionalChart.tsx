@@ -160,7 +160,7 @@ export function YosenSection({ data }: { data: YosenData }) {
                         height: "120%",
                         objectFit: "cover",
                         objectPosition: "center 20%",
-                        opacity: isDark ? 0.04 : 0.05,
+                        opacity: isDark ? 0.025 : 0.035,
                         pointerEvents: "none",
                         zIndex: 0,
                         filter: isDark ? "invert(1)" : "none",
