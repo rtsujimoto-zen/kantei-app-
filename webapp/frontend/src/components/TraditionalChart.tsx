@@ -358,17 +358,13 @@ interface TenchuData {
 export function TenchuSection({ data, ijokanshi }: { data: TenchuData; ijokanshi: string[] }) {
     const { t } = useTheme();
     return (
-        <div style={{ background: t.card, border: `1px solid ${t.border}`, borderColor: `${t.vermillion}20`, borderRadius: 2, padding: 16, transition: "all 0.3s", boxShadow: t.shadowCard }}>
-            <div style={{
-                display: "inline-block", fontSize: 11, fontWeight: 600,
-                color: t.vermillion, background: t.vermillionBg,
-                padding: "2px 8px", fontFamily: fonts.serif, marginBottom: 10, letterSpacing: 1,
-            }}>天中殺</div>
+        <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 16, transition: "all 0.3s", boxShadow: t.shadowCard }}>
+            <div style={{ fontFamily: fonts.serif, fontSize: 12, fontWeight: 600, color: t.text3, letterSpacing: 6, marginBottom: 10 }}>天中殺</div>
             <div style={{ fontSize: 18, fontWeight: 600, color: t.text1, fontFamily: fonts.serif, marginBottom: 12 }}>
                 {data.グループ}天中殺
             </div>
             <div style={{ marginBottom: 8 }}>
-                <div style={{ fontSize: 11, color: t.text3, fontFamily: fonts.mono, marginBottom: 3, letterSpacing: 1 }}>宿命天中殺</div>
+                <div style={{ fontSize: 11, color: t.text3, fontFamily: fonts.serif, marginBottom: 3, letterSpacing: 1 }}>宿命天中殺</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                     {data.宿命天中殺 && data.宿命天中殺.length > 0 ? (
                         data.宿命天中殺.map((item, i) => (
@@ -382,7 +378,7 @@ export function TenchuSection({ data, ijokanshi }: { data: TenchuData; ijokanshi
                 </div>
             </div>
             <div>
-                <div style={{ fontSize: 11, color: t.text4, fontFamily: fonts.mono, marginBottom: 3, letterSpacing: 1 }}>異常干支</div>
+                <div style={{ fontSize: 11, color: t.text4, fontFamily: fonts.serif, marginBottom: 3, letterSpacing: 1 }}>異常干支</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                     {ijokanshi && ijokanshi.length > 0 ? (
                         ijokanshi.map((item, i) => (
