@@ -177,7 +177,7 @@ export function YosenSection({ data }: { data: YosenData }) {
                                 padding: "14px 3px",
                                 textAlign: "center",
                                 fontSize: item.main ? 13 : 12,
-                                fontWeight: item.main ? 600 : 300,
+                                fontWeight: item.main ? 600 : 500,
                                 color: item.main ? t.text1 : t.text2,
                                 fontFamily: fonts.serif,
                                 transition: "all 0.3s",
