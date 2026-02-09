@@ -143,7 +143,7 @@ function CalculatorInner() {
         <>
             {/* Input Section */}
             <div style={{ padding: "0 0 20px" }}>
-                <div style={{ fontFamily: fonts.mono, fontSize: 11, fontWeight: 500, color: t.text3, letterSpacing: 4, textTransform: "uppercase" as const, marginBottom: 14 }}>
+                <div style={{ fontFamily: fonts.serif, fontSize: 12, fontWeight: 600, color: t.text3, letterSpacing: 6, marginBottom: 14 }}>
                     鑑定入力
                 </div>
                 <div style={{
@@ -156,7 +156,7 @@ function CalculatorInner() {
                 }}>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
                         <div>
-                            <label style={{ display: "block", fontSize: 10, color: t.text4, letterSpacing: 2, fontFamily: fonts.mono, textTransform: "uppercase" as const, marginBottom: 6 }}>
+                            <label style={{ display: "block", fontSize: 10, color: t.text4, letterSpacing: 2, fontFamily: fonts.serif, marginBottom: 6 }}>
                                 生年月日
                             </label>
                             <input
@@ -187,7 +187,7 @@ function CalculatorInner() {
                             />
                         </div>
                         <div>
-                            <label style={{ display: "block", fontSize: 10, color: t.text4, letterSpacing: 2, fontFamily: fonts.mono, textTransform: "uppercase" as const, marginBottom: 6 }}>
+                            <label style={{ display: "block", fontSize: 10, color: t.text4, letterSpacing: 2, fontFamily: fonts.serif, marginBottom: 6 }}>
                                 性別
                             </label>
                             <div style={{ display: "flex", border: `1px solid ${t.inputBorder}`, background: t.inputBg }}>
@@ -413,7 +413,7 @@ function CalculatorInner() {
                                 justifyContent: "center",
                                 height: "100%",
                                 color: t.text4,
-                                fontFamily: fonts.mono,
+                                fontFamily: fonts.serif,
                                 fontSize: 13,
                                 gap: 12,
                                 padding: 40,

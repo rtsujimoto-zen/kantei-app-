@@ -113,7 +113,7 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
     // ============================================
     const personaSelector = (
         <div style={{ marginBottom: 16 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 500, color: t.text3, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 8 }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 500, color: t.text3, fontFamily: fonts.serif, letterSpacing: 2, marginBottom: 8 }}>
                 👤 相談相手
             </label>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
@@ -154,7 +154,7 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
 
     const depthSelector = (
         <div style={{ marginBottom: 16 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 500, color: t.text3, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 8 }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 500, color: t.text3, fontFamily: fonts.serif, letterSpacing: 2, marginBottom: 8 }}>
                 📖 解説レベル
             </label>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>
@@ -189,7 +189,7 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
 
     const modelSelector = (
         <div style={{ marginBottom: 16 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 500, color: t.text3, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 8 }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 500, color: t.text3, fontFamily: fonts.serif, letterSpacing: 2, marginBottom: 8 }}>
                 🤖 AIモデル
             </label>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>
@@ -423,7 +423,7 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                         {!loading && (
                             <div style={{ padding: "0 20px 8px" }}>
                                 <div style={{ marginBottom: 10 }}>
-                                    <div style={{ fontSize: 10, fontWeight: 600, color: t.text4, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 5, textTransform: "uppercase" as const }}>テーマ</div>
+                                    <div style={{ fontSize: 10, fontWeight: 600, color: t.text4, fontFamily: fonts.serif, letterSpacing: 2, marginBottom: 5 }}>テーマ</div>
                                     <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                                         {themeTopics.map((item, idx) => (
                                             <button
@@ -447,7 +447,7 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                                     </div>
                                 </div>
                                 <div>
-                                    <div style={{ fontSize: 10, fontWeight: 600, color: t.text4, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 5, textTransform: "uppercase" as const }}>各ポイント</div>
+                                    <div style={{ fontSize: 10, fontWeight: 600, color: t.text4, fontFamily: fonts.serif, letterSpacing: 2, marginBottom: 5 }}>各ポイント</div>
                                     <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                                         {pointTopics.map((item, idx) => (
                                             <button
@@ -558,7 +558,7 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                     {messages.length > 0 && !loading && (
                         <div style={{ padding: "0 16px 6px" }}>
                             <div style={{ marginBottom: 8 }}>
-                                <div style={{ fontSize: 10, fontWeight: 600, color: t.text4, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 4, textTransform: "uppercase" as const }}>テーマ</div>
+                                <div style={{ fontSize: 10, fontWeight: 600, color: t.text4, fontFamily: fonts.serif, letterSpacing: 2, marginBottom: 4 }}>テーマ</div>
                                 <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                                     {themeTopics.map((item, idx) => (
                                         <button
@@ -581,7 +581,7 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                                 </div>
                             </div>
                             <div>
-                                <div style={{ fontSize: 10, fontWeight: 600, color: t.text4, fontFamily: fonts.mono, letterSpacing: 2, marginBottom: 4, textTransform: "uppercase" as const }}>各ポイント</div>
+                                <div style={{ fontSize: 10, fontWeight: 600, color: t.text4, fontFamily: fonts.serif, letterSpacing: 2, marginBottom: 4 }}>各ポイント</div>
                                 <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                                     {pointTopics.map((item, idx) => (
                                         <button
