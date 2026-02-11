@@ -161,6 +161,7 @@ export function YosenSection({ data }: { data: YosenData }) {
                         pointerEvents: "none",
                         zIndex: 0,
                         filter: isDark ? "invert(1)" : "none",
+                        mixBlendMode: isDark ? "screen" : "multiply",
                     }}
                 />
                 {/* 星の配置グリッド */}
