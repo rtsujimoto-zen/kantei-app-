@@ -169,7 +169,7 @@ export function YosenSection({ data }: { data: YosenData }) {
                         if (!item) return <div key={i} />;
                         return (
                             <div key={i} style={{
-                                background: item.main ? `${t.text1}08` : `${t.inputBg}cc`,
+                                background: item.main ? `${t.text1}08` : "transparent",
                                 border: item.main ? `1px solid ${t.text1}20` : `1px solid ${t.border}`,
                                 padding: "14px 3px",
                                 textAlign: "center",
