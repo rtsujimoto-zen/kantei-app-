@@ -153,13 +153,10 @@ export function YosenSection({ data }: { data: YosenData }) {
                     alt=""
                     style={{
                         position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%)",
-                        width: "150%",
-                        height: "200%",
-                        objectFit: "cover",
-                        objectPosition: "center 10%",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "auto",
                         opacity: isDark ? 0.025 : 0.035,
                         pointerEvents: "none",
                         zIndex: 0,
