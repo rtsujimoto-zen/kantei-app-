@@ -149,7 +149,7 @@ export function YosenSection({ data }: { data: YosenData }) {
             <div style={{ position: "relative", overflow: "hidden" }}>
                 {/* 人体図 背景画像 */}
                 <img
-                    src="/body-silhouette-transparent.png"
+                    src="/body-silhouette-final.png"
                     alt=""
                     style={{
                         position: "absolute",
