@@ -149,7 +149,7 @@ export function YosenSection({ data }: { data: YosenData }) {
             <div style={{ position: "relative", overflow: "hidden" }}>
                 {/* 人体図 背景画像 */}
                 <img
-                    src="/body-silhouette.png"
+                    src="/body-silhouette-transparent.png"
                     alt=""
                     style={{
                         position: "absolute",
@@ -161,7 +161,6 @@ export function YosenSection({ data }: { data: YosenData }) {
                         pointerEvents: "none",
                         zIndex: 0,
                         filter: isDark ? "invert(1)" : "none",
-                        mixBlendMode: isDark ? "screen" : "multiply",
                     }}
                 />
                 {/* 星の配置グリッド */}
