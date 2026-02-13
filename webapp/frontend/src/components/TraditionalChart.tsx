@@ -153,7 +153,7 @@ export function YosenSection({ data }: { data: YosenData }) {
                     alt=""
                     style={{
                         position: "absolute",
-                        top: 0,
+                        top: "3%",
                         left: 0,
                         width: "100%",
                         height: "auto",
