@@ -703,12 +703,17 @@ export function HachimonSection({ data, dayGan }: { data: HachimonData; dayGan?:
     const west = getEntry("西方");
     const center = getEntry("中央");
 
+    // 五行→本能マッピング
+    const instinctMap: { [key: string]: string } = {
+        "木": "守備本能", "火": "伝達本能", "土": "引力本能", "金": "攻撃本能", "水": "習得本能",
+    };
+
     const items: { el: string; val: number; color: string; label: string }[] = [
-        { el: north.element, val: north.value, color: elementColors[north.element] || t.text2, label: "習得" },
-        { el: east.element, val: east.value, color: elementColors[east.element] || t.text2, label: "蓄積" },
-        { el: center.element, val: center.value, color: elementColors[center.element] || t.text2, label: "自分" },
-        { el: west.element, val: west.value, color: elementColors[west.element] || t.text2, label: "名誉" },
-        { el: south.element, val: south.value, color: elementColors[south.element] || t.text2, label: "伝達" },
+        { el: north.element, val: north.value, color: elementColors[north.element] || t.text2, label: instinctMap[north.element] || "" },
+        { el: east.element, val: east.value, color: elementColors[east.element] || t.text2, label: instinctMap[east.element] || "" },
+        { el: center.element, val: center.value, color: elementColors[center.element] || t.text2, label: instinctMap[center.element] || "" },
+        { el: west.element, val: west.value, color: elementColors[west.element] || t.text2, label: instinctMap[west.element] || "" },
+        { el: south.element, val: south.value, color: elementColors[south.element] || t.text2, label: instinctMap[south.element] || "" },
     ];
 
     // Grid layout: 3x3 (empty, north, empty, east, center, west, empty, south, empty)
