@@ -55,9 +55,21 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
     const [floatOpen, setFloatOpen] = useState(false);
     const [showPersonaPopup, setShowPersonaPopup] = useState(false);
     const chatEndRef = useRef<HTMLDivElement>(null);
+    const chatStartRef = useRef<HTMLDivElement>(null);
+    const prevMessagesLenRef = useRef(0);
 
     useEffect(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        // Scroll to start of new response (not end)
+        if (messages.length > prevMessagesLenRef.current && messages.length > 0) {
+            const lastMsg = messages[messages.length - 1];
+            if (lastMsg.role === 'assistant') {
+                // Scroll to start of new assistant message
+                setTimeout(() => {
+                    chatStartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
+        }
+        prevMessagesLenRef.current = messages.length;
     }, [messages]);
 
     // Open float when first message arrives
@@ -219,7 +231,7 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
     );
 
     const chatMessages = (
-        <div style={{ flex: 1, overflowY: "auto", padding: "16px 16px" }}>
+        <div style={{ flex: 1, overflowY: "auto", padding: "16px 16px", WebkitOverflowScrolling: "touch" }}>
             {messages.length > 0 && (
                 <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
                     <button onClick={handleCopyAll} style={{ background: "none", border: "none", fontSize: 11, color: copiedAll ? t.vermillion : t.text4, cursor: "pointer", fontFamily: fonts.mono }}>
@@ -229,69 +241,75 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
             )}
             {messages.map((msg, i) => {
                 const isUser = msg.role === 'user';
+                // Place scroll marker before the last assistant message
+                const isLastAssistant = !isUser && i === messages.length - 1;
                 return (
-                    <div key={i} style={{
-                        display: "flex",
-                        flexDirection: isUser ? "row-reverse" : "row",
-                        alignItems: "flex-start",
-                        gap: 10,
-                        marginBottom: 18,
-                    }}>
-                        {/* アイコン（軍師のみ） */}
-                        {!isUser && (
-                            <img
-                                src={getPersonaDisplay().icon}
-                                alt=""
-                                style={{ width: 40, height: 40, objectFit: "contain", flexShrink: 0, marginTop: 2 }}
-                            />
-                        )}
-                        {/* 吹き出し */}
-                        <div style={{ maxWidth: "80%", position: "relative" }}>
-                            {/* 名前 */}
-                            <div style={{
-                                fontSize: 10,
-                                color: t.text4,
-                                fontFamily: fonts.mono,
-                                marginBottom: 3,
-                                textAlign: isUser ? "right" : "left",
-                            }}>
-                                {isUser ? 'あなた' : getPersonaDisplay().label}
+                    <div key={i}>
+                        {isLastAssistant && <div ref={chatStartRef} />}
+                        <div style={{
+                            display: "flex",
+                            flexDirection: isUser ? "row-reverse" : "row",
+                            alignItems: "flex-start",
+                            gap: 10,
+                            marginBottom: 18,
+                        }}>
+                            {/* アイコン（軍師のみ） */}
+                            {!isUser && (
+                                <img
+                                    src={getPersonaDisplay().icon}
+                                    alt=""
+                                    style={{ width: 40, height: 40, objectFit: "contain", flexShrink: 0, marginTop: 2 }}
+                                />
+                            )}
+                            {/* 吹き出し */}
+                            <div style={{ maxWidth: "80%", position: "relative" }}>
+                                {/* 名前 */}
+                                <div style={{
+                                    fontSize: 10,
+                                    color: t.text4,
+                                    fontFamily: fonts.mono,
+                                    marginBottom: 3,
+                                    textAlign: isUser ? "right" : "left",
+                                }}>
+                                    {isUser ? 'あなた' : getPersonaDisplay().label}
+                                </div>
+                                {/* メッセージ本体 */}
+                                <div style={{
+                                    position: "relative",
+                                    padding: "10px 14px",
+                                    borderRadius: isUser ? "14px 2px 14px 14px" : "2px 14px 14px 14px",
+                                    background: isUser
+                                        ? (isDark ? '#2a4a3a' : '#dcf8c6')
+                                        : (isDark ? `${t.text1}0a` : '#ffffff'),
+                                    border: isUser ? 'none' : `1px solid ${t.border}`,
+                                    boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
+                                    fontSize: 14,
+                                    lineHeight: 1.85,
+                                    color: t.text1,
+                                    fontFamily: isUser ? fonts.mono : fonts.serif,
+                                    whiteSpace: "pre-wrap",
+                                }}>
+                                    {msg.content}
+                                </div>
+                                {/* コピーボタン */}
+                                <button
+                                    onClick={() => handleCopyMessage(i)}
+                                    style={{
+                                        background: "none", border: "none",
+                                        fontSize: 10, color: copiedIndex === i ? t.vermillion : t.text4,
+                                        cursor: "pointer", fontFamily: fonts.mono,
+                                        marginTop: 2,
+                                        float: isUser ? "right" : "left",
+                                    }}
+                                >
+                                    {copiedIndex === i ? '✓ コピー済' : '📋'}
+                                </button>
                             </div>
-                            {/* メッセージ本体 */}
-                            <div style={{
-                                position: "relative",
-                                padding: "10px 14px",
-                                borderRadius: isUser ? "14px 2px 14px 14px" : "2px 14px 14px 14px",
-                                background: isUser
-                                    ? (isDark ? '#2a4a3a' : '#dcf8c6')
-                                    : (isDark ? `${t.text1}0a` : '#ffffff'),
-                                border: isUser ? 'none' : `1px solid ${t.border}`,
-                                boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
-                                fontSize: 14,
-                                lineHeight: 1.85,
-                                color: t.text1,
-                                fontFamily: isUser ? fonts.mono : fonts.serif,
-                                whiteSpace: "pre-wrap",
-                            }}>
-                                {msg.content}
-                            </div>
-                            {/* コピーボタン */}
-                            <button
-                                onClick={() => handleCopyMessage(i)}
-                                style={{
-                                    background: "none", border: "none",
-                                    fontSize: 10, color: copiedIndex === i ? t.vermillion : t.text4,
-                                    cursor: "pointer", fontFamily: fonts.mono,
-                                    marginTop: 2,
-                                    float: isUser ? "right" : "left",
-                                }}
-                            >
-                                {copiedIndex === i ? '✓ コピー済' : '📋'}
-                            </button>
                         </div>
                     </div>
                 );
             })}
+
             {loading && messages.length > 0 && (
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
                     <img src={getPersonaDisplay().icon} alt="" style={{ width: 40, height: 40, objectFit: "contain" }} />
@@ -519,7 +537,7 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                 </div>
             )}
 
-            {/* Full-Screen Chat Overlay (slides from left) */}
+            {/* Full-Screen Chat Overlay */}
             <div style={{
                 position: "fixed",
                 inset: 0,
@@ -527,6 +545,7 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                 background: t.card,
                 display: "flex",
                 flexDirection: "column",
+                overflow: "hidden",
                 transform: floatOpen ? "translateX(0)" : "translateX(100%)",
                 transition: "transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
                 willChange: "transform",
@@ -546,31 +565,33 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                         <span style={{ fontSize: 15, fontWeight: 600, color: t.text1, fontFamily: fonts.serif, letterSpacing: 2 }}>AI軍師</span>
                         <span style={{ fontSize: 10, color: t.text4, fontFamily: fonts.mono, marginLeft: 8, letterSpacing: 1 }}>{getPersonaDisplay().label}</span>
                     </div>
-                    {/* Close (slide right) button */}
+                    {/* Close button */}
                     <button
                         onClick={() => setFloatOpen(false)}
-                        aria-label="チャットを閉じる"
+                        aria-label="鑑定結果に戻る"
                         style={{
-                            width: 36, height: 36,
+                            padding: "6px 14px",
                             border: `1px solid ${t.border}`,
                             background: "transparent",
-                            color: t.text1,
-                            fontSize: 16,
+                            color: t.text3,
+                            fontSize: 12,
+                            fontFamily: fonts.serif,
                             cursor: "pointer",
-                            display: "flex", alignItems: "center", justifyContent: "center",
+                            display: "flex", alignItems: "center", gap: 6,
                             flexShrink: 0,
+                            letterSpacing: 1,
                         }}
                     >
-                        →
+                        <span style={{ fontSize: 14 }}>✕</span> 閉じる
                     </button>
                 </div>
 
-                {/* Persona / Depth / Model selectors */}
-                <div style={{ padding: "10px 16px", borderBottom: `1px solid ${t.borderLight}`, flexShrink: 0 }}>
-                    {personaSelector}
-                    {depthSelector}
-                    {modelSelector}
-                    {messages.length === 0 && (
+                {/* Selectors: shown only before first message */}
+                {messages.length === 0 && (
+                    <div style={{ padding: "10px 16px", borderBottom: `1px solid ${t.border}`, flexShrink: 0 }}>
+                        {personaSelector}
+                        {depthSelector}
+                        {modelSelector}
                         <button
                             onClick={handleInitialConsult}
                             disabled={loading}
@@ -593,10 +614,10 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                         >
                             {loading ? '思考中...' : '鑑定結果を読み解く'}
                         </button>
-                    )}
-                </div>
+                    </div>
+                )}
 
-                {/* Chat messages area */}
+                {/* Chat messages area (full screen after first message) */}
                 {messages.length > 0 && (
                     <>
                         {chatMessages}
