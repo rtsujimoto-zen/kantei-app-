@@ -644,10 +644,32 @@ export function UchubanSection({ data }: { data: { 干支番号: number[] } }) {
 // 【八門法】Hachimon Section
 // =====================================
 interface HachimonEntry { value: number; element: string; }
-interface HachimonData { [key: string]: HachimonEntry; }
+interface HachimonData { [key: string]: HachimonEntry | number; }
 
-export function HachimonSection({ data }: { data: HachimonData }) {
+// 日干から八門法の五行マッピングを計算
+const WU_XING_MAP: { [key: string]: string } = {
+    "甲": "木", "乙": "木", "丙": "火", "丁": "火", "戊": "土",
+    "己": "土", "庚": "金", "辛": "金", "壬": "水", "癸": "水",
+};
+const WX_ORDER = ["木", "火", "土", "金", "水"];
+
+function computeHachimonElements(dayGan: string) {
+    const wx = WU_XING_MAP[dayGan] || "土";
+    const idx = WX_ORDER.indexOf(wx);
+    return {
+        "中央": WX_ORDER[idx],
+        "北方": WX_ORDER[(idx - 1 + 5) % 5],
+        "南方": WX_ORDER[(idx + 1) % 5],
+        "東方": WX_ORDER[(idx + 2) % 5],
+        "西方": WX_ORDER[(idx - 2 + 5) % 5],
+    };
+}
+
+export function HachimonSection({ data, dayGan }: { data: HachimonData; dayGan?: string }) {
     const { t, isDark } = useTheme();
+
+    // 日干からの五行マッピング (フロントエンド計算 - 後方互換用)
+    const elementMap = dayGan ? computeHachimonElements(dayGan) : null;
 
     // 五行ごとの色マップ
     const elementColors: { [key: string]: string } = {
@@ -662,12 +684,17 @@ export function HachimonSection({ data }: { data: HachimonData }) {
     const getEntry = (prefix: string): HachimonEntry => {
         for (const [k, v] of Object.entries(data)) {
             if (k.startsWith(prefix)) {
-                // 後方互換: 旧形式(number直接)にも対応
-                if (typeof v === 'number') return { value: v, element: '' };
-                return v;
+                if (typeof v === 'number') {
+                    // 旧形式: 数値のみ → 日干からelement計算
+                    const el = elementMap?.[prefix as keyof typeof elementMap] || '';
+                    return { value: v, element: el };
+                }
+                // 新形式: {value, element}
+                const entry = v as HachimonEntry;
+                return { value: entry.value, element: entry.element || elementMap?.[prefix as keyof typeof elementMap] || '' };
             }
         }
-        return { value: 0, element: '' };
+        return { value: 0, element: elementMap?.[prefix as keyof typeof elementMap] || '' };
     };
 
     const north = getEntry("北方");
@@ -800,7 +827,7 @@ export function TraditionalChart({ report, birthYear }: TraditionalChartProps) {
             {/* Row 3: 宇宙盤, 八門法, 数理法 */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 8 }}>
                 <UchubanSection data={report.宇宙盤} />
-                <HachimonSection data={report.八門法} />
+                <HachimonSection data={report.八門法} dayGan={report.陰占.日.replace(/^.*?\)\s*/, '').charAt(0)} />
                 <SurihouSection data={report.数理法} />
             </div>
         </div>
