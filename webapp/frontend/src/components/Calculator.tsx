@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { ThemeProvider, useTheme, ThemeToggle } from './ThemeContext';
 import { TraditionalChart } from './TraditionalChart';
 import { AiStrategist, AiModel, AiPersona } from './StrategistCard';
+import { CompatibilityTab } from './CompatibilityTab';
 
 // Types definition
 interface SanmeiReport {
@@ -48,6 +49,7 @@ function CalculatorInner() {
 
     // AI Strategist State
     const [isAiLoading, setIsAiLoading] = useState(false);
+    const [activeTab, setActiveTab] = useState<'individual' | 'compatibility'>('individual');
 
     // Responsive: PC (≥1024px) vs Mobile
     const [isDesktop, setIsDesktop] = useState(false);
@@ -375,75 +377,118 @@ function CalculatorInner() {
                 </div>
             </header>
 
-            {/* Main Content */}
-            {isDesktop ? (
-                /* ========== PC: 2-Pane Layout ========== */
-                <div style={{
-                    display: "grid",
-                    gridTemplateColumns: "55fr 45fr",
-                    minHeight: "calc(100vh - 70px)",
-                }}>
-                    {/* Left Pane: Chart */}
-                    <div style={{
-                        padding: "24px 32px 80px",
-                        overflowY: "auto",
-                        borderRight: `1px solid ${t.border}`,
-                    }}>
-                        {leftPaneContent}
-                    </div>
-
-                    {/* Right Pane: AI Strategist (sticky) */}
-                    <div style={{
-                        position: "sticky",
-                        top: 70,
-                        height: "calc(100vh - 70px)",
-                        overflowY: "auto",
-                    }}>
-                        {hasReport ? (
-                            <AiStrategist
-                                onConsult={handleAiConsultation}
-                                loading={isAiLoading}
-                                layout="panel"
-                            />
-                        ) : (
-                            <div style={{
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                height: "100%",
-                                color: t.text4,
-                                fontFamily: fonts.serif,
+            {/* Tab Bar */}
+            <div style={{
+                borderBottom: `1px solid ${t.border}`,
+                background: t.bg,
+                position: "sticky",
+                top: 70,
+                zIndex: 99,
+            }}>
+                <div style={{ display: "flex", maxWidth: isDesktop ? "none" : 900, margin: "0 auto", padding: "0 24px" }}>
+                    {([
+                        { id: 'individual' as const, label: '個人鑑定' },
+                        { id: 'compatibility' as const, label: '相性診断' },
+                    ]).map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            style={{
+                                padding: "10px 20px",
+                                border: "none",
+                                borderBottom: activeTab === tab.id ? `2px solid ${t.vermillion}` : "2px solid transparent",
+                                background: "transparent",
+                                color: activeTab === tab.id ? t.text1 : t.text4,
                                 fontSize: 13,
-                                gap: 12,
-                                padding: 40,
-                                textAlign: "center",
-                            }}>
-                                <div style={{ fontSize: 40, opacity: 0.3 }}>🔮</div>
-                                <div>鑑定を実行すると</div>
-                                <div>AI軍師に相談できます</div>
-                            </div>
-                        )}
-                    </div>
+                                fontWeight: activeTab === tab.id ? 600 : 400,
+                                fontFamily: fonts.serif,
+                                letterSpacing: 3,
+                                cursor: "pointer",
+                                transition: "all 0.2s",
+                            }}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
                 </div>
-            ) : (
-                /* ========== Mobile: Single Column + Float ========== */
-                <div style={{
-                    maxWidth: 600,
-                    margin: "0 auto",
-                    padding: "20px 16px 120px",
-                }}>
-                    {leftPaneContent}
+            </div>
 
-                    {/* Mobile: AI not inline, shown as float */}
-                    {hasReport && !isDesktop && (
-                        <AiStrategist
-                            onConsult={handleAiConsultation}
-                            loading={isAiLoading}
-                            layout="float"
-                        />
+            {/* Main Content */}
+            {activeTab === 'individual' ? (
+                <>
+                    {isDesktop ? (
+                        /* ========== PC: 2-Pane Layout ========== */
+                        <div style={{
+                            display: "grid",
+                            gridTemplateColumns: "55fr 45fr",
+                            minHeight: "calc(100vh - 110px)",
+                        }}>
+                            {/* Left Pane: Chart */}
+                            <div style={{
+                                padding: "24px 32px 80px",
+                                overflowY: "auto",
+                                borderRight: `1px solid ${t.border}`,
+                            }}>
+                                {leftPaneContent}
+                            </div>
+
+                            {/* Right Pane: AI Strategist (sticky) */}
+                            <div style={{
+                                position: "sticky",
+                                top: 110,
+                                height: "calc(100vh - 110px)",
+                                overflowY: "auto",
+                            }}>
+                                {hasReport ? (
+                                    <AiStrategist
+                                        onConsult={handleAiConsultation}
+                                        loading={isAiLoading}
+                                        layout="panel"
+                                    />
+                                ) : (
+                                    <div style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        height: "100%",
+                                        color: t.text4,
+                                        fontFamily: fonts.serif,
+                                        fontSize: 13,
+                                        gap: 12,
+                                        padding: 40,
+                                        textAlign: "center",
+                                    }}>
+                                        <div style={{ fontSize: 40, opacity: 0.3 }}>🔮</div>
+                                        <div>鑑定を実行すると</div>
+                                        <div>AI軍師に相談できます</div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    ) : (
+                        /* ========== Mobile: Single Column + Float ========== */
+                        <div style={{
+                            maxWidth: 600,
+                            margin: "0 auto",
+                            padding: "20px 16px 120px",
+                        }}>
+                            {leftPaneContent}
+
+                            {/* Mobile: AI not inline, shown as float */}
+                            {hasReport && !isDesktop && (
+                                <AiStrategist
+                                    onConsult={handleAiConsultation}
+                                    loading={isAiLoading}
+                                    layout="float"
+                                />
+                            )}
+                        </div>
                     )}
-                </div>
+                </>
+            ) : (
+                /* ========== Compatibility Tab ========== */
+                <CompatibilityTab isDesktop={isDesktop} />
             )}
         </div>
     );
