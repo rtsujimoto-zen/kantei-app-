@@ -121,6 +121,14 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
         return p || personas[0];
     };
 
+    // SVG copy icon component
+    const CopyIcon = ({ size = 12, color = t.text4 }: { size?: number; color?: string }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+        </svg>
+    );
+
     // ============================================
     // Shared UI fragments
     // ============================================
@@ -235,8 +243,8 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
         <div style={{ flex: 1, overflowY: "auto", padding: "16px 16px", WebkitOverflowScrolling: "touch" }}>
             {messages.length > 0 && (
                 <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
-                    <button onClick={handleCopyAll} style={{ background: "none", border: "none", fontSize: 11, color: copiedAll ? t.vermillion : t.text4, cursor: "pointer", fontFamily: fonts.mono }}>
-                        {copiedAll ? '✓ Copied' : '📋 全コピー'}
+                    <button onClick={handleCopyAll} style={{ background: "none", border: "none", fontSize: 11, color: copiedAll ? t.vermillion : t.text4, cursor: "pointer", fontFamily: fonts.mono, display: "flex", alignItems: "center", gap: 3 }}>
+                        {copiedAll ? '✓ Copied' : <><CopyIcon size={13} color={t.text4} /> 全コピー</>}
                     </button>
                 </div>
             )}
@@ -301,9 +309,10 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                                         cursor: "pointer", fontFamily: fonts.mono,
                                         marginTop: 2,
                                         float: isUser ? "right" : "left",
+                                        display: "flex", alignItems: "center", gap: 2,
                                     }}
                                 >
-                                    {copiedIndex === i ? '✓ コピー済' : '📋'}
+                                    {copiedIndex === i ? '✓ コピー済' : <CopyIcon size={11} color={t.text4} />}
                                 </button>
                             </div>
                         </div>
@@ -362,7 +371,23 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
     };
 
     const chatInput = (
-        <div style={{ display: "flex", gap: 6, background: t.inputBg, padding: "3px 3px 3px 14px", border: `1px solid ${t.border}` }}>
+        <div style={{ display: "flex", gap: 6, background: t.inputBg, padding: "3px 3px 3px 6px", border: `1px solid ${t.border}`, alignItems: "flex-end" }}>
+            {/* Persona icon in input bar */}
+            <button
+                onClick={() => setShowPersonaPopup(!showPersonaPopup)}
+                style={{
+                    width: 32, height: 32,
+                    border: `1px solid ${t.border}`,
+                    borderRadius: "50%",
+                    background: "transparent",
+                    cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0,
+                    marginBottom: 2,
+                }}
+            >
+                <img src={getPersonaDisplay().icon} alt="" style={{ width: 20, height: 20, objectFit: "contain" }} />
+            </button>
             <textarea
                 ref={textareaRef}
                 value={inputValue}
@@ -668,7 +693,7 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                                         {themeTopics.map((item, idx) => (
                                             <button
                                                 key={idx}
-                                                onClick={() => setInputValue(item.text)}
+                                                onClick={() => setInputValue(prev => prev ? prev + '\n' + item.text : item.text)}
                                                 style={{
                                                     padding: "3px 10px",
                                                     border: `1px solid ${t.border}`,
@@ -691,7 +716,7 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                                         {pointTopics.map((item, idx) => (
                                             <button
                                                 key={idx}
-                                                onClick={() => setInputValue(item.text)}
+                                                onClick={() => setInputValue(prev => prev ? prev + '\n' + item.text : item.text)}
                                                 style={{
                                                     padding: "3px 10px",
                                                     border: `1px solid ${t.border}`,
@@ -785,8 +810,8 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                         top: "50%",
                         transform: "translateY(-50%)",
                         zIndex: 800,
-                        width: 28,
-                        height: 100,
+                        width: 24,
+                        height: 140,
                         border: `1px solid ${t.border}`,
                         borderRight: "none",
                         borderRadius: "6px 0 0 6px",
@@ -797,12 +822,13 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                         flexDirection: "column",
                         alignItems: "center",
                         justifyContent: "center",
-                        gap: 4,
-                        padding: 0,
+                        gap: 0,
+                        padding: "8px 2px",
                     }}
                 >
-                    <span style={{ fontSize: 10, fontFamily: fonts.mono, color: t.text4, writingMode: "vertical-rl" }}>&lt;&lt;</span>
-                    <span style={{ writingMode: "vertical-rl", fontSize: 11, color: t.text3, fontFamily: fonts.serif, letterSpacing: 2 }}>AI軍師</span>
+                    {'チャットを開く'.split('').map((char, i) => (
+                        <span key={i} style={{ fontSize: 10, color: t.text3, fontFamily: fonts.serif, lineHeight: 1.5 }}>{char}</span>
+                    ))}
                 </button>
             )}
         </>
