@@ -303,119 +303,191 @@ function UchubanOverlap({
 
 // ===== 五行循環グラフ =====
 function GogyoCycleGraph({
-    gogyoA, gogyoB, nameA, nameB, relation,
+    gogyoA, gogyoB, nameA, nameB, relation, energyA, energyB,
 }: {
     gogyoA: string; gogyoB: string; nameA: string; nameB: string; relation: GogyoRelation;
+    energyA?: { [key: string]: number }; energyB?: { [key: string]: number };
 }) {
     const { t, isDark } = useTheme();
-    const cx = 140, cy = 140, r = 90;
+    const W = 380, H = 380;
+    const cx = W / 2, cy = 175, r = 100;
     const elements = ['木', '火', '土', '金', '水'];
+    const stemPairs = ['甲・乙', '丙・丁', '戊・己', '庚・辛', '壬・癸'];
     const positions = elements.map((_, i) => {
         const angle = (i / 5) * 2 * Math.PI - Math.PI / 2;
         return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
     });
 
-    // 相生の矢印（円周に沿って）
+    // 相生: 木→火→土→金→水→木
     const sojoArrows = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 0]];
-    // 相剋の線（星形）
+    // 相剋: 木→土→水→火→金→木
     const sokokLines = [[0, 2], [2, 4], [4, 1], [1, 3], [3, 0]];
 
     const idxA = elements.indexOf(gogyoA);
     const idxB = elements.indexOf(gogyoB);
 
+    // ノード半径の外側から矢印を引くためのoffset計算
+    const nodeR = 24;
+    const getEdgePoint = (fromIdx: number, toIdx: number, rOffset: number) => {
+        const f = positions[fromIdx], tr = positions[toIdx];
+        const dx = tr.x - f.x, dy = tr.y - f.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const nx = dx / dist, ny = dy / dist;
+        return {
+            x1: f.x + nx * rOffset, y1: f.y + ny * rOffset,
+            x2: tr.x - nx * rOffset, y2: tr.y - ny * rOffset,
+        };
+    };
+
+    const sojoColor = isDark ? '#7a7060' : '#5a4a3a';
+    const sokokColor = isDark ? '#b8a070' : '#b89860';
+
     return (
-        <svg viewBox="0 0 280 280" style={{ width: 240, height: 240, maxWidth: "100%" }}>
-            {/* 相生の円弧矢印 */}
+        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: 340, height: 340, maxWidth: "100%" }}>
+            <defs>
+                <marker id="arrowSojoBase" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+                    <path d="M0,0 L10,4 L0,8 Z" fill={sojoColor} />
+                </marker>
+                <marker id="arrowSokokBase" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+                    <path d="M0,0 L10,4 L0,8 Z" fill={sokokColor} />
+                </marker>
+            </defs>
+
+            {/* 相生の円弧矢印（暗い色・太い実線） */}
             {sojoArrows.map(([from, to], i) => {
-                const f = positions[from], tr = positions[to];
-                const mx = (f.x + tr.x) / 2 + (tr.y - f.y) * 0.15;
-                const my = (f.y + tr.y) / 2 - (tr.x - f.x) * 0.15;
+                const ep = getEdgePoint(from, to, nodeR + 4);
+                const mx = (ep.x1 + ep.x2) / 2 + (ep.y2 - ep.y1) * 0.2;
+                const my = (ep.y1 + ep.y2) / 2 - (ep.x2 - ep.x1) * 0.2;
                 return (
                     <path
                         key={`sojo-${i}`}
-                        d={`M ${f.x} ${f.y} Q ${mx} ${my} ${tr.x} ${tr.y}`}
+                        d={`M ${ep.x1} ${ep.y1} Q ${mx} ${my} ${ep.x2} ${ep.y2}`}
                         fill="none"
-                        stroke={`${t.text1}20`}
-                        strokeWidth="1.5"
-                        markerEnd="url(#arrowGogyo)"
+                        stroke={sojoColor}
+                        strokeWidth="2"
+                        opacity="0.7"
+                        markerEnd="url(#arrowSojoBase)"
                     />
                 );
             })}
 
-            {/* 相剋の星形線 */}
-            {sokokLines.map(([from, to], i) => (
-                <line
-                    key={`sokok-${i}`}
-                    x1={positions[from].x} y1={positions[from].y}
-                    x2={positions[to].x} y2={positions[to].y}
-                    stroke={`${t.text1}10`}
-                    strokeWidth="1"
-                    strokeDasharray="3,3"
-                />
-            ))}
-
-            {/* A→B の関係を強調 */}
-            {idxA >= 0 && idxB >= 0 && idxA !== idxB && (
-                <line
-                    x1={positions[idxA].x} y1={positions[idxA].y}
-                    x2={positions[idxB].x} y2={positions[idxB].y}
-                    stroke={relation === '相生' ? '#6A9E6A' : relation === '相剋' ? '#E07050' : '#A08B6D'}
-                    strokeWidth="2.5"
-                    opacity="0.6"
-                    markerEnd={relation === '相生' ? 'url(#arrowSojo)' : 'url(#arrowSokok)'}
-                />
-            )}
+            {/* 相剋の星形矢印（金色・太い実線） */}
+            {sokokLines.map(([from, to], i) => {
+                const ep = getEdgePoint(from, to, nodeR + 4);
+                return (
+                    <line
+                        key={`sokok-${i}`}
+                        x1={ep.x1} y1={ep.y1}
+                        x2={ep.x2} y2={ep.y2}
+                        stroke={sokokColor}
+                        strokeWidth="1.8"
+                        opacity="0.5"
+                        markerEnd="url(#arrowSokokBase)"
+                    />
+                );
+            })}
 
             {/* 五行ノード */}
             {elements.map((el, i) => {
                 const p = positions[i];
                 const isA = i === idxA;
                 const isB = i === idxB;
-                const nodeR = (isA || isB) ? 22 : 18;
+                const isAB = idxA === idxB && isA; // 比和の場合
+                const r2 = nodeR;
+                const eA = energyA?.[el] ?? 0;
+                const eB = energyB?.[el] ?? 0;
                 return (
                     <g key={el}>
+                        {/* ノード円 */}
                         <circle
-                            cx={p.x} cy={p.y} r={nodeR}
-                            fill={isA ? PERSON_COLORS.A.light : isB ? PERSON_COLORS.B.light : (isDark ? `${t.text1}08` : '#f5f3ef')}
-                            stroke={isA ? PERSON_COLORS.A.main : isB ? PERSON_COLORS.B.main : `${t.text1}30`}
+                            cx={p.x} cy={p.y} r={r2}
+                            fill={isAB ? `${PERSON_COLORS.A.main}15` : isA ? PERSON_COLORS.A.light : isB ? PERSON_COLORS.B.light : (isDark ? `${t.text1}08` : '#f5f3ef')}
+                            stroke={isAB ? PERSON_COLORS.A.main : isA ? PERSON_COLORS.A.main : isB ? PERSON_COLORS.B.main : `${t.text1}30`}
                             strokeWidth={isA || isB ? 2.5 : 1}
                         />
+                        {isAB && (
+                            <circle
+                                cx={p.x} cy={p.y} r={r2 + 3}
+                                fill="none"
+                                stroke={PERSON_COLORS.B.main}
+                                strokeWidth="2"
+                                strokeDasharray="4,3"
+                            />
+                        )}
+                        {/* 五行文字 */}
                         <text
-                            x={p.x} y={p.y}
+                            x={p.x} y={p.y - 3}
                             textAnchor="middle" dominantBaseline="central"
-                            fontSize={isA || isB ? 16 : 14}
-                            fontWeight={isA || isB ? 700 : 500}
+                            fontSize={18} fontWeight={700}
                             fill={GOGYO_COLORS[el]}
                             fontFamily={fonts.serif}
                         >
                             {el}
                         </text>
-                        {isA && (
-                            <text x={p.x} y={p.y + nodeR + 12} textAnchor="middle" fontSize={9} fill={PERSON_COLORS.A.main} fontFamily={fonts.serif}>
-                                {nameA}
-                            </text>
+                        {/* 干ペア */}
+                        <text
+                            x={p.x} y={p.y + 13}
+                            textAnchor="middle" dominantBaseline="central"
+                            fontSize={7} fill={`${t.text1}50`}
+                            fontFamily={fonts.serif}
+                        >
+                            {stemPairs[i]}
+                        </text>
+
+                        {/* A/B のエネルギー値バッジ */}
+                        {(energyA || energyB) && (
+                            <>
+                                {/* Aの値 */}
+                                <rect x={p.x - 30} y={p.y - r2 - 18} width={26} height={14} rx={2}
+                                    fill={PERSON_COLORS.A.bg} stroke={PERSON_COLORS.A.border} strokeWidth="0.8" />
+                                <text x={p.x - 17} y={p.y - r2 - 10}
+                                    textAnchor="middle" dominantBaseline="central"
+                                    fontSize={8} fontWeight={600} fill={PERSON_COLORS.A.main} fontFamily={fonts.mono}>
+                                    {eA}
+                                </text>
+                                {/* Bの値 */}
+                                <rect x={p.x + 4} y={p.y - r2 - 18} width={26} height={14} rx={2}
+                                    fill={PERSON_COLORS.B.bg} stroke={PERSON_COLORS.B.border} strokeWidth="0.8" />
+                                <text x={p.x + 17} y={p.y - r2 - 10}
+                                    textAnchor="middle" dominantBaseline="central"
+                                    fontSize={8} fontWeight={600} fill={PERSON_COLORS.B.main} fontFamily={fonts.mono}>
+                                    {eB}
+                                </text>
+                            </>
                         )}
-                        {isB && (
-                            <text x={p.x} y={p.y + nodeR + 12} textAnchor="middle" fontSize={9} fill={PERSON_COLORS.B.main} fontFamily={fonts.serif}>
-                                {nameB}
-                            </text>
+
+                        {/* A/Bラベル（比和は両方表示） */}
+                        {isAB ? (
+                            <>
+                                <text x={p.x - 14} y={p.y + r2 + 13} textAnchor="middle" fontSize={9} fill={PERSON_COLORS.A.main} fontFamily={fonts.serif}>{nameA}</text>
+                                <text x={p.x + 14} y={p.y + r2 + 13} textAnchor="middle" fontSize={9} fill={PERSON_COLORS.B.main} fontFamily={fonts.serif}>{nameB}</text>
+                            </>
+                        ) : (
+                            <>
+                                {isA && (
+                                    <text x={p.x} y={p.y + r2 + 13} textAnchor="middle" fontSize={9} fill={PERSON_COLORS.A.main} fontFamily={fonts.serif}>{nameA}</text>
+                                )}
+                                {isB && (
+                                    <text x={p.x} y={p.y + r2 + 13} textAnchor="middle" fontSize={9} fill={PERSON_COLORS.B.main} fontFamily={fonts.serif}>{nameB}</text>
+                                )}
+                            </>
                         )}
                     </g>
                 );
             })}
 
-            {/* Arrow markers */}
-            <defs>
-                <marker id="arrowGogyo" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                    <path d="M0,0 L6,3 L0,6" fill={`${t.text1}30`} />
-                </marker>
-                <marker id="arrowSojo" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-                    <path d="M0,0 L8,4 L0,8" fill="#6A9E6A" />
-                </marker>
-                <marker id="arrowSokok" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-                    <path d="M0,0 L8,4 L0,8" fill="#E07050" />
-                </marker>
-            </defs>
+            {/* 凡例（右下） */}
+            <g transform={`translate(${W - 120}, ${H - 60})`}>
+                {/* 相生 */}
+                <line x1={0} y1={8} x2={20} y2={8} stroke={sojoColor} strokeWidth="2" markerEnd="url(#arrowSojoBase)" />
+                <text x={28} y={8} dominantBaseline="central" fontSize={11} fill={t.text2} fontFamily={fonts.serif}>相生</text>
+                {/* 相剋 */}
+                <line x1={0} y1={26} x2={20} y2={26} stroke={sokokColor} strokeWidth="1.8" markerEnd="url(#arrowSokokBase)" />
+                <text x={28} y={26} dominantBaseline="central" fontSize={11} fill={t.text2} fontFamily={fonts.serif}>相剋</text>
+                {/* 比和 */}
+                <line x1={0} y1={44} x2={20} y2={44} stroke={`${t.text1}40`} strokeWidth="2" strokeDasharray="4,3" />
+                <text x={28} y={44} dominantBaseline="central" fontSize={11} fill={t.text2} fontFamily={fonts.serif}>比和</text>
+            </g>
         </svg>
     );
 }
@@ -525,6 +597,8 @@ function GogyoCompatibility({
                         gogyoA={gogyoA} gogyoB={gogyoB}
                         nameA={nameA} nameB={nameB}
                         relation={spiritRel.type}
+                        energyA={reportA.数理法?.五行分布}
+                        energyB={reportB.数理法?.五行分布}
                     />
                     {/* 凡例 */}
                     <div style={{ display: "flex", justifyContent: "center", gap: 16, marginTop: 4 }}>
