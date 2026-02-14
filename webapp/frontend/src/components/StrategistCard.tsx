@@ -375,7 +375,7 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
         { label: '健康', text: '健康運について詳しく教えてください。私の宿命から見える健康面での注意点、体質の傾向を解説してください。' },
         { label: '運氣UP', text: '運氣を開いた人生を送るためのポイントを教えてください。私の宿命を活かして開運するための具体的なアドバイスをお願いします。' },
         { label: '今年', text: '今年の運氣について詳しく教えてください。年運から見える今年のテーマ、チャンス、注意点を解説してください。' },
-        { label: '🌙 夜', text: 'この方の「夜の顔」について、算命学の観点から詳しく教えてください。宿命から読み取れる性欲の強さ、性的な傾向や嗜好、SEXのタイプ（情熱的・テクニシャン・受け身・支配的など）、パートナーに求めること、夜の相性が良いタイプなどを具体的に解説してください。星の配置や五行バランスから見える「夜の本質」を深掘りしてください。' },
+        { label: '夜', text: 'この方の「夜の顔」について、算命学の観点から詳しく教えてください。以下の項目を具体的に解説してください。\n\n1. 性欲の強さ（強い/普通/淡白など、星の根拠とともに）\n2. SEXのタイプ（情熱的・テクニシャン・受け身・支配的・甘えたがりなど）\n3. S/Mの度合い（どちらの傾向が強いか、その根拠）\n4. SEXに求めること（快楽重視・精神的繋がり・征服欲・安心感など）\n5. 性的な嗜好や癖（マンネリを嫌うか、特定のこだわりがあるかなど）\n6. 理想のSEXの頻度・回数\n7. パートナーに求める夜の姿（リードしてほしい・甘えたいなど）\n8. 夜の相性が良いタイプ（どんな星や五行の相手と合うか）\n9. この人を夜の世界に誘うための効果的なアプローチ方法\n10. SEXに関する運氣の流れ（今日の運氣・今月の運氣・今年の運氣・一生を通じた性的エネルギーの変化）\n\n星の配置や五行バランスから見える「夜の本質」を深掘りしてください。' },
     ];
 
     const pointTopics = [
@@ -386,9 +386,8 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
         { label: '宇宙盤', text: '宇宙盤（八門法）について詳しく解説してください。私のエネルギー分布と、どの領域を意識すべきか教えてください。' },
     ];
 
-    // Auto-resize textarea up to 10 lines
-    const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setInputValue(e.target.value);
+    // Auto-resize textarea helper
+    const resizeTextarea = () => {
         const ta = textareaRef.current;
         if (ta) {
             ta.style.height = 'auto';
@@ -397,6 +396,17 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
             ta.style.height = Math.min(ta.scrollHeight, maxHeight) + 'px';
         }
     };
+
+    // Auto-resize textarea up to 10 lines
+    const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setInputValue(e.target.value);
+        resizeTextarea();
+    };
+
+    // Resize when inputValue changes externally (e.g. theme button)
+    useEffect(() => {
+        resizeTextarea();
+    }, [inputValue]);
 
     const chatInput = (
         <div style={{ display: "flex", gap: 6, background: t.inputBg, padding: "3px 3px 3px 6px", border: `1px solid ${t.border}`, alignItems: "flex-end" }}>
