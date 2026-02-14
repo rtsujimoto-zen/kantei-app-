@@ -30,6 +30,8 @@ interface AiStrategistProps {
     loading: boolean;
     className?: string;
     layout?: 'panel' | 'float';
+    customThemes?: { label: string; text: string }[];
+    customPoints?: { label: string; text: string }[];
 }
 
 const personas: { id: AiPersona; icon: string; label: string }[] = [
@@ -45,7 +47,7 @@ const models: { id: AiModel; label: string; sub: string }[] = [
     { id: "gemini-flash", label: "⚡ Flash", sub: "Gemini 3 Flash" },
 ];
 
-export function AiStrategist({ onConsult, loading, className, layout = 'panel' }: AiStrategistProps) {
+export function AiStrategist({ onConsult, loading, className, layout = 'panel', customThemes, customPoints }: AiStrategistProps) {
     const { t, isDark } = useTheme();
     const [persona, setPersona] = useState<AiPersona>('onmyoji');
     const [depth, setDepth] = useState<'professional' | 'intermediate' | 'beginner'>('beginner');
@@ -368,7 +370,7 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
         </div>
     );
 
-    const themeTopics = [
+    const defaultThemeTopics = [
         { label: '恋愛', text: '恋愛運について詳しく教えてください。私の宿命から見える恋愛の傾向、理想のパートナー像、気をつけるべき点などを解説してください。' },
         { label: '仕事', text: '仕事運について詳しく教えてください。私の宿命に適した職業、働き方、成功へのポイントを解説してください。' },
         { label: 'お金', text: 'お金・財運について詳しく教えてください。私の宿命から見える金運の傾向、お金との付き合い方を解説してください。' },
@@ -378,13 +380,16 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
         { label: '夜', text: 'この方の「夜の顔」について、算命学の観点から詳しく教えてください。以下の項目を具体的に解説してください。\n\n1. 性欲の強さ（強い/普通/淡白など、星の根拠とともに）\n2. SEXのタイプ（情熱的・テクニシャン・受け身・支配的・甘えたがりなど）\n3. S/Mの度合い（どちらの傾向が強いか、その根拠）\n4. SEXに求めること（快楽重視・精神的繋がり・征服欲・安心感など）\n5. 性的な嗜好や癖（マンネリを嫌うか、特定のこだわりがあるかなど）\n6. 理想のSEXの頻度・回数\n7. パートナーに求める夜の姿（リードしてほしい・甘えたいなど）\n8. 夜の相性が良いタイプ（どんな星や五行の相手と合うか）\n9. この人を夜の世界に誘うための効果的なアプローチ方法\n10. SEXに関する運氣の流れ（今日の運氣・今月の運氣・今年の運氣・一生を通じた性的エネルギーの変化）\n\n星の配置や五行バランスから見える「夜の本質」を深掘りしてください。' },
     ];
 
-    const pointTopics = [
+    const defaultPointTopics = [
         { label: '陰占と陽占', text: '陰占と陽占について詳しく解説してください。それぞれの読み方と、私の命式ではどのような意味を持つか教えてください。' },
         { label: '陽占', text: '陽占（人体星図）について詳しく解説してください。各星の配置と意味、精神構造の全体像を教えてください。' },
         { label: '大運', text: '大運について詳しく解説してください。これまでの大運の流れと、今後の大運のテーマを教えてください。' },
         { label: '年運', text: '年運について詳しく解説してください。直近5年と今後5年の運気の流れを教えてください。' },
         { label: '宇宙盤', text: '宇宙盤（八門法）について詳しく解説してください。私のエネルギー分布と、どの領域を意識すべきか教えてください。' },
     ];
+
+    const themeTopics = customThemes || defaultThemeTopics;
+    const pointTopics = customPoints || defaultPointTopics;
 
     // Auto-resize textarea helper
     const resizeTextarea = () => {
