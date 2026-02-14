@@ -12,6 +12,7 @@ const fonts = {
 interface ChatMessage {
     role: 'user' | 'assistant';
     content: string;
+    personaId?: AiPersona;
 }
 
 export type AiModel = 'gemini-3.0-pro-high' | 'gemini-3.0-pro-low' | 'gemini-flash';
@@ -56,6 +57,7 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
     const [copiedAll, setCopiedAll] = useState(false);
     const [floatOpen, setFloatOpen] = useState(false);
     const [showPersonaPopup, setShowPersonaPopup] = useState(false);
+    const [zoomedPersona, setZoomedPersona] = useState<{ icon: string; label: string } | null>(null);
     const chatEndRef = useRef<HTMLDivElement>(null);
     const chatStartRef = useRef<HTMLDivElement>(null);
     const prevMessagesLenRef = useRef(0);
@@ -80,21 +82,23 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
     }, [messages, layout]);
 
     const handleInitialConsult = async () => {
-        const response = await onConsult(persona, depth, model, undefined, []);
+        const currentPersona = persona;
+        const response = await onConsult(currentPersona, depth, model, undefined, []);
         if (response) {
-            setMessages([{ role: 'assistant', content: response }]);
+            setMessages([{ role: 'assistant', content: response, personaId: currentPersona }]);
         }
     };
 
     const handleFollowUp = async () => {
         if (!inputValue.trim() || loading) return;
+        const currentPersona = persona;
         const userMessage: ChatMessage = { role: 'user', content: inputValue.trim() };
         const newHistory = [...messages, userMessage];
         setMessages(newHistory);
         setInputValue('');
-        const response = await onConsult(persona, depth, model, inputValue.trim(), messages);
+        const response = await onConsult(currentPersona, depth, model, inputValue.trim(), messages);
         if (response) {
-            setMessages([...newHistory, { role: 'assistant', content: response }]);
+            setMessages([...newHistory, { role: 'assistant', content: response, personaId: currentPersona }]);
         }
     };
 
@@ -117,8 +121,9 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
         // Enterは改行を許可。送信はボタンのみ
     };
 
-    const getPersonaDisplay = () => {
-        const p = personas.find(p => p.id === persona);
+    const getPersonaDisplay = (id?: AiPersona) => {
+        const targetId = id || persona;
+        const p = personas.find(p => p.id === targetId);
         return p || personas[0];
     };
 
@@ -253,6 +258,7 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                 const isUser = msg.role === 'user';
                 // Place scroll marker before the last assistant message
                 const isLastAssistant = !isUser && i === messages.length - 1;
+                const msgPersona = getPersonaDisplay(msg.personaId);
                 return (
                     <div key={i}>
                         {isLastAssistant && <div ref={chatStartRef} />}
@@ -263,12 +269,13 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                             gap: 10,
                             marginBottom: 18,
                         }}>
-                            {/* アイコン（軍師のみ） */}
+                            {/* アイコン（軍師のみ）- タップでアップ表示 */}
                             {!isUser && (
                                 <img
-                                    src={getPersonaDisplay().icon}
-                                    alt=""
-                                    style={{ width: 40, height: 40, objectFit: "contain", flexShrink: 0, marginTop: 2 }}
+                                    src={msgPersona.icon}
+                                    alt={msgPersona.label}
+                                    onClick={() => setZoomedPersona(msgPersona)}
+                                    style={{ width: 40, height: 40, objectFit: "contain", flexShrink: 0, marginTop: 2, cursor: "pointer", borderRadius: "50%" }}
                                 />
                             )}
                             {/* 吹き出し */}
@@ -281,7 +288,7 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                                     marginBottom: 3,
                                     textAlign: isUser ? "right" : "left",
                                 }}>
-                                    {isUser ? 'あなた' : getPersonaDisplay().label}
+                                    {isUser ? 'あなた' : msgPersona.label}
                                 </div>
                                 {/* メッセージ本体 */}
                                 <div style={{
@@ -850,6 +857,48 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                         <span key={i} style={{ fontSize: 10, color: t.text3, fontFamily: fonts.serif, lineHeight: 1.5 }}>{char}</span>
                     ))}
                 </button>
+            )}
+
+            {/* Persona Zoom Modal */}
+            {zoomedPersona && (
+                <div
+                    onClick={() => setZoomedPersona(null)}
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        zIndex: 2000,
+                        background: "rgba(0,0,0,0.75)",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 16,
+                        cursor: "pointer",
+                    }}
+                >
+                    <img
+                        src={zoomedPersona.icon}
+                        alt={zoomedPersona.label}
+                        style={{
+                            width: 180,
+                            height: 180,
+                            objectFit: "contain",
+                            borderRadius: "50%",
+                            background: `${t.card}`,
+                            boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+                            padding: 12,
+                        }}
+                    />
+                    <span style={{
+                        color: "#fff",
+                        fontSize: 16,
+                        fontFamily: fonts.serif,
+                        letterSpacing: 3,
+                        textShadow: "0 2px 8px rgba(0,0,0,0.5)",
+                    }}>
+                        {zoomedPersona.label}
+                    </span>
+                </div>
             )}
         </>
     );
