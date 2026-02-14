@@ -264,6 +264,7 @@ export function CompatibilityTab({ isDesktop }: CompatibilityTabProps) {
     const [error, setError] = useState('');
     const [reportA, setReportA] = useState<SanmeiReport | null>(null);
     const [reportB, setReportB] = useState<SanmeiReport | null>(null);
+    const [copySuccess, setCopySuccess] = useState('');
 
     const formatBirthday = (value: string) => {
         let v = value.replace(/[^\d]/g, '');
@@ -311,6 +312,25 @@ export function CompatibilityTab({ isDesktop }: CompatibilityTabProps) {
     // Names
     const nameA = personA.nickname || 'Aさん';
     const nameB = personB.nickname || 'Bさん';
+
+    // Build prompt text for copy
+    const buildPromptText = () => {
+        if (!reportA || !reportB) return '';
+        const header = `=== 相性診断データ ===\n${nameA}（${personA.birthday} / ${personA.gender === 'M' ? '男性' : '女性'}）\n${nameB}（${personB.birthday} / ${personB.gender === 'M' ? '男性' : '女性'}）\n${relationship ? `関係性: ${relationship}` : ''}\n`;
+        const textA = `\n--- ${nameA} の鑑定データ ---\n${reportA.output_text || '(データなし)'}`;
+        const textB = `\n--- ${nameB} の鑑定データ ---\n${reportB.output_text || '(データなし)'}`;
+        return header + textA + textB;
+    };
+
+    const handleCopyPrompt = async () => {
+        try {
+            await navigator.clipboard.writeText(buildPromptText());
+            setCopySuccess('Copied!');
+            setTimeout(() => setCopySuccess(''), 2000);
+        } catch (err) {
+            console.error('Failed to copy!', err);
+        }
+    };
 
     // Shared field styles
     const inputStyle = {
@@ -422,6 +442,41 @@ export function CompatibilityTab({ isDesktop }: CompatibilityTabProps) {
 
     const hasResults = reportA && reportB && reportA.宇宙盤 && reportB.宇宙盤;
 
+    // Energy data
+    const energyA = reportA?.数理法?.総エネルギー ?? 0;
+    const energyB = reportB?.数理法?.総エネルギー ?? 0;
+    const maxEnergy = Math.max(energyA, energyB, 1);
+    const energyDiff = Math.abs(energyA - energyB);
+    const higherName = energyA >= energyB ? nameA : nameB;
+    const lowerName = energyA >= energyB ? nameB : nameA;
+    const higherEnergy = Math.max(energyA, energyB);
+    const lowerEnergy = Math.min(energyA, energyB);
+
+    // Energy evaluation
+    let energyEval: { type: string; score: number; desc: string; advice: string };
+    if (energyDiff <= 50) {
+        energyEval = {
+            type: 'バランス良好',
+            score: 2,
+            desc: 'エネルギーの総量が近く、対等な関係を築きやすい理想的なバランスです。お互いの力を引き出し合えます。',
+            advice: '対等なパートナーシップを活かし、共同で目標に向かうと最大の成果が出ます。',
+        };
+    } else if (energyDiff <= 120) {
+        energyEval = {
+            type: '程よい格差',
+            score: 1,
+            desc: `${higherName}のエネルギーが高く、${lowerName}をリードする立場になりやすい関係です。高い側が意識的にペースを合わせることで良好な関係を保てます。`,
+            advice: `${lowerName}は「他力」を使いこなし、${higherName}のエネルギーを借りることで大きく飛躍できます。`,
+        };
+    } else {
+        energyEval = {
+            type: '大きな格差',
+            score: 0,
+            desc: `エネルギーの格差が大きいため、${higherName}が「自分が正しい、同じようにできるはずだ」と押し付けると、${lowerName}の器がパンクし、病気や精神的摩耗（陰転）を引き起こすリスクがあります。`,
+            advice: `${higherName}は意識的にペースダウンし、${lowerName}のリズムを尊重することが重要です。逆に${lowerName}が「他力」を使いこなせれば、${higherName}のエネルギーを借りて飛躍できます。`,
+        };
+    }
+
     return (
         <div style={{ padding: isDesktop ? "24px 32px 80px" : "20px 16px 120px", maxWidth: isDesktop ? 900 : 600, margin: "0 auto" }}>
             <div style={{ fontFamily: fonts.serif, fontSize: 12, fontWeight: 600, color: t.text3, letterSpacing: 6, marginBottom: 14 }}>
@@ -512,6 +567,163 @@ export function CompatibilityTab({ isDesktop }: CompatibilityTabProps) {
                         nameB={nameB}
                         isDesktop={isDesktop}
                     />
+
+                    {/* エネルギー比較（数理法） */}
+                    {reportA.数理法 && reportB.数理法 && (
+                        <div style={{
+                            background: t.card,
+                            border: `1px solid ${t.border}`,
+                            borderRadius: 2,
+                            padding: 20,
+                            transition: "all 0.3s",
+                            boxShadow: t.shadowCard,
+                            marginBottom: 20,
+                        }}>
+                            <div style={{ fontFamily: fonts.serif, fontSize: 12, fontWeight: 600, color: t.text3, letterSpacing: 6, marginBottom: 14 }}>
+                                エネルギーの力学（数理法）
+                            </div>
+
+                            {/* Bar comparison */}
+                            <div style={{ marginBottom: 20 }}>
+                                {/* Person A bar */}
+                                <div style={{ marginBottom: 12 }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
+                                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                            <div style={{ width: 10, height: 10, borderRadius: "50%", background: PERSON_COLORS.A.main }} />
+                                            <span style={{ fontSize: 12, color: t.text2, fontFamily: fonts.serif }}>{nameA}</span>
+                                        </div>
+                                        <span style={{ fontSize: 18, fontWeight: 700, color: PERSON_COLORS.A.main, fontFamily: fonts.serif }}>{energyA}</span>
+                                    </div>
+                                    <div style={{ width: "100%", height: 8, background: isDark ? `${t.text1}10` : '#f0ede8', borderRadius: 4 }}>
+                                        <div style={{
+                                            width: `${(energyA / maxEnergy) * 100}%`,
+                                            height: "100%",
+                                            background: `linear-gradient(90deg, ${PERSON_COLORS.A.main}, ${PERSON_COLORS.A.main}aa)`,
+                                            borderRadius: 4,
+                                            transition: "width 0.6s ease",
+                                        }} />
+                                    </div>
+                                </div>
+
+                                {/* Person B bar */}
+                                <div>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
+                                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                            <div style={{ width: 10, height: 10, borderRadius: "50%", background: PERSON_COLORS.B.main }} />
+                                            <span style={{ fontSize: 12, color: t.text2, fontFamily: fonts.serif }}>{nameB}</span>
+                                        </div>
+                                        <span style={{ fontSize: 18, fontWeight: 700, color: PERSON_COLORS.B.main, fontFamily: fonts.serif }}>{energyB}</span>
+                                    </div>
+                                    <div style={{ width: "100%", height: 8, background: isDark ? `${t.text1}10` : '#f0ede8', borderRadius: 4 }}>
+                                        <div style={{
+                                            width: `${(energyB / maxEnergy) * 100}%`,
+                                            height: "100%",
+                                            background: `linear-gradient(90deg, ${PERSON_COLORS.B.main}, ${PERSON_COLORS.B.main}aa)`,
+                                            borderRadius: 4,
+                                            transition: "width 0.6s ease",
+                                        }} />
+                                    </div>
+                                </div>
+
+                                {/* Difference label */}
+                                <div style={{
+                                    textAlign: "center",
+                                    marginTop: 12,
+                                    fontSize: 12,
+                                    color: t.text3,
+                                    fontFamily: fonts.mono,
+                                }}>
+                                    差: {energyDiff}点
+                                </div>
+                            </div>
+
+                            {/* Evaluation */}
+                            <div style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 6,
+                                padding: "6px 14px",
+                                background: energyEval.score === 2 ? (isDark ? '#3a5a2e' : '#e8f5e9') : energyEval.score === 1 ? (isDark ? '#4a3a2e' : '#fff8e1') : (isDark ? '#5a2e2e' : '#fce4ec'),
+                                border: `1px solid ${energyEval.score === 2 ? (isDark ? '#5a7a4e' : '#a5d6a7') : energyEval.score === 1 ? (isDark ? '#6a5a4e' : '#ffe082') : (isDark ? '#7a4e4e' : '#ef9a9a')}`,
+                                borderRadius: 2,
+                                marginBottom: 14,
+                            }}>
+                                <span style={{ fontSize: 16 }}>{energyEval.score === 2 ? '◎' : energyEval.score === 1 ? '○' : '△'}</span>
+                                <span style={{ fontSize: 13, fontWeight: 600, fontFamily: fonts.serif, color: t.text1 }}>
+                                    {energyEval.type}
+                                </span>
+                                <span style={{ fontSize: 11, color: t.text3, fontFamily: fonts.mono }}>+{energyEval.score}</span>
+                            </div>
+
+                            <p style={{ fontSize: 13, lineHeight: 1.8, color: t.text2, fontFamily: fonts.serif, margin: "0 0 14px" }}>
+                                {energyEval.desc}
+                            </p>
+
+                            <div style={{
+                                padding: "10px 14px",
+                                background: isDark ? `${t.text1}06` : '#f8f6f3',
+                                border: `1px solid ${t.border}`,
+                                borderRadius: 2,
+                            }}>
+                                <div style={{ fontSize: 10, fontWeight: 600, color: t.text4, fontFamily: fonts.serif, letterSpacing: 2, marginBottom: 6 }}>
+                                    アドバイス
+                                </div>
+                                <p style={{ fontSize: 12, lineHeight: 1.7, color: t.text3, fontFamily: fonts.serif, margin: 0 }}>
+                                    {energyEval.advice}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* プロンプトコピー枠 */}
+                    {(reportA.output_text || reportB.output_text) && (
+                        <div style={{
+                            background: t.card,
+                            border: `1px solid ${t.border}`,
+                            borderRadius: 2,
+                            overflow: "hidden",
+                            transition: "all 0.3s",
+                            boxShadow: t.shadowCard,
+                        }}>
+                            <div style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                padding: "10px 20px",
+                                borderBottom: `1px solid ${t.border}`,
+                            }}>
+                                <span style={{ fontSize: 12, fontWeight: 500, color: t.text3, letterSpacing: 3, fontFamily: fonts.mono }}>
+                                    PROMPT DATA
+                                </span>
+                                <button
+                                    onClick={handleCopyPrompt}
+                                    style={{
+                                        background: "none", border: "none",
+                                        color: copySuccess ? '#E07050' : t.text3,
+                                        fontSize: 12, cursor: "pointer",
+                                        fontFamily: fonts.mono,
+                                    }}
+                                >
+                                    {copySuccess || 'Copy'}
+                                </button>
+                            </div>
+                            <pre style={{
+                                padding: 20,
+                                color: t.text2,
+                                fontSize: 12,
+                                fontFamily: fonts.mono,
+                                lineHeight: 1.8,
+                                whiteSpace: "pre-wrap",
+                                maxHeight: 300,
+                                overflowY: "auto",
+                                margin: 0,
+                                background: isDark ? `${t.text1}04` : '#faf9f7',
+                                transition: "all 0.3s",
+                            }}>
+                                {buildPromptText()}
+                            </pre>
+                        </div>
+                    )}
                 </>
             )}
         </div>
