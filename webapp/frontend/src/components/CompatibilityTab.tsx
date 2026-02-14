@@ -39,6 +39,53 @@ const PERSON_COLORS = {
     B: { main: '#5A8ECC', light: '#5A8ECC30', bg: '#5A8ECC10', border: '#5A8ECC40' },
 };
 
+// ===== 五行ロジック =====
+const STEM_TO_GOGYO: { [key: string]: string } = {
+    '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
+    '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水',
+};
+
+const STAR_TO_GOGYO: { [key: string]: string } = {
+    '貫索星': '木', '石門星': '木',
+    '鳳閣星': '火', '調舒星': '火',
+    '禄存星': '土', '司禄星': '土',
+    '車騎星': '金', '牽牛星': '金',
+    '龍高星': '水', '玉堂星': '水',
+};
+
+const STEM_NATURE: { [key: string]: string } = {
+    '甲': '大木（樹木）', '乙': '草花', '丙': '太陽', '丁': '灯火',
+    '戊': '山岳', '己': '田園', '庚': '鉱石・剣', '辛': '宝石',
+    '壬': '大海', '癸': '雨露',
+};
+
+const GOGYO_COLORS: { [key: string]: string } = {
+    '木': '#6A9E6A', '火': '#E07050', '土': '#A08B6D', '金': '#8B8B8B', '水': '#5A8ECC',
+};
+
+type GogyoRelation = '相生' | '相剋' | '比和';
+
+function getGogyoRelation(a: string, b: string): { type: GogyoRelation; detail: string } {
+    if (a === b) return { type: '比和', detail: `${a}と${b}（同じ性質）` };
+    const sojo: [string, string][] = [['木', '火'], ['火', '土'], ['土', '金'], ['金', '水'], ['水', '木']];
+    for (const [from, to] of sojo) {
+        if (a === from && b === to) return { type: '相生', detail: `${a}が${b}を生む` };
+        if (b === from && a === to) return { type: '相生', detail: `${b}が${a}を生む` };
+    }
+    return { type: '相剋', detail: `${a}と${b}が刺激し合う` };
+}
+
+function extractNikkan(report: SanmeiReport): string | null {
+    if (!report.陰占?.日) return null;
+    const match = report.陰占.日.match(/\)\s*(.)/);
+    return match ? match[1] : null;
+}
+
+function extractStarGogyo(report: SanmeiReport, pos: '左手' | '右手' | '胸'): string | null {
+    const star = report.陽占?.十大主星?.[pos];
+    return star ? (STAR_TO_GOGYO[star] || null) : null;
+}
+
 // ===== 宇宙盤の重なり表示 =====
 function UchubanOverlap({
     numsA, numsB, nameA, nameB, isDesktop,
@@ -254,11 +301,313 @@ function UchubanOverlap({
     );
 }
 
+// ===== 五行循環グラフ =====
+function GogyoCycleGraph({
+    gogyoA, gogyoB, nameA, nameB, relation,
+}: {
+    gogyoA: string; gogyoB: string; nameA: string; nameB: string; relation: GogyoRelation;
+}) {
+    const { t, isDark } = useTheme();
+    const cx = 140, cy = 140, r = 90;
+    const elements = ['木', '火', '土', '金', '水'];
+    const positions = elements.map((_, i) => {
+        const angle = (i / 5) * 2 * Math.PI - Math.PI / 2;
+        return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
+    });
+
+    // 相生の矢印（円周に沿って）
+    const sojoArrows = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 0]];
+    // 相剋の線（星形）
+    const sokokLines = [[0, 2], [2, 4], [4, 1], [1, 3], [3, 0]];
+
+    const idxA = elements.indexOf(gogyoA);
+    const idxB = elements.indexOf(gogyoB);
+
+    return (
+        <svg viewBox="0 0 280 280" style={{ width: 240, height: 240, maxWidth: "100%" }}>
+            {/* 相生の円弧矢印 */}
+            {sojoArrows.map(([from, to], i) => {
+                const f = positions[from], tr = positions[to];
+                const mx = (f.x + tr.x) / 2 + (tr.y - f.y) * 0.15;
+                const my = (f.y + tr.y) / 2 - (tr.x - f.x) * 0.15;
+                return (
+                    <path
+                        key={`sojo-${i}`}
+                        d={`M ${f.x} ${f.y} Q ${mx} ${my} ${tr.x} ${tr.y}`}
+                        fill="none"
+                        stroke={`${t.text1}20`}
+                        strokeWidth="1.5"
+                        markerEnd="url(#arrowGogyo)"
+                    />
+                );
+            })}
+
+            {/* 相剋の星形線 */}
+            {sokokLines.map(([from, to], i) => (
+                <line
+                    key={`sokok-${i}`}
+                    x1={positions[from].x} y1={positions[from].y}
+                    x2={positions[to].x} y2={positions[to].y}
+                    stroke={`${t.text1}10`}
+                    strokeWidth="1"
+                    strokeDasharray="3,3"
+                />
+            ))}
+
+            {/* A→B の関係を強調 */}
+            {idxA >= 0 && idxB >= 0 && idxA !== idxB && (
+                <line
+                    x1={positions[idxA].x} y1={positions[idxA].y}
+                    x2={positions[idxB].x} y2={positions[idxB].y}
+                    stroke={relation === '相生' ? '#6A9E6A' : relation === '相剋' ? '#E07050' : '#A08B6D'}
+                    strokeWidth="2.5"
+                    opacity="0.6"
+                    markerEnd={relation === '相生' ? 'url(#arrowSojo)' : 'url(#arrowSokok)'}
+                />
+            )}
+
+            {/* 五行ノード */}
+            {elements.map((el, i) => {
+                const p = positions[i];
+                const isA = i === idxA;
+                const isB = i === idxB;
+                const nodeR = (isA || isB) ? 22 : 18;
+                return (
+                    <g key={el}>
+                        <circle
+                            cx={p.x} cy={p.y} r={nodeR}
+                            fill={isA ? PERSON_COLORS.A.light : isB ? PERSON_COLORS.B.light : (isDark ? `${t.text1}08` : '#f5f3ef')}
+                            stroke={isA ? PERSON_COLORS.A.main : isB ? PERSON_COLORS.B.main : `${t.text1}30`}
+                            strokeWidth={isA || isB ? 2.5 : 1}
+                        />
+                        <text
+                            x={p.x} y={p.y}
+                            textAnchor="middle" dominantBaseline="central"
+                            fontSize={isA || isB ? 16 : 14}
+                            fontWeight={isA || isB ? 700 : 500}
+                            fill={GOGYO_COLORS[el]}
+                            fontFamily={fonts.serif}
+                        >
+                            {el}
+                        </text>
+                        {isA && (
+                            <text x={p.x} y={p.y + nodeR + 12} textAnchor="middle" fontSize={9} fill={PERSON_COLORS.A.main} fontFamily={fonts.serif}>
+                                {nameA}
+                            </text>
+                        )}
+                        {isB && (
+                            <text x={p.x} y={p.y + nodeR + 12} textAnchor="middle" fontSize={9} fill={PERSON_COLORS.B.main} fontFamily={fonts.serif}>
+                                {nameB}
+                            </text>
+                        )}
+                    </g>
+                );
+            })}
+
+            {/* Arrow markers */}
+            <defs>
+                <marker id="arrowGogyo" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                    <path d="M0,0 L6,3 L0,6" fill={`${t.text1}30`} />
+                </marker>
+                <marker id="arrowSojo" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                    <path d="M0,0 L8,4 L0,8" fill="#6A9E6A" />
+                </marker>
+                <marker id="arrowSokok" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                    <path d="M0,0 L8,4 L0,8" fill="#E07050" />
+                </marker>
+            </defs>
+        </svg>
+    );
+}
+
+// ===== 五行相性セクション =====
+function GogyoCompatibility({
+    reportA, reportB, nameA, nameB, isDesktop,
+}: {
+    reportA: SanmeiReport; reportB: SanmeiReport; nameA: string; nameB: string; isDesktop: boolean;
+}) {
+    const { t, isDark } = useTheme();
+
+    const nikkanA = extractNikkan(reportA);
+    const nikkanB = extractNikkan(reportB);
+    if (!nikkanA || !nikkanB) return null;
+
+    const gogyoA = STEM_TO_GOGYO[nikkanA];
+    const gogyoB = STEM_TO_GOGYO[nikkanB];
+    if (!gogyoA || !gogyoB) return null;
+
+    const spiritRel = getGogyoRelation(gogyoA, gogyoB);
+
+    // 東方（左手）= 仕事の星
+    const eastGogyoA = extractStarGogyo(reportA, '左手');
+    const eastGogyoB = extractStarGogyo(reportB, '左手');
+    const eastRel = eastGogyoA && eastGogyoB ? getGogyoRelation(eastGogyoA, eastGogyoB) : null;
+
+    // 西方（右手）= パートナーの星、中央（胸）= 本質
+    const westGogyoA = extractStarGogyo(reportA, '右手');
+    const centerGogyoB = extractStarGogyo(reportB, '胸');
+    const westRel = westGogyoA && centerGogyoB ? getGogyoRelation(westGogyoA, centerGogyoB) : null;
+
+    const getRelMsg = (rel: GogyoRelation): { icon: string; color: string; score: number; title: string; desc: string } => {
+        switch (rel) {
+            case '相生': return {
+                icon: '◎', color: isDark ? '#3a5a2e' : '#e8f5e9', score: 2,
+                title: '生かし合う関係',
+                desc: '一緒にいると自然にやる気が湧く、応援し合える関係です。どちらかが支え、どちらかが伸びる。未来を語るパートナーに最適。',
+            };
+            case '相剋': return {
+                icon: '○', color: isDark ? '#4a3a2e' : '#fff8e1', score: 1,
+                title: '魂を磨き合う関係',
+                desc: '自分にない視点を与えてくれる、魂を磨き合う関係です。剋する側は「責任感」を、剋される側は「忍耐と成長」を学びます。',
+            };
+            case '比和': return {
+                icon: '◎', color: isDark ? '#3a5a2e' : '#e8f5e9', score: 2,
+                title: '同志のような深い理解',
+                desc: '価値観が近く、同志のような深い理解が得られる関係です。一緒にいるとエネルギーが安定し、運気が巡ります。',
+            };
+        }
+    };
+
+    const spiritMsg = getRelMsg(spiritRel.type);
+
+    // 総合スコア
+    const totalScore = spiritMsg.score
+        + (eastRel ? getRelMsg(eastRel.type).score : 0)
+        + (westRel ? getRelMsg(westRel.type).score : 0);
+
+    const sectionCard = (title: string, subtitle: string, rel: { type: GogyoRelation; detail: string }, msg: ReturnType<typeof getRelMsg>) => (
+        <div style={{
+            padding: 14,
+            background: isDark ? `${t.text1}04` : '#faf9f7',
+            border: `1px solid ${t.border}`,
+            borderRadius: 2,
+        }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: t.text1, fontFamily: fonts.serif }}>{title}</div>
+                    <div style={{ fontSize: 10, color: t.text4, fontFamily: fonts.mono, marginTop: 2 }}>{subtitle}</div>
+                </div>
+                <div style={{
+                    display: "inline-flex", alignItems: "center", gap: 4,
+                    padding: "3px 10px",
+                    background: msg.color,
+                    border: `1px solid ${rel.type === '相剋' ? (isDark ? '#6a5a4e' : '#ffe082') : (isDark ? '#5a7a4e' : '#a5d6a7')}`,
+                    borderRadius: 2,
+                    fontSize: 11, fontWeight: 600, color: t.text1, fontFamily: fonts.serif,
+                }}>
+                    {msg.icon} {rel.type} +{msg.score}
+                </div>
+            </div>
+            <p style={{ fontSize: 12, lineHeight: 1.7, color: t.text2, fontFamily: fonts.serif, margin: 0 }}>
+                {msg.desc}
+            </p>
+        </div>
+    );
+
+    return (
+        <div style={{
+            background: t.card,
+            border: `1px solid ${t.border}`,
+            borderRadius: 2,
+            padding: 20,
+            transition: "all 0.3s",
+            boxShadow: t.shadowCard,
+            marginBottom: 20,
+        }}>
+            <div style={{ fontFamily: fonts.serif, fontSize: 12, fontWeight: 600, color: t.text3, letterSpacing: 6, marginBottom: 14 }}>
+                五行相性ナビゲーター
+            </div>
+
+            <div style={{ display: "flex", flexDirection: isDesktop ? "row" : "column", gap: 20, alignItems: isDesktop ? "flex-start" : "center", marginBottom: 20 }}>
+                {/* 五行循環グラフ */}
+                <div style={{ flexShrink: 0 }}>
+                    <GogyoCycleGraph
+                        gogyoA={gogyoA} gogyoB={gogyoB}
+                        nameA={nameA} nameB={nameB}
+                        relation={spiritRel.type}
+                    />
+                    {/* 凡例 */}
+                    <div style={{ display: "flex", justifyContent: "center", gap: 16, marginTop: 4 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                            <div style={{ width: 10, height: 10, borderRadius: "50%", background: PERSON_COLORS.A.main }} />
+                            <span style={{ fontSize: 10, color: t.text2, fontFamily: fonts.serif }}>{nameA}（{nikkanA}・{STEM_NATURE[nikkanA]}）</span>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                            <div style={{ width: 10, height: 10, borderRadius: "50%", background: PERSON_COLORS.B.main }} />
+                            <span style={{ fontSize: 10, color: t.text2, fontFamily: fonts.serif }}>{nameB}（{nikkanB}・{STEM_NATURE[nikkanB]}）</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 診断項目 */}
+                <div style={{ flex: 1, minWidth: 200, display: "flex", flexDirection: "column", gap: 12 }}>
+                    {/* ① 精神の土台 */}
+                    {sectionCard(
+                        '精神のシンクロ率',
+                        `日干: ${nikkanA}(${gogyoA}) × ${nikkanB}(${gogyoB})`,
+                        spiritRel,
+                        spiritMsg,
+                    )}
+
+                    {/* ② ビジネス加速力 */}
+                    {eastRel && (
+                        sectionCard(
+                            'ビジネス加速力',
+                            `東方の星: ${reportA.陽占?.十大主星?.左手 || '?'}(${eastGogyoA}) × ${reportB.陽占?.十大主星?.左手 || '?'}(${eastGogyoB})`,
+                            eastRel,
+                            getRelMsg(eastRel.type),
+                        )
+                    )}
+
+                    {/* ③ プライベートの安らぎ */}
+                    {westRel && (
+                        sectionCard(
+                            'プライベートの安らぎ',
+                            `Aの西方: ${reportA.陽占?.十大主星?.右手 || '?'}(${westGogyoA}) × Bの中心: ${reportB.陽占?.十大主星?.胸 || '?'}(${centerGogyoB})`,
+                            westRel,
+                            getRelMsg(westRel.type),
+                        )
+                    )}
+                </div>
+            </div>
+
+            {/* 帝王のアドバイス */}
+            <div style={{
+                padding: "14px 16px",
+                background: isDark ? `${t.text1}06` : '#f8f6f3',
+                border: `1px solid ${t.border}`,
+                borderRadius: 2,
+            }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: t.text4, fontFamily: fonts.serif, letterSpacing: 2, marginBottom: 8 }}>
+                    帝王のアドバイス
+                </div>
+                {spiritRel.type === '相剋' ? (
+                    <p style={{ fontSize: 13, lineHeight: 1.8, color: t.text2, fontFamily: fonts.serif, margin: 0 }}>
+                        違いは間違いではない。相手の不快を認めることで、あなたの器は拡大し、新たな宇宙（可能性）が生まれます。
+                        剋し合う関係こそ、最も大きな成長をもたらします。逃げずに「在り方」を変えることが覚醒の鍵です。
+                    </p>
+                ) : spiritRel.type === '比和' ? (
+                    <p style={{ fontSize: 13, lineHeight: 1.8, color: t.text2, fontFamily: fonts.serif, margin: 0 }}>
+                        同じ五行を持つ二人は、阿吽の呼吸で動けます。しかし、同じ世界に閉じこもりすぎると
+                        成長が止まるリスクも。意識的に「異質な風」を取り入れることで、関係性がさらに進化します。
+                    </p>
+                ) : (
+                    <p style={{ fontSize: 13, lineHeight: 1.8, color: t.text2, fontFamily: fonts.serif, margin: 0 }}>
+                        生かし合う関係は、最も自然で調和のとれたエネルギーの流れを生みます。
+                        支える側は「与える喜び」を、伸びる側は「感謝の力」を忘れないことが、
+                        この美しい循環を永続させる秘訣です。
+                    </p>
+                )}
+            </div>
+        </div>
+    );
+}
+
 export function CompatibilityTab({ isDesktop }: CompatibilityTabProps) {
     const { t, isDark } = useTheme();
 
-    const [personA, setPersonA] = useState<PersonInput>({ birthday: '', gender: 'M', nickname: '' });
-    const [personB, setPersonB] = useState<PersonInput>({ birthday: '', gender: 'F', nickname: '' });
+    const [personA, setPersonA] = useState<PersonInput>({ birthday: '1992-04-23', gender: 'F', nickname: '' });
+    const [personB, setPersonB] = useState<PersonInput>({ birthday: '1988-03-21', gender: 'M', nickname: '' });
     const [relationship, setRelationship] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -563,6 +912,15 @@ export function CompatibilityTab({ isDesktop }: CompatibilityTabProps) {
                     <UchubanOverlap
                         numsA={reportA.宇宙盤!.干支番号}
                         numsB={reportB.宇宙盤!.干支番号}
+                        nameA={nameA}
+                        nameB={nameB}
+                        isDesktop={isDesktop}
+                    />
+
+                    {/* 五行相性ナビゲーター */}
+                    <GogyoCompatibility
+                        reportA={reportA}
+                        reportB={reportB}
                         nameA={nameA}
                         nameB={nameB}
                         isDesktop={isDesktop}
