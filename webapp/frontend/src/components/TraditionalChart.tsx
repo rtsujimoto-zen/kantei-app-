@@ -643,25 +643,48 @@ export function UchubanSection({ data }: { data: { 干支番号: number[] } }) {
 // =====================================
 // 【八門法】Hachimon Section
 // =====================================
-interface HachimonData { [key: string]: number; }
+interface HachimonEntry { value: number; element: string; }
+interface HachimonData { [key: string]: HachimonEntry; }
 
 export function HachimonSection({ data }: { data: HachimonData }) {
     const { t, isDark } = useTheme();
-    const gogyoValues = {
-        水: data['北方(親・目上/習得)'] || 0,
-        木: data['中央(自分/比劫)'] || 0,
-        火: data['南方(子供・目下/伝達)'] || 0,
-        土: data['東方(家庭・配偶者/蓄積)'] || 0,
-        金: data['西方(仕事・社会/名誉)'] || 0,
+
+    // 五行ごとの色マップ
+    const elementColors: { [key: string]: string } = {
+        "水": isDark ? "#6AADE4" : "#5A8EAA",
+        "木": isDark ? "#7AB87A" : "#6A9E6A",
+        "火": isDark ? "#E07050" : "#C75B39",
+        "土": isDark ? "#A08B6D" : "#8B7355",
+        "金": t.text2,
     };
 
-    const items: { el: string; val: number; color: string }[] = [
-        { el: "水", val: gogyoValues.水, color: isDark ? "#6AADE4" : "#5A8EAA" },
-        { el: "金", val: gogyoValues.金, color: t.text2 },
-        { el: "木", val: gogyoValues.木, color: isDark ? "#7AB87A" : "#6A9E6A" },
-        { el: "土", val: gogyoValues.土, color: isDark ? "#A08B6D" : "#8B7355" },
-        { el: "火", val: gogyoValues.火, color: isDark ? "#E07050" : "#C75B39" },
+    // バックエンドのキーから方位ごとのデータを取得
+    const getEntry = (prefix: string): HachimonEntry => {
+        for (const [k, v] of Object.entries(data)) {
+            if (k.startsWith(prefix)) {
+                // 後方互換: 旧形式(number直接)にも対応
+                if (typeof v === 'number') return { value: v, element: '' };
+                return v;
+            }
+        }
+        return { value: 0, element: '' };
+    };
+
+    const north = getEntry("北方");
+    const south = getEntry("南方");
+    const east = getEntry("東方");
+    const west = getEntry("西方");
+    const center = getEntry("中央");
+
+    const items: { el: string; val: number; color: string; label: string }[] = [
+        { el: north.element, val: north.value, color: elementColors[north.element] || t.text2, label: "習得" },
+        { el: east.element, val: east.value, color: elementColors[east.element] || t.text2, label: "蓄積" },
+        { el: center.element, val: center.value, color: elementColors[center.element] || t.text2, label: "自分" },
+        { el: west.element, val: west.value, color: elementColors[west.element] || t.text2, label: "名誉" },
+        { el: south.element, val: south.value, color: elementColors[south.element] || t.text2, label: "伝達" },
     ];
+
+    // Grid layout: 3x3 (empty, north, empty, east, center, west, empty, south, empty)
     const layout = [null, items[0], null, items[1], items[2], items[3], null, items[4], null];
 
     return (
@@ -673,6 +696,7 @@ export function HachimonSection({ data }: { data: HachimonData }) {
                         <div key={i} style={{ background: `${item.color}10`, border: `1px solid ${item.color}20`, padding: "6px 2px", transition: "all 0.3s" }}>
                             <div style={{ fontSize: 11, color: `${item.color}99`, fontFamily: fonts.serif }}>{item.el}</div>
                             <div style={{ fontSize: 18, fontWeight: 600, color: item.color, fontFamily: fonts.serif }}>{item.val}</div>
+                            <div style={{ fontSize: 9, color: t.text4, fontFamily: fonts.mono, marginTop: 2 }}>{item.label}</div>
                         </div>
                     ) : <div key={i} />
                 )}

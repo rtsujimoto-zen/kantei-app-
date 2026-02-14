@@ -372,11 +372,11 @@ class SanmeiEngine:
         # 中央: 比劫 (自分) / 北: 印星 / 南: 食傷 / 西: 官星 / 東: 財星
         # 注: 西と東が流派により反転すること、資料の視覚配置を優先
         return {
-            "中央(自分/比劫)": energy_by_wx[wx_order[idx]],
-            "北方(親・目上/習得)": energy_by_wx[wx_order[(idx - 1) % 5]],
-            "南方(子供・目下/伝達)": energy_by_wx[wx_order[(idx + 1) % 5]],
-            "西方(仕事・社会/名誉)": energy_by_wx[wx_order[(idx - 2) % 5]], # 官星
-            "東方(家庭・配偶者/蓄積)": energy_by_wx[wx_order[(idx + 2) % 5]]  # 財星
+            "中央(自分/比劫)": {"value": energy_by_wx[wx_order[idx]], "element": wx_order[idx]},
+            "北方(親・目上/習得)": {"value": energy_by_wx[wx_order[(idx - 1) % 5]], "element": wx_order[(idx - 1) % 5]},
+            "南方(子供・目下/伝達)": {"value": energy_by_wx[wx_order[(idx + 1) % 5]], "element": wx_order[(idx + 1) % 5]},
+            "西方(仕事・社会/名誉)": {"value": energy_by_wx[wx_order[(idx - 2) % 5]], "element": wx_order[(idx - 2) % 5]},
+            "東方(家庭・配偶者/蓄積)": {"value": energy_by_wx[wx_order[(idx + 2) % 5]], "element": wx_order[(idx + 2) % 5]},
         }
 
     def __init__(self, year, month, day, hour=0, minute=0):
@@ -862,7 +862,10 @@ class SanmeiEngine:
         hachi = report["八門法"]
         def get_h_val(d):
             for k, v in hachi.items():
-                if k.startswith(d): return v
+                if k.startswith(d):
+                    if isinstance(v, dict):
+                        return v.get("value", 0)
+                    return v
             return 0
         lines.append(f"      北方(習得): {get_h_val('北方')}")
         lines.append(f"      {'|':^10}")

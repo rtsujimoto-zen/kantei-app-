@@ -24,7 +24,7 @@ interface SanmeiReport {
     位相法?: string[];
     数理法?: { 総エネルギー: number; 五行分布: any; 十干内訳: { [key: string]: number } };
     気図法?: any;
-    八門法?: { [key: string]: number };
+    八門法?: { [key: string]: { value: number; element: string } };
     大運?: { 立運: number; 方向: string; サイクル: any[] };
     年運?: any[];
     宇宙盤?: { 干支番号: number[] };
