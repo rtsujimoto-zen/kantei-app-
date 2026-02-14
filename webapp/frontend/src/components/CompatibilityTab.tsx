@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useTheme } from './ThemeContext';
+import { AiStrategist, AiModel, AiPersona } from './StrategistCard';
 
 const fonts = {
     serif: "var(--font-noto-serif-jp), 'Noto Serif JP', serif",
@@ -689,6 +690,55 @@ export function CompatibilityTab({ isDesktop }: CompatibilityTabProps) {
     const [reportB, setReportB] = useState<SanmeiReport | null>(null);
     const [copySuccess, setCopySuccess] = useState('');
 
+    // AI Strategist State
+    const [isAiLoading, setIsAiLoading] = useState(false);
+
+    interface ChatMessage {
+        role: 'user' | 'assistant';
+        content: string;
+    }
+
+    const handleAiConsultation = async (
+        persona: AiPersona,
+        depth: 'professional' | 'intermediate' | 'beginner',
+        model: AiModel,
+        message?: string,
+        history?: ChatMessage[]
+    ): Promise<string | null> => {
+        if (!reportA || !reportB) return null;
+        setIsAiLoading(true);
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://kantei-api-538317999249.us-central1.run.app';
+            const res = await fetch(`${apiUrl}/ai/compatibility-consult`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    reportA,
+                    reportB,
+                    nameA: personA.nickname || 'Aさん',
+                    nameB: personB.nickname || 'Bさん',
+                    relationship,
+                    persona,
+                    depth,
+                    model,
+                    message,
+                    history: history || [],
+                }),
+            });
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.detail || 'AI consultation failed');
+            }
+            const data = await res.json();
+            return data.response;
+        } catch (err: any) {
+            console.error('AI compatibility consultation error:', err);
+            return `エラー: ${err.message || 'AI軍師への接続に失敗しました'}`;
+        } finally {
+            setIsAiLoading(false);
+        }
+    };
+
     const formatBirthday = (value: string) => {
         let v = value.replace(/[^\d]/g, '');
         if (v.length > 8) v = v.slice(0, 8);
@@ -900,8 +950,10 @@ export function CompatibilityTab({ isDesktop }: CompatibilityTabProps) {
         };
     }
 
-    return (
-        <div style={{ padding: isDesktop ? "24px 32px 80px" : "20px 16px 120px", maxWidth: isDesktop ? 900 : 600, margin: "0 auto" }}>
+    const hasReport = reportA && reportB;
+
+    const mainContent = (
+        <div>
             <div style={{ fontFamily: fonts.serif, fontSize: 12, fontWeight: 600, color: t.text3, letterSpacing: 6, marginBottom: 14 }}>
                 相性診断
             </div>
@@ -1159,5 +1211,79 @@ export function CompatibilityTab({ isDesktop }: CompatibilityTabProps) {
                 </>
             )}
         </div>
+    );
+
+    return (
+        <>
+            {isDesktop ? (
+                /* ========== PC: 2-Pane Layout ========== */
+                <div style={{
+                    display: "grid",
+                    gridTemplateColumns: "55fr 45fr",
+                    minHeight: "calc(100vh - 110px)",
+                }}>
+                    {/* Left Pane: Chart */}
+                    <div style={{
+                        padding: "24px 32px 80px",
+                        overflowY: "auto",
+                        borderRight: `1px solid ${t.border}`,
+                    }}>
+                        {mainContent}
+                    </div>
+
+                    {/* Right Pane: AI Strategist (sticky) */}
+                    <div style={{
+                        position: "sticky",
+                        top: 110,
+                        height: "calc(100vh - 110px)",
+                        overflowY: "auto",
+                    }}>
+                        {hasReport ? (
+                            <AiStrategist
+                                onConsult={handleAiConsultation}
+                                loading={isAiLoading}
+                                layout="panel"
+                            />
+                        ) : (
+                            <div style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                height: "100%",
+                                color: t.text4,
+                                fontFamily: fonts.serif,
+                                fontSize: 13,
+                                gap: 12,
+                                padding: 40,
+                                textAlign: "center",
+                            }}>
+                                <div style={{ fontSize: 40, opacity: 0.3 }}>🔮</div>
+                                <div>相性鑑定を実行すると</div>
+                                <div>AI軍師に相談できます</div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            ) : (
+                /* ========== Mobile: Single Column + Float ========== */
+                <div style={{
+                    maxWidth: 600,
+                    margin: "0 auto",
+                    padding: "20px 16px 120px",
+                }}>
+                    {mainContent}
+
+                    {/* Mobile: AI float */}
+                    {hasReport && !isDesktop && (
+                        <AiStrategist
+                            onConsult={handleAiConsultation}
+                            loading={isAiLoading}
+                            layout="float"
+                        />
+                    )}
+                </div>
+            )}
+        </>
     );
 }
