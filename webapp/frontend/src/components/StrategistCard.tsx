@@ -375,6 +375,7 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
         { label: '健康', text: '健康運について詳しく教えてください。私の宿命から見える健康面での注意点、体質の傾向を解説してください。' },
         { label: '運氣UP', text: '運氣を開いた人生を送るためのポイントを教えてください。私の宿命を活かして開運するための具体的なアドバイスをお願いします。' },
         { label: '今年', text: '今年の運氣について詳しく教えてください。年運から見える今年のテーマ、チャンス、注意点を解説してください。' },
+        { label: '🌙 夜', text: 'この方の「夜の顔」について、算命学の観点から詳しく教えてください。宿命から読み取れる性欲の強さ、性的な傾向や嗜好、SEXのタイプ（情熱的・テクニシャン・受け身・支配的など）、パートナーに求めること、夜の相性が良いタイプなどを具体的に解説してください。星の配置や五行バランスから見える「夜の本質」を深掘りしてください。' },
     ];
 
     const pointTopics = [
@@ -464,23 +465,72 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                 flexDirection: "column",
                 height: "100%",
                 background: t.card,
+                position: "relative",
             }}>
-                {/* Panel Header */}
-                <div style={{ padding: "16px 20px 12px", borderBottom: `1px solid ${t.border}` }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                        <img src={getPersonaDisplay().icon} alt="" style={{ width: 28, height: 28, objectFit: "contain" }} />
-                        <span style={{ fontSize: 15, fontWeight: 600, color: t.text1, fontFamily: fonts.serif, letterSpacing: 2 }}>AI軍師</span>
-                        <span style={{ fontSize: 10, color: t.text4, fontFamily: fonts.mono, marginLeft: "auto", letterSpacing: 1 }}>{getPersonaDisplay().label}</span>
+                {/* Persona Popup for Panel mode */}
+                {showPersonaPopup && (
+                    <div
+                        style={{
+                            position: "fixed",
+                            inset: 0,
+                            zIndex: 1098,
+                            background: "rgba(0,0,0,0.3)",
+                        }}
+                        onClick={() => setShowPersonaPopup(false)}
+                    />
+                )}
+                {showPersonaPopup && (
+                    <div style={{
+                        position: "absolute",
+                        bottom: 60,
+                        left: 16,
+                        zIndex: 1099,
+                        background: t.card,
+                        border: `1px solid ${t.border}`,
+                        boxShadow: "0 -4px 24px rgba(0,0,0,0.15)",
+                        padding: 16,
+                        width: 320,
+                        borderRadius: 4,
+                    }}>
+                        {personaSelector}
+                        {depthSelector}
+                        {modelSelector}
                     </div>
-                    {personaSelector}
-                    {depthSelector}
-                    {modelSelector}
-                    {messages.length === 0 && (
+                )}
+
+                {/* Panel Header - Compact */}
+                <div style={{ padding: "12px 20px", borderBottom: `1px solid ${t.border}`, display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+                    <button
+                        onClick={() => setShowPersonaPopup(!showPersonaPopup)}
+                        style={{
+                            width: 36, height: 36,
+                            border: `1px solid ${t.border}`,
+                            borderRadius: "50%",
+                            background: "transparent",
+                            cursor: "pointer",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            flexShrink: 0,
+                        }}
+                    >
+                        <img src={getPersonaDisplay().icon} alt="" style={{ width: 24, height: 24, objectFit: "contain" }} />
+                    </button>
+                    <div style={{ flex: 1 }}>
+                        <span style={{ fontSize: 15, fontWeight: 600, color: t.text1, fontFamily: fonts.serif, letterSpacing: 2 }}>AI軍師</span>
+                        <span style={{ fontSize: 10, color: t.text4, fontFamily: fonts.mono, marginLeft: 8, letterSpacing: 1 }}>{getPersonaDisplay().label} / {models.find(m => m.id === model)?.label}</span>
+                    </div>
+                </div>
+
+                {/* Initial state: show button to start */}
+                {messages.length === 0 && (
+                    <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 40, gap: 20 }}>
+                        <img src={getPersonaDisplay().icon} alt="" style={{ width: 80, height: 80, objectFit: "contain", opacity: 0.6 }} />
+                        <span style={{ fontSize: 12, color: t.text4, fontFamily: fonts.serif, letterSpacing: 2, textAlign: "center" }}>キャラクターやモデルは左下のアイコンから変更できます</span>
                         <button
                             onClick={handleInitialConsult}
                             disabled={loading}
                             style={{
-                                width: "100%",
+                                width: "80%",
+                                maxWidth: 280,
                                 padding: "12px 0",
                                 border: `1.5px solid ${t.text1}`,
                                 borderRadius: 0,
@@ -497,8 +547,8 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                         >
                             {loading ? '思考中...' : '鑑定結果を読み解く'}
                         </button>
-                    )}
-                </div>
+                    </div>
+                )}
 
                 {/* Chat area */}
                 {messages.length > 0 && (
