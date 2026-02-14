@@ -51,6 +51,7 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputValue, setInputValue] = useState('');
     const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [copiedAll, setCopiedAll] = useState(false);
     const [floatOpen, setFloatOpen] = useState(false);
     const [showPersonaPopup, setShowPersonaPopup] = useState(false);
@@ -348,11 +349,24 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
         { label: '宇宙盤', text: '宇宙盤（八門法）について詳しく解説してください。私のエネルギー分布と、どの領域を意識すべきか教えてください。' },
     ];
 
+    // Auto-resize textarea up to 10 lines
+    const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setInputValue(e.target.value);
+        const ta = textareaRef.current;
+        if (ta) {
+            ta.style.height = 'auto';
+            const lineHeight = 20;
+            const maxHeight = lineHeight * 10; // 10 lines
+            ta.style.height = Math.min(ta.scrollHeight, maxHeight) + 'px';
+        }
+    };
+
     const chatInput = (
         <div style={{ display: "flex", gap: 6, background: t.inputBg, padding: "3px 3px 3px 14px", border: `1px solid ${t.border}` }}>
             <textarea
+                ref={textareaRef}
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                onChange={handleTextareaChange}
                 onKeyDown={handleKeyDown}
                 placeholder="追加で質問する..."
                 rows={1}
@@ -360,8 +374,10 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                     flex: 1, background: "none", border: "none",
                     color: t.text1, fontFamily: fonts.serif, fontSize: 14,
                     outline: "none", resize: "none",
-                    minHeight: 36, maxHeight: 120,
+                    minHeight: 36, maxHeight: 200,
                     padding: "8px 0",
+                    lineHeight: '20px',
+                    overflow: 'auto',
                 }}
             />
             <button
@@ -565,10 +581,10 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                         <span style={{ fontSize: 15, fontWeight: 600, color: t.text1, fontFamily: fonts.serif, letterSpacing: 2 }}>AI軍師</span>
                         <span style={{ fontSize: 10, color: t.text4, fontFamily: fonts.mono, marginLeft: 8, letterSpacing: 1 }}>{getPersonaDisplay().label}</span>
                     </div>
-                    {/* Close button */}
+                    {/* Collapse button */}
                     <button
                         onClick={() => setFloatOpen(false)}
-                        aria-label="鑑定結果に戻る"
+                        aria-label="たたむ"
                         style={{
                             padding: "6px 14px",
                             border: `1px solid ${t.border}`,
@@ -577,14 +593,35 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                             fontSize: 12,
                             fontFamily: fonts.serif,
                             cursor: "pointer",
-                            display: "flex", alignItems: "center", gap: 6,
+                            display: "flex", alignItems: "center", gap: 4,
                             flexShrink: 0,
                             letterSpacing: 1,
                         }}
                     >
-                        <span style={{ fontSize: 14 }}>✕</span> 閉じる
+                        <span style={{ fontSize: 11, fontFamily: fonts.mono }}>&gt;&gt;</span> たたむ
                     </button>
                 </div>
+
+                {/* Persona icon in chat mode (shown after first message) */}
+                {messages.length > 0 && (
+                    <div style={{ padding: "6px 16px", borderBottom: `1px solid ${t.border}`, flexShrink: 0, display: "flex", alignItems: "center", gap: 8 }}>
+                        <button
+                            onClick={() => setShowPersonaPopup(!showPersonaPopup)}
+                            style={{
+                                width: 32, height: 32,
+                                border: `1px solid ${t.border}`,
+                                borderRadius: "50%",
+                                background: "transparent",
+                                cursor: "pointer",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                flexShrink: 0,
+                            }}
+                        >
+                            <img src={getPersonaDisplay().icon} alt="" style={{ width: 20, height: 20, objectFit: "contain" }} />
+                        </button>
+                        <span style={{ fontSize: 10, color: t.text4, fontFamily: fonts.mono }}>{getPersonaDisplay().label} / {models.find(m => m.id === model)?.label}</span>
+                    </div>
+                )}
 
                 {/* Selectors: shown only before first message */}
                 {messages.length === 0 && (
@@ -682,8 +719,8 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                 )}
             </div>
 
-            {/* Floating Bottom Bar (always visible when overlay is closed) */}
-            {!floatOpen && (
+            {/* Bottom bar for initial state (no messages yet) */}
+            {!floatOpen && messages.length === 0 && (
                 <div style={{
                     position: "fixed",
                     bottom: 0,
@@ -699,7 +736,6 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                     alignItems: "center",
                     gap: 10,
                 }}>
-                    {/* Persona icon */}
                     <button
                         onClick={() => setShowPersonaPopup(!showPersonaPopup)}
                         style={{
@@ -716,48 +752,58 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                     >
                         <img src={getPersonaDisplay().icon} alt="" style={{ width: 24, height: 24, objectFit: "contain" }} />
                     </button>
-
-                    {messages.length === 0 ? (
-                        /* Initial consult button */
-                        <button
-                            onClick={() => { setFloatOpen(true); }}
-                            disabled={loading}
-                            style={{
-                                flex: 1,
-                                padding: "10px 0",
-                                border: `1.5px solid ${t.text1}`,
-                                borderRadius: 0,
-                                cursor: loading ? "wait" : "pointer",
-                                fontSize: 14,
-                                fontWeight: 600,
-                                fontFamily: fonts.serif,
-                                letterSpacing: 2,
-                                color: t.text1,
-                                background: "transparent",
-                                opacity: loading ? 0.5 : 1,
-                            }}
-                        >
-                            {loading ? '思考中...' : 'AI軍師を開く'}
-                        </button>
-                    ) : (
-                        /* Reopen chat */
-                        <div
-                            onClick={() => setFloatOpen(true)}
-                            style={{
-                                flex: 1,
-                                padding: "10px 14px",
-                                background: t.inputBg,
-                                border: `1px solid ${t.border}`,
-                                color: t.text3,
-                                fontSize: 14,
-                                fontFamily: fonts.serif,
-                                cursor: "pointer",
-                            }}
-                        >
-                            タップしてチャットを開く...
-                        </div>
-                    )}
+                    <button
+                        onClick={() => { setFloatOpen(true); }}
+                        disabled={loading}
+                        style={{
+                            flex: 1,
+                            padding: "10px 0",
+                            border: `1.5px solid ${t.text1}`,
+                            borderRadius: 0,
+                            cursor: loading ? "wait" : "pointer",
+                            fontSize: 14,
+                            fontWeight: 600,
+                            fontFamily: fonts.serif,
+                            letterSpacing: 2,
+                            color: t.text1,
+                            background: "transparent",
+                            opacity: loading ? 0.5 : 1,
+                        }}
+                    >
+                        {loading ? '思考中...' : 'AI軍師を開く'}
+                    </button>
                 </div>
+            )}
+
+            {/* Side tab button on right edge (shown after chat has messages & overlay is closed) */}
+            {!floatOpen && messages.length > 0 && (
+                <button
+                    onClick={() => setFloatOpen(true)}
+                    style={{
+                        position: "fixed",
+                        right: 0,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        zIndex: 800,
+                        width: 28,
+                        height: 100,
+                        border: `1px solid ${t.border}`,
+                        borderRight: "none",
+                        borderRadius: "6px 0 0 6px",
+                        background: `${t.card}ee`,
+                        boxShadow: "-2px 0 8px rgba(0,0,0,0.06)",
+                        cursor: "pointer",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 4,
+                        padding: 0,
+                    }}
+                >
+                    <span style={{ fontSize: 10, fontFamily: fonts.mono, color: t.text4, writingMode: "vertical-rl" }}>&lt;&lt;</span>
+                    <span style={{ writingMode: "vertical-rl", fontSize: 11, color: t.text3, fontFamily: fonts.serif, letterSpacing: 2 }}>AI軍師</span>
+                </button>
             )}
         </>
     );
