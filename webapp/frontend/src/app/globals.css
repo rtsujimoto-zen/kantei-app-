@@ -27,3 +27,13 @@
     box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
   }
 }
+
+/* Hide scrollbar in chat area */
+.chat-scroll-area::-webkit-scrollbar {
+  display: none;
+}
+
+.chat-scroll-area {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

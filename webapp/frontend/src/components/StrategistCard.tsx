@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { useTheme } from "./ThemeContext";
 
 const fonts = {
@@ -240,7 +241,7 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
     );
 
     const chatMessages = (
-        <div style={{ flex: 1, overflowY: "auto", padding: "16px 16px", WebkitOverflowScrolling: "touch" }}>
+        <div className="chat-scroll-area" style={{ flex: 1, overflowY: "auto", padding: "16px 16px", WebkitOverflowScrolling: "touch" }}>
             {messages.length > 0 && (
                 <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
                     <button onClick={handleCopyAll} style={{ background: "none", border: "none", fontSize: 11, color: copiedAll ? t.vermillion : t.text4, cursor: "pointer", fontFamily: fonts.mono, display: "flex", alignItems: "center", gap: 3 }}>
@@ -296,23 +297,42 @@ export function AiStrategist({ onConsult, loading, className, layout = 'panel' }
                                     lineHeight: 1.85,
                                     color: t.text1,
                                     fontFamily: isUser ? fonts.mono : fonts.serif,
-                                    whiteSpace: "pre-wrap",
+                                    whiteSpace: isUser ? "pre-wrap" : "normal",
                                 }}>
-                                    {msg.content}
+                                    {isUser ? msg.content : (
+                                        <div className="ai-message-md">
+                                            <ReactMarkdown
+                                                components={{
+                                                    h1: ({ children }) => <h3 style={{ fontSize: 16, fontWeight: 700, color: t.text1, margin: '20px 0 8px', fontFamily: fonts.serif, borderBottom: `1px solid ${t.border}`, paddingBottom: 6 }}>{children}</h3>,
+                                                    h2: ({ children }) => <h3 style={{ fontSize: 15, fontWeight: 700, color: t.text1, margin: '18px 0 6px', fontFamily: fonts.serif }}>{children}</h3>,
+                                                    h3: ({ children }) => <h4 style={{ fontSize: 14, fontWeight: 700, color: t.vermillion, margin: '16px 0 6px', fontFamily: fonts.serif }}>{children}</h4>,
+                                                    p: ({ children }) => <p style={{ margin: '8px 0', lineHeight: 1.85 }}>{children}</p>,
+                                                    strong: ({ children }) => <strong style={{ fontWeight: 700, color: t.text1 }}>{children}</strong>,
+                                                    em: ({ children }) => <em style={{ fontStyle: 'normal', color: t.text2, borderBottom: `1px dotted ${t.text4}` }}>{children}</em>,
+                                                    ul: ({ children }) => <ul style={{ margin: '6px 0', paddingLeft: 18, listStyleType: 'disc' }}>{children}</ul>,
+                                                    ol: ({ children }) => <ol style={{ margin: '6px 0', paddingLeft: 18 }}>{children}</ol>,
+                                                    li: ({ children }) => <li style={{ margin: '4px 0', lineHeight: 1.75 }}>{children}</li>,
+                                                    hr: () => <hr style={{ border: 'none', borderTop: `1px solid ${t.border}`, margin: '16px 0' }} />,
+                                                    blockquote: ({ children }) => <blockquote style={{ borderLeft: `3px solid ${t.vermillion}40`, paddingLeft: 12, margin: '8px 0', color: t.text2, fontStyle: 'italic' }}>{children}</blockquote>,
+                                                    code: ({ children }) => <code style={{ background: `${t.text1}08`, padding: '1px 4px', borderRadius: 3, fontSize: 13, fontFamily: fonts.mono }}>{children}</code>,
+                                                }}
+                                            >{msg.content}</ReactMarkdown>
+                                        </div>
+                                    )}
                                 </div>
-                                {/* コピーボタン */}
+                                {/* コピーボタン - 右下固定 */}
                                 <button
                                     onClick={() => handleCopyMessage(i)}
                                     style={{
                                         background: "none", border: "none",
                                         fontSize: 10, color: copiedIndex === i ? t.vermillion : t.text4,
                                         cursor: "pointer", fontFamily: fonts.mono,
-                                        marginTop: 2,
-                                        float: isUser ? "right" : "left",
-                                        display: "flex", alignItems: "center", gap: 2,
+                                        marginTop: 4,
+                                        float: "right",
+                                        display: "flex", alignItems: "center", gap: 3,
                                     }}
                                 >
-                                    {copiedIndex === i ? '✓ コピー済' : <CopyIcon size={11} color={t.text4} />}
+                                    {copiedIndex === i ? '✓ コピー済' : <CopyIcon size={14} color={t.text4} />}
                                 </button>
                             </div>
                         </div>
