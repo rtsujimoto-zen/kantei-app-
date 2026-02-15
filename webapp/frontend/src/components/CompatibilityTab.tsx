@@ -674,6 +674,104 @@ function GogyoCompatibility({
                     </p>
                 )}
             </div>
+
+            {/* 関係性ガイド */}
+            <div style={{
+                padding: "14px 16px",
+                background: isDark ? `${t.text1}04` : '#fdfcfa',
+                border: `1px solid ${t.border}`,
+                borderRadius: 2,
+                marginTop: 12,
+            }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: t.text4, fontFamily: fonts.serif, letterSpacing: 2, marginBottom: 10 }}>
+                    関係性ガイド
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    {/* 相生 */}
+                    <div style={{
+                        display: "flex", gap: 12, alignItems: "flex-start",
+                        padding: "10px 12px",
+                        background: isDark ? '#2a3a2a18' : '#e8f5e910',
+                        border: `1px solid ${isDark ? '#4a6a4a30' : '#c8e6c920'}`,
+                        borderRadius: 2,
+                    }}>
+                        <div style={{
+                            flexShrink: 0, width: 56, textAlign: "center",
+                            padding: "4px 0",
+                            background: isDark ? '#4a6a4a30' : '#c8e6c940',
+                            borderRadius: 2,
+                            fontSize: 11, fontWeight: 700, color: isDark ? '#8bc34a' : '#558b2f',
+                            fontFamily: fonts.serif,
+                        }}>
+                            相生
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 12, lineHeight: 1.7, color: t.text2, fontFamily: fonts.serif, marginBottom: 4 }}>
+                                「一緒にいると自然にやる気が湧く、応援し合える関係です」
+                            </div>
+                            <div style={{ fontSize: 11, lineHeight: 1.6, color: t.text4, fontFamily: fonts.serif }}>
+                                ▸ どちらかが支え、どちらかが伸びる。未来を語るパートナーに最適。
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 相剋 */}
+                    <div style={{
+                        display: "flex", gap: 12, alignItems: "flex-start",
+                        padding: "10px 12px",
+                        background: isDark ? '#3a2a1a18' : '#fff3e010',
+                        border: `1px solid ${isDark ? '#6a5a3a30' : '#ffe08220'}`,
+                        borderRadius: 2,
+                    }}>
+                        <div style={{
+                            flexShrink: 0, width: 56, textAlign: "center",
+                            padding: "4px 0",
+                            background: isDark ? '#6a5a3a30' : '#ffe08240',
+                            borderRadius: 2,
+                            fontSize: 11, fontWeight: 700, color: isDark ? '#ffd54f' : '#bf6c00',
+                            fontFamily: fonts.serif,
+                        }}>
+                            相剋
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 12, lineHeight: 1.7, color: t.text2, fontFamily: fonts.serif, marginBottom: 4 }}>
+                                「自分にない視点を与えてくれる、魂を磨き合う関係です」
+                            </div>
+                            <div style={{ fontSize: 11, lineHeight: 1.6, color: t.text4, fontFamily: fonts.serif }}>
+                                ▸ 剋する側は「責任感」を、剋される側は「忍耐と成長」を学ぶ。
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 比和 */}
+                    <div style={{
+                        display: "flex", gap: 12, alignItems: "flex-start",
+                        padding: "10px 12px",
+                        background: isDark ? `${t.text1}06` : '#f5f5f510',
+                        border: `1px solid ${isDark ? `${t.text1}15` : '#e0e0e020'}`,
+                        borderRadius: 2,
+                    }}>
+                        <div style={{
+                            flexShrink: 0, width: 56, textAlign: "center",
+                            padding: "4px 0",
+                            background: isDark ? `${t.text1}12` : '#e0e0e040',
+                            borderRadius: 2,
+                            fontSize: 11, fontWeight: 700, color: t.text3,
+                            fontFamily: fonts.serif,
+                        }}>
+                            比和
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 12, lineHeight: 1.7, color: t.text2, fontFamily: fonts.serif, marginBottom: 4 }}>
+                                「価値観が近く、同志のような深い理解が得られる関係です」
+                            </div>
+                            <div style={{ fontSize: 11, lineHeight: 1.6, color: t.text4, fontFamily: fonts.serif }}>
+                                ▸ 一緒に仕事をするとエネルギーが「木性（安定）」に変わり、運気が巡る。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
