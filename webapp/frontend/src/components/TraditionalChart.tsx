@@ -128,9 +128,9 @@ interface YosenData {
 export function YosenSection({ data }: { data: YosenData }) {
     const { t, isDark } = useTheme();
     // Grid layout: 正しい人体星図配置（頭・腹は中央列）
-    // [空,   頭,      初年]
-    // [右手, 胸(中心), 左手]
-    // [晩年, 腹,      中年]
+    // [空,   頭,      初年]    ← 頭の行
+    // [右手, 胸(中心), 左手]    ← 手・胸の行
+    // [晩年, 腹,      中年]    ← 腹の行
     const grid = [
         null,
         { v: data.十大主星.頭, main: false, label: '北' },
@@ -143,20 +143,29 @@ export function YosenSection({ data }: { data: YosenData }) {
         { v: data.十二大従星.中年, main: false, label: '中年' },
     ];
 
+    // 画像配置の計算:
+    // 人体画像の手の中心は画像の約33%の位置にある
+    // グリッドは3行均等なので、手（中段）はグリッドの50%の位置
+    // → 画像を約120%に拡大し、topをマイナスにして手の位置を中段に合わせる
+
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 20, transition: "all 0.3s", boxShadow: t.shadowCard }}>
             <div style={{ fontFamily: fonts.serif, fontSize: 12, fontWeight: 600, color: t.text3, letterSpacing: 6, marginBottom: 14 }}>陽占</div>
             <div style={{ position: "relative", overflow: "hidden" }}>
-                {/* 人体図 背景画像 */}
+                {/* 人体図 背景画像 - 手を中段、頭を上段、腹を下段に合わせる */}
                 <img
                     src="/body-silhouette-final.png"
                     alt=""
                     style={{
                         position: "absolute",
-                        top: "3%",
-                        left: 0,
-                        width: "100%",
+                        // width 70%にして中央配置、top調整で手が中段に来るようにする
+                        // 画像の手の位置は高さの約33%、グリッドの中段は約50%
+                        // → top = 50% - 33% * scale の比率で調整
+                        width: "70%",
                         height: "auto",
+                        top: "8%",
+                        left: "50%",
+                        transform: "translateX(-50%)",
                         opacity: isDark ? 0.025 : 0.035,
                         pointerEvents: "none",
                         zIndex: 0,

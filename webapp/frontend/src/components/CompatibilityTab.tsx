@@ -440,9 +440,9 @@ function GogyoCycleGraph({
                             // 各ノードのバッジ配置: 木=上, 火=右, 土=右下, 金=左下, 水=左
                             const badgeW = 30, badgeH = 16, gap = 3;
                             let ax: number, ay: number, bx: number, by: number;
-                            if (i === 0) { // 木 (top) → 上に横並び
-                                ax = p.x - badgeW - gap / 2; ay = p.y - r2 - badgeH - 6;
-                                bx = p.x + gap / 2; by = ay;
+                            if (i === 0) { // 木 (top) → 右上に縦並び
+                                ax = p.x + r2 + 6; ay = p.y - badgeH - gap / 2;
+                                bx = ax; by = p.y + gap / 2;
                             } else if (i === 1) { // 火 (right) → 右に縦並び
                                 ax = p.x + r2 + 6; ay = p.y - badgeH - gap / 2;
                                 bx = ax; by = p.y + gap / 2;
