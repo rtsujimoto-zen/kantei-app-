@@ -22,3 +22,8 @@ cd /Users/r_tsuji/Documents/開発/算命学算出 && git add . && git commit -m
 ```bash
 cd /Users/r_tsuji/Documents/開発/算命学算出 && git push origin main
 ```
+
+4. ローカル開発サーバーを再起動する（ビルドで停止するため必須）
+```bash
+cd /Users/r_tsuji/Documents/開発/算命学算出/webapp/frontend && npm run dev
+```

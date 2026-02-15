@@ -435,27 +435,48 @@ function GogyoCycleGraph({
                             {stemPairs[i]}
                         </text>
 
-                        {/* A/B のエネルギー値バッジ */}
-                        {(energyA || energyB) && (
-                            <>
-                                {/* Aの値 */}
-                                <rect x={p.x - 30} y={p.y - r2 - 18} width={26} height={14} rx={2}
-                                    fill={PERSON_COLORS.A.bg} stroke={PERSON_COLORS.A.border} strokeWidth="0.8" />
-                                <text x={p.x - 17} y={p.y - r2 - 10}
-                                    textAnchor="middle" dominantBaseline="central"
-                                    fontSize={8} fontWeight={600} fill={PERSON_COLORS.A.main} fontFamily={fonts.mono}>
-                                    {eA}
-                                </text>
-                                {/* Bの値 */}
-                                <rect x={p.x + 4} y={p.y - r2 - 18} width={26} height={14} rx={2}
-                                    fill={PERSON_COLORS.B.bg} stroke={PERSON_COLORS.B.border} strokeWidth="0.8" />
-                                <text x={p.x + 17} y={p.y - r2 - 10}
-                                    textAnchor="middle" dominantBaseline="central"
-                                    fontSize={8} fontWeight={600} fill={PERSON_COLORS.B.main} fontFamily={fonts.mono}>
-                                    {eB}
-                                </text>
-                            </>
-                        )}
+                        {/* A/B のエネルギー値バッジ - ノード位置に応じて配置方向を変更 */}
+                        {(energyA || energyB) && (() => {
+                            // 各ノードのバッジ配置: 木=上, 火=右, 土=右下, 金=左下, 水=左
+                            const badgeW = 30, badgeH = 16, gap = 3;
+                            let ax: number, ay: number, bx: number, by: number;
+                            if (i === 0) { // 木 (top) → 上に横並び
+                                ax = p.x - badgeW - gap / 2; ay = p.y - r2 - badgeH - 6;
+                                bx = p.x + gap / 2; by = ay;
+                            } else if (i === 1) { // 火 (right) → 右に縦並び
+                                ax = p.x + r2 + 6; ay = p.y - badgeH - gap / 2;
+                                bx = ax; by = p.y + gap / 2;
+                            } else if (i === 2) { // 土 (bottom-right) → 右下に縦並び
+                                ax = p.x + r2 + 6; ay = p.y - badgeH / 2 - gap / 2;
+                                bx = ax; by = p.y + badgeH / 2 + gap / 2;
+                            } else if (i === 3) { // 金 (bottom-left) → 左下に縦並び
+                                ax = p.x - r2 - badgeW - 6; ay = p.y - badgeH / 2 - gap / 2;
+                                bx = ax; by = p.y + badgeH / 2 + gap / 2;
+                            } else { // 水 (left) → 左に縦並び
+                                ax = p.x - r2 - badgeW - 6; ay = p.y - badgeH - gap / 2;
+                                bx = ax; by = p.y + gap / 2;
+                            }
+                            return (
+                                <>
+                                    {/* Aの値 */}
+                                    <rect x={ax} y={ay} width={badgeW} height={badgeH} rx={2}
+                                        fill={PERSON_COLORS.A.bg} stroke={PERSON_COLORS.A.border} strokeWidth="0.8" />
+                                    <text x={ax + badgeW / 2} y={ay + badgeH / 2}
+                                        textAnchor="middle" dominantBaseline="central"
+                                        fontSize={11} fontWeight={700} fill={PERSON_COLORS.A.main} fontFamily={fonts.mono}>
+                                        {eA}
+                                    </text>
+                                    {/* Bの値 */}
+                                    <rect x={bx} y={by} width={badgeW} height={badgeH} rx={2}
+                                        fill={PERSON_COLORS.B.bg} stroke={PERSON_COLORS.B.border} strokeWidth="0.8" />
+                                    <text x={bx + badgeW / 2} y={by + badgeH / 2}
+                                        textAnchor="middle" dominantBaseline="central"
+                                        fontSize={11} fontWeight={700} fill={PERSON_COLORS.B.main} fontFamily={fonts.mono}>
+                                        {eB}
+                                    </text>
+                                </>
+                            );
+                        })()}
 
                         {/* A/Bラベル（比和は両方表示） */}
                         {isAB ? (
@@ -476,6 +497,17 @@ function GogyoCycleGraph({
                     </g>
                 );
             })}
+
+            {/* 比和の場合: ノード周りに点線の強調リング */}
+            {idxA === idxB && idxA >= 0 && (
+                <circle
+                    cx={positions[idxA].x} cy={positions[idxA].y} r={nodeR + 8}
+                    fill="none"
+                    stroke={`${t.text1}40`}
+                    strokeWidth="2"
+                    strokeDasharray="5,4"
+                />
+            )}
 
             {/* 凡例（右下） */}
             <g transform={`translate(${W - 120}, ${H - 60})`}>
