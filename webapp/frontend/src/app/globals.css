@@ -37,3 +37,25 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* 陽占 人体シルエット */
+.yosen-silhouette {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 0;
+  /* SP（モバイル）デフォルト */
+  width: 55%;
+  height: auto;
+  top: 3%;
+}
+
+/* PC: height基準で大きく表示 */
+@media (min-width: 768px) {
+  .yosen-silhouette {
+    height: 100%;
+    width: auto;
+    top: 5%;
+  }
+}

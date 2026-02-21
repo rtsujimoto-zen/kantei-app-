@@ -156,19 +156,11 @@ export function YosenSection({ data }: { data: YosenData }) {
                 <img
                     src="/body-silhouette-final.png"
                     alt=""
+                    className="yosen-silhouette"
                     style={{
-                        position: "absolute",
-                        // width 70%にして中央配置、top調整で手が中段に来るようにする
-                        // 画像の手の位置は高さの約33%、グリッドの中段は約50%
-                        // → top = 50% - 33% * scale の比率で調整
-                        width: "70%",
-                        height: "auto",
-                        top: "8%",
-                        left: "50%",
-                        transform: "translateX(-50%)",
+                        // サイズ・位置は globals.css の .yosen-silhouette で PC/SP別に管理
+                        // opacity/filter はテーマ依存のためインライン
                         opacity: isDark ? 0.025 : 0.035,
-                        pointerEvents: "none",
-                        zIndex: 0,
                         filter: isDark ? "invert(1)" : "none",
                     }}
                 />

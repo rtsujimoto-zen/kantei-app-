@@ -9,7 +9,7 @@ from sanmei_engine import SanmeiEngine
 
 # Vertex AI imports
 from google import genai
-from google.genai.types import HttpOptions
+from google.genai.types import HttpOptions, GenerateContentConfig, Tool, Retrieval, VertexAISearch # Added new types for Grounding
 import google.auth
 import google.auth.transport.requests
 
@@ -285,6 +285,10 @@ Markdownの見出し（#, ##, ###）や太字（**）は絶対に使わないで
 
 {format_instruction}
 
+【独自知識の検索について】
+あなたには専用のデータストア（独自の算命学解釈マニュアル等）を検索する機能が与えられています。
+回答を生成する前に、必ず提供されたツール（Retrieval/VertexAISearch）を使って関連する用語や内容を検索し、もし独自の解釈が見つかった場合はその内容を**必ず優先して**回答に組み込んでください。
+
 以下はこの人の算命学鑑定結果です：
 
 {output_text}"""
@@ -294,21 +298,44 @@ Markdownの見出し（#, ##, ###）や太字（**）は絶対に使わないで
     try:
         # Determine Model and Config
         model_name = "gemini-3-pro-preview"
-        config = None
+        
+        # Grounding configuration
+        data_store_id = os.environ.get("DATA_STORE_ID", "kantei-app-rag-store_1771599660977")
+        data_store_location = os.environ.get("DATA_STORE_LOCATION", "global")
+        
+        grounding_tool = None
+        if project_id and data_store_id and data_store_location:
+            grounding_tool = Tool(
+                retrieval=Retrieval(
+                    vertex_ai_search=VertexAISearch(
+                        datastore=f"projects/{project_id}/locations/{data_store_location}/collections/default_collection/dataStores/{data_store_id}"
+                    )
+                )
+            )
+
+        config = GenerateContentConfig()
 
         if req.model == "gemini-3.0-pro-high":
             model_name = "gemini-3-pro-preview"
-            config = genai.types.GenerateContentConfig(
-                thinking_config=genai.types.ThinkingConfig(
-                    thinking_level="HIGH"
-                )
-            )
+            config.thinking_config = genai.types.ThinkingConfig(thinking_level="HIGH")
+            if grounding_tool:
+                config.tools = [grounding_tool]
         elif req.model == "gemini-3.0-pro-low":
              model_name = "gemini-3-pro-preview"
-             # No thinking config (Standard/Low reasoning)
+             if grounding_tool:
+                 config.tools = [grounding_tool]
         elif req.model == "gemini-flash":
              model_name = "gemini-3-flash-preview"
+             if grounding_tool:
+                 config.tools = [grounding_tool]
         
+        print(f"=== GROUNDING DEBUG ===")
+        print(f"Project ID: {project_id}")
+        print(f"Datastore path inside tool: {grounding_tool.retrieval.vertex_ai_search.datastore if grounding_tool and grounding_tool.retrieval and grounding_tool.retrieval.vertex_ai_search else 'None'}")
+        print(f"Config Tools: {config.tools}")
+        print(f"Model Name: {model_name}")
+        print(f"=======================")
+
         if req.message and len(req.history) > 0:
             # Follow-up conversation: Include history and ask naturally
             contents = []
@@ -343,16 +370,25 @@ Markdownの見出し（#, ##, ###）や太字（**）は絶対に使わないで
                 config=config
             )
         else:
-            prompt = f"""{system_context}
+            prompt_text = f"""{system_context}
 
 上記のフォーマットに従って、この人の宿命を読み解いてください。Markdownの見出し（#, ##, ###）や太字（**）は絶対に使わないでください。区切りには「──」や空行を、項目名には「◆」を使ってください。箇条書きには「・」を使い「-」は使わないでください。"""
             
+            if req.message:
+                prompt_text += f"\n\n特に以下の点にフォーカスしてください：\n{req.message}"
+
+            contents = [genai.types.Content(
+                role="user",
+                parts=[genai.types.Part.from_text(text=prompt_text)]
+            )]
+
             response = client.models.generate_content(
                 model=model_name,
-                contents=prompt,
+                contents=contents,
                 config=config
             )
         
+        print(f"DEBUG RESPONSE (length: {len(response.text)}): {response.text[:100]}...")
         return {"response": response.text}
     except Exception as e:
         print(f"GenAI Error: {e}")
@@ -542,6 +578,10 @@ Aの西方とBの中心星の五行関係から、私生活での調和と課題
 
 {format_instruction}
 
+【独自知識の検索について】
+あなたには専用のデータストア（独自の算命学解釈マニュアル等）を検索する機能が与えられています。
+相性鑑定や質問への回答を生成する前に、必ず提供されたツール（Retrieval/VertexAISearch）を使って関連する用語や内容を検索し、もし独自の解釈が見つかった場合はその内容を**必ず優先して**回答に組み込んでください。
+
 あなたは今から「二人の相性鑑定」を行います。
 以下は二人の算命学鑑定結果です。二人の関係性を多角的に分析してください。
 
@@ -554,17 +594,36 @@ Aの西方とBの中心星の五行関係から、私生活での調和と課題
 
     try:
         model_name = "gemini-3-pro-preview"
-        config = None
+        
+        # Grounding configuration
+        data_store_id = os.environ.get("DATA_STORE_ID", "kantei-app-rag-store_1771599660977")
+        data_store_location = os.environ.get("DATA_STORE_LOCATION", "global")
+        
+        grounding_tool = None
+        if project_id and data_store_id and data_store_location:
+            grounding_tool = Tool(
+                retrieval=Retrieval(
+                    vertex_ai_search=VertexAISearch(
+                        datastore=f"projects/{project_id}/locations/{data_store_location}/collections/default_collection/dataStores/{data_store_id}"
+                    )
+                )
+            )
+
+        config = GenerateContentConfig()
 
         if req.model == "gemini-3.0-pro-high":
             model_name = "gemini-3-pro-preview"
-            config = genai.types.GenerateContentConfig(
-                thinking_config=genai.types.ThinkingConfig(thinking_level="HIGH")
-            )
+            config.thinking_config = genai.types.ThinkingConfig(thinking_level="HIGH")
+            if grounding_tool:
+                config.tools = [grounding_tool]
         elif req.model == "gemini-3.0-pro-low":
             model_name = "gemini-3-pro-preview"
+            if grounding_tool:
+                config.tools = [grounding_tool]
         elif req.model == "gemini-flash":
             model_name = "gemini-3-flash-preview"
+            if grounding_tool:
+                config.tools = [grounding_tool]
         
         if req.message and len(req.history) > 0:
             contents = []
@@ -589,13 +648,23 @@ Aの西方とBの中心星の五行関係から、私生活での調和と課題
                 model=model_name, contents=contents, config=config
             )
         else:
-            prompt = f"""{system_context}
+            prompt_text = f"""{system_context}
 
 上記のフォーマットに従って、二人の相性を読み解いてください。Markdownの見出し（#, ##, ###）や太字（**）は絶対に使わないでください。区切りには「──」や空行を、項目名には「◆」を使ってください。箇条書きには「・」を使い「-」は使わないでください。"""
+            
+            if req.message:
+                prompt_text += f"\n\n特に以下の点にフォーカスしてください：\n{req.message}"
+
+            contents = [genai.types.Content(
+                role="user",
+                parts=[genai.types.Part.from_text(text=prompt_text)]
+            )]
+
             response = client.models.generate_content(
-                model=model_name, contents=prompt, config=config
+                model=model_name, contents=contents, config=config
             )
         
+        print(f"DEBUG RESPONSE COMPAT (length: {len(response.text)}): {response.text[:100]}...")
         return {"response": response.text}
     except Exception as e:
         print(f"GenAI Compatibility Error: {e}")
