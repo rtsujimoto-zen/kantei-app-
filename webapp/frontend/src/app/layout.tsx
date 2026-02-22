@@ -36,7 +36,7 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body
-        className={`${notoSerifJP.variable} ${dmMono.variable} ${cormorant.variable} antialiased`}
+        className={`${notoSerifJP.variable} ${dmMono.variable} ${cormorant.variable} antialiased font-sans flex flex-col min-h-screen`}
       >
         {children}
       </body>

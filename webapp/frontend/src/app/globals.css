@@ -2,18 +2,20 @@
 
 @plugin "tailwindcss-animate";
 
+:root {
+  --background: #fafaf9;
+  --foreground: #44403c;
+  --font-sans: var(--font-noto-serif-jp), serif;
+}
+
 @theme {
   --font-sans: var(--font-noto-serif-jp), serif;
 }
 
-:root {
-  --background: #fafaf9;
-  --foreground: #44403c;
-}
-
 @layer base {
   body {
-    @apply bg-[#fafaf9] text-[#44403c] antialiased;
+    background-color: var(--background);
+    color: var(--foreground);
     font-family: var(--font-sans);
     transition: background-color 0.4s ease, color 0.4s ease;
   }
