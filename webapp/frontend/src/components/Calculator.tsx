@@ -65,8 +65,7 @@ function CalculatorInner() {
         setError('');
         setCopySuccess('');
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://kantei-api-538317999249.us-central1.run.app';
-            const res = await fetch(`${apiUrl}/calculate`, {
+            const res = await fetch('/api/calculate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ birthday, gender }),
@@ -111,8 +110,7 @@ function CalculatorInner() {
         setIsAiLoading(true);
 
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://kantei-api-538317999249.us-central1.run.app';
-            const res = await fetch(`${apiUrl}/ai/consult`, {
+            const res = await fetch('/api/ai/consult', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

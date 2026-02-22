@@ -838,8 +838,7 @@ export function CompatibilityTab({ isDesktop }: CompatibilityTabProps) {
         if (!reportA || !reportB) return null;
         setIsAiLoading(true);
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://kantei-api-538317999249.us-central1.run.app';
-            const res = await fetch(`${apiUrl}/ai/compatibility-consult`, {
+            const res = await fetch('/api/ai/compatibility-consult', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -886,14 +885,13 @@ export function CompatibilityTab({ isDesktop }: CompatibilityTabProps) {
         setReportA(null);
         setReportB(null);
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://kantei-api-538317999249.us-central1.run.app';
             const [resA, resB] = await Promise.all([
-                fetch(`${apiUrl}/calculate`, {
+                fetch('/api/calculate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ birthday: personA.birthday, gender: personA.gender }),
                 }),
-                fetch(`${apiUrl}/calculate`, {
+                fetch('/api/calculate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ birthday: personB.birthday, gender: personB.gender }),
