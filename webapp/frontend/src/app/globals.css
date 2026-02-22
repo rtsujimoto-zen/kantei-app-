@@ -9,7 +9,8 @@
 
 @layer base {
   body {
-    @apply bg-[#fafaf9] text-[#44403c] font-sans antialiased;
+    @apply bg-[#fafaf9] text-[#44403c] antialiased;
+    font-family: var(--font-noto-serif-jp), serif;
     transition: background-color 0.4s ease, color 0.4s ease;
   }
 }
