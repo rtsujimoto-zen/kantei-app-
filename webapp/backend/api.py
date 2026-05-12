@@ -78,7 +78,7 @@ class AiConsultRequest(BaseModel):
     report: dict
     persona: str = "jiya"
     depth: str = "professional"
-    model: str = "gemini-3.0-pro-high" # New field
+    model: str = "gemini-pro-deep" # Model selection: gemini-pro-deep / gemini-pro / gemini-flash
     message: Optional[str] = None
     history: list[ChatMessage] = []
 
@@ -297,7 +297,7 @@ Markdownの見出し（#, ##, ###）や太字（**）は絶対に使わないで
     # 4. Generate Content (Chat or Single)
     try:
         # Determine Model and Config
-        model_name = "gemini-3-pro-preview"
+        model_name = "gemini-3.1-pro-preview"
         
         # Grounding configuration
         data_store_id = os.environ.get("DATA_STORE_ID", "kantei-app-rag-store_1771599660977")
@@ -315,13 +315,14 @@ Markdownの見出し（#, ##, ###）や太字（**）は絶対に使わないで
 
         config = GenerateContentConfig()
 
-        if req.model == "gemini-3.0-pro-high":
-            model_name = "gemini-3-pro-preview"
+        if req.model == "gemini-pro-deep":
+            model_name = "gemini-3.1-pro-preview"
             config.thinking_config = genai.types.ThinkingConfig(thinking_level="HIGH")
             if grounding_tool:
                 config.tools = [grounding_tool]
-        elif req.model == "gemini-3.0-pro-low":
-             model_name = "gemini-3-pro-preview"
+        elif req.model == "gemini-pro":
+             model_name = "gemini-3.1-pro-preview"
+             config.thinking_config = genai.types.ThinkingConfig(thinking_level="LOW")
              if grounding_tool:
                  config.tools = [grounding_tool]
         elif req.model == "gemini-flash":
@@ -406,7 +407,7 @@ class AiCompatibilityConsultRequest(BaseModel):
     relationship: str = ""
     persona: str = "onmyoji"
     depth: str = "professional"
-    model: str = "gemini-3.0-pro-high"
+    model: str = "gemini-pro-deep"
     message: Optional[str] = None
     history: list[ChatMessage] = []
 
@@ -593,7 +594,7 @@ Aの西方とBの中心星の五行関係から、私生活での調和と課題
 {rel_text}"""
 
     try:
-        model_name = "gemini-3-pro-preview"
+        model_name = "gemini-3.1-pro-preview"
         
         # Grounding configuration
         data_store_id = os.environ.get("DATA_STORE_ID", "kantei-app-rag-store_1771599660977")
@@ -611,13 +612,14 @@ Aの西方とBの中心星の五行関係から、私生活での調和と課題
 
         config = GenerateContentConfig()
 
-        if req.model == "gemini-3.0-pro-high":
-            model_name = "gemini-3-pro-preview"
+        if req.model == "gemini-pro-deep":
+            model_name = "gemini-3.1-pro-preview"
             config.thinking_config = genai.types.ThinkingConfig(thinking_level="HIGH")
             if grounding_tool:
                 config.tools = [grounding_tool]
-        elif req.model == "gemini-3.0-pro-low":
-            model_name = "gemini-3-pro-preview"
+        elif req.model == "gemini-pro":
+            model_name = "gemini-3.1-pro-preview"
+            config.thinking_config = genai.types.ThinkingConfig(thinking_level="LOW")
             if grounding_tool:
                 config.tools = [grounding_tool]
         elif req.model == "gemini-flash":

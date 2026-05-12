@@ -15,7 +15,7 @@ interface ChatMessage {
     personaId?: AiPersona;
 }
 
-export type AiModel = 'gemini-3.0-pro-high' | 'gemini-3.0-pro-low' | 'gemini-flash';
+export type AiModel = 'gemini-pro-deep' | 'gemini-pro' | 'gemini-flash';
 
 export type AiPersona = 'jiya' | 'master' | 'tokyo_mother' | 'onmyoji';
 
@@ -42,9 +42,9 @@ const personas: { id: AiPersona; icon: string; label: string }[] = [
 ];
 
 const models: { id: AiModel; label: string; sub: string }[] = [
-    { id: "gemini-3.0-pro-high", label: "Pro High", sub: "熟考・最大性能" },
-    { id: "gemini-3.0-pro-low", label: "Pro Low", sub: "通常・バランス" },
-    { id: "gemini-flash", label: "⚡ Flash", sub: "Gemini 3 Flash" },
+    { id: "gemini-pro-deep", label: "🧠 Pro Deep", sub: "深い思考・最高品質" },
+    { id: "gemini-pro", label: "Pro", sub: "標準・バランス" },
+    { id: "gemini-flash", label: "⚡ Flash", sub: "高速・低コスト" },
 ];
 
 export function AiStrategist({ onConsult, loading, className, layout = 'panel', customThemes, customPoints }: AiStrategistProps) {
