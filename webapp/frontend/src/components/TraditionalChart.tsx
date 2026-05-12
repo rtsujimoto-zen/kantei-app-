@@ -71,7 +71,7 @@ export function InsenSection({ data }: { data: InsenData }) {
                     <tr>
                         <td style={cellStyle} />
                         {cols.map((c, i) => (
-                            <td key={`kan-${i}`} style={{ ...cellStyle, fontSize: 24, fontWeight: 200, color: t.text1, padding: "4px 0" }}>
+                            <td key={`kan-${i}`} style={{ ...cellStyle, fontSize: 28, fontWeight: 200, color: t.text1, padding: "4px 0" }}>
                                 {c.kan}
                             </td>
                         ))}
@@ -79,29 +79,29 @@ export function InsenSection({ data }: { data: InsenData }) {
                     </tr>
                     {/* 地支行 (左右に蔵干の追加表示) */}
                     <tr>
-                        <td style={{ ...cellStyle, fontSize: 13, color: t.text3 }}>
+                        <td style={{ ...cellStyle, fontSize: 14, color: t.text3 }}>
                             {cols[0].zokan.length > 1 ? cols[0].zokan[1] : ''}
                         </td>
                         {cols.map((c, i) => (
-                            <td key={`shi-${i}`} style={{ ...cellStyle, fontSize: 18, color: t.text2, fontWeight: 400, padding: "4px 0" }}>
+                            <td key={`shi-${i}`} style={{ ...cellStyle, fontSize: 20, color: t.text2, fontWeight: 400, padding: "4px 0" }}>
                                 {c.shi}
                             </td>
                         ))}
-                        <td style={{ ...cellStyle, fontSize: 13, color: t.text3 }}>
+                        <td style={{ ...cellStyle, fontSize: 14, color: t.text3 }}>
                             {cols[2].zokan.length > 1 ? cols[2].zokan[1] : ''}
                         </td>
                     </tr>
                     {/* 蔵干行 */}
                     <tr>
-                        <td style={{ ...cellStyle, fontSize: 13, color: t.text4 }}>
+                        <td style={{ ...cellStyle, fontSize: 14, color: t.text4 }}>
                             {cols[0].zokan.length > 2 ? cols[0].zokan[2] : ''}
                         </td>
                         {cols.map((c, i) => (
-                            <td key={`zo-${i}`} style={{ ...cellStyle, fontSize: 13, color: t.text3, padding: "2px 0" }}>
+                            <td key={`zo-${i}`} style={{ ...cellStyle, fontSize: 14, color: t.text3, padding: "2px 0" }}>
                                 {c.zokan[0] || ''}
                             </td>
                         ))}
-                        <td style={{ ...cellStyle, fontSize: 13, color: t.text4 }}>
+                        <td style={{ ...cellStyle, fontSize: 14, color: t.text4 }}>
                             {cols[2].zokan.length > 2 ? cols[2].zokan[2] : ''}
                         </td>
                     </tr>
@@ -174,7 +174,7 @@ export function YosenSection({ data }: { data: YosenData }) {
                                 border: item.main ? `1px solid ${t.text1}20` : `1px solid ${t.border}`,
                                 padding: "14px 3px",
                                 textAlign: "center",
-                                fontSize: item.main ? 13 : 12,
+                                fontSize: item.main ? 15 : 14,
                                 fontWeight: item.main ? 600 : 500,
                                 color: item.main ? t.text1 : t.text2,
                                 fontFamily: fonts.serif,
@@ -264,7 +264,7 @@ export function IsohouSection({ data, shis }: { data: string[]; shis: { 年: str
             <div style={{ display: "flex", justifyContent: "space-around", marginBottom: 4 }}>
                 {shiLabels.map((s, i) => (
                     <div key={i} style={{
-                        fontSize: 16, fontWeight: 500, color: t.text1,
+                        fontSize: 18, fontWeight: 500, color: t.text1,
                         fontFamily: fonts.serif, textAlign: "center",
                         width: 60,
                     }}>
@@ -316,7 +316,7 @@ export function IsohouSection({ data, shis }: { data: string[]; shis: { 年: str
                                 {/* 右端のドロップ */}
                                 <line x1={x1} y1={y - 6} x2={x1} y2={y} stroke={color} strokeWidth="1.5" />
                                 {/* 関係ラベル */}
-                                <text x={midX} y={y + 14} textAnchor="middle" fill={color} fontSize="11" fontFamily={fonts.serif} fontWeight="600">
+                                <text x={midX} y={y + 14} textAnchor="middle" fill={color} fontSize="13" fontFamily={fonts.serif} fontWeight="600">
                                     {rel.name}
                                 </text>
                             </g>
@@ -348,34 +348,34 @@ export function TenchuSection({ data, ijokanshi }: { data: TenchuData; ijokanshi
     return (
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 16, transition: "all 0.3s", boxShadow: t.shadowCard }}>
             <div style={{ fontFamily: fonts.serif, fontSize: 12, fontWeight: 600, color: t.text3, letterSpacing: 6, marginBottom: 10 }}>天中殺</div>
-            <div style={{ fontSize: 18, fontWeight: 600, color: t.text1, fontFamily: fonts.serif, marginBottom: 12 }}>
+            <div style={{ fontSize: 20, fontWeight: 600, color: t.text1, fontFamily: fonts.serif, marginBottom: 12 }}>
                 {data.グループ}天中殺
             </div>
             <div style={{ marginBottom: 8 }}>
-                <div style={{ fontSize: 11, color: t.text3, fontFamily: fonts.serif, marginBottom: 3, letterSpacing: 1 }}>宿命天中殺</div>
+                <div style={{ fontSize: 12, color: t.text3, fontFamily: fonts.serif, marginBottom: 3, letterSpacing: 1 }}>宿命天中殺</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                     {data.宿命天中殺 && data.宿命天中殺.length > 0 ? (
                         data.宿命天中殺.map((item, i) => (
-                            <span key={i} style={{ fontSize: 11, padding: "2px 6px", background: t.vermillionBg, color: t.vermillion, fontFamily: fonts.serif }}>
+                            <span key={i} style={{ fontSize: 13, padding: "2px 6px", background: t.vermillionBg, color: t.vermillion, fontFamily: fonts.serif }}>
                                 {item}
                             </span>
                         ))
                     ) : (
-                        <span style={{ color: t.text3, fontSize: 12 }}>なし</span>
+                        <span style={{ color: t.text3, fontSize: 13 }}>なし</span>
                     )}
                 </div>
             </div>
             <div>
-                <div style={{ fontSize: 11, color: t.text4, fontFamily: fonts.serif, marginBottom: 3, letterSpacing: 1 }}>異常干支</div>
+                <div style={{ fontSize: 12, color: t.text4, fontFamily: fonts.serif, marginBottom: 3, letterSpacing: 1 }}>異常干支</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                     {ijokanshi && ijokanshi.length > 0 ? (
                         ijokanshi.map((item, i) => (
-                            <span key={i} style={{ fontSize: 11, padding: "2px 6px", border: `1px solid ${t.warmAccent}30`, color: t.warmAccent, fontFamily: fonts.serif }}>
+                            <span key={i} style={{ fontSize: 13, padding: "2px 6px", border: `1px solid ${t.warmAccent}30`, color: t.warmAccent, fontFamily: fonts.serif }}>
                                 {item}
                             </span>
                         ))
                     ) : (
-                        <span style={{ color: t.text3, fontSize: 12 }}>なし</span>
+                        <span style={{ color: t.text3, fontSize: 13 }}>なし</span>
                     )}
                 </div>
             </div>
@@ -411,11 +411,11 @@ export function DaiunSection({ data, birthYear }: { data: DaiunData; birthYear: 
                 <span style={{ fontSize: 11, color: t.text4, fontFamily: fonts.mono }}>開始{data.立運}歳{data.方向}</span>
             </div>
             <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse", fontFamily: fonts.serif }}>
+                <table style={{ width: "100%", fontSize: 14, borderCollapse: "collapse", fontFamily: fonts.serif }}>
                     <thead>
                         <tr style={{ borderBottom: `1px solid ${t.border}` }}>
                             {["西暦", "歳", "干支", "主星", "従星", "位相法"].map(h => (
-                                <th key={h} style={{ padding: "5px 3px", textAlign: "left", fontWeight: 400, fontSize: 11, color: t.text3, fontFamily: fonts.mono, letterSpacing: 1 }}>{h}</th>
+                                <th key={h} style={{ padding: "5px 3px", textAlign: "left", fontWeight: 400, fontSize: 12, color: t.text3, fontFamily: fonts.mono, letterSpacing: 1 }}>{h}</th>
                             ))}
                         </tr>
                     </thead>
@@ -479,11 +479,11 @@ export function NenunSection({ data, limit = 10 }: { data: NenunData[]; limit?: 
                 <span style={{ fontSize: 11, color: t.text3, fontFamily: fonts.mono }}>直近{limit}年</span>
             </div>
             <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse", fontFamily: fonts.serif }}>
+                <table style={{ width: "100%", fontSize: 14, borderCollapse: "collapse", fontFamily: fonts.serif }}>
                     <thead>
                         <tr style={{ borderBottom: `1px solid ${t.border}` }}>
                             {["西暦", "歳", "干支", "主星", "従星", "位相法"].map(h => (
-                                <th key={h} style={{ padding: "5px 3px", textAlign: "left", fontWeight: 400, fontSize: 11, color: t.text3, fontFamily: fonts.mono, letterSpacing: 1 }}>{h}</th>
+                                <th key={h} style={{ padding: "5px 3px", textAlign: "left", fontWeight: 400, fontSize: 12, color: t.text3, fontFamily: fonts.mono, letterSpacing: 1 }}>{h}</th>
                             ))}
                         </tr>
                     </thead>
@@ -704,17 +704,13 @@ export function HachimonSection({ data, dayGan }: { data: HachimonData; dayGan?:
     const west = getEntry("西方");
     const center = getEntry("中央");
 
-    // 五行→本能マッピング
-    const instinctMap: { [key: string]: string } = {
-        "木": "守備本能", "火": "伝達本能", "土": "引力本能", "金": "攻撃本能", "水": "習得本能",
-    };
-
+    // 八門法: 方位ごとに固定のラベル（日干基準の相生関係による役割）
     const items: { el: string; val: number; color: string; label: string }[] = [
-        { el: north.element, val: north.value, color: elementColors[north.element] || t.text2, label: instinctMap[north.element] || "" },
-        { el: east.element, val: east.value, color: elementColors[east.element] || t.text2, label: instinctMap[east.element] || "" },
-        { el: center.element, val: center.value, color: elementColors[center.element] || t.text2, label: instinctMap[center.element] || "" },
-        { el: west.element, val: west.value, color: elementColors[west.element] || t.text2, label: instinctMap[west.element] || "" },
-        { el: south.element, val: south.value, color: elementColors[south.element] || t.text2, label: instinctMap[south.element] || "" },
+        { el: north.element, val: north.value, color: elementColors[north.element] || t.text2, label: "習得本能" },
+        { el: east.element, val: east.value, color: elementColors[east.element] || t.text2, label: "蓄積本能" },
+        { el: center.element, val: center.value, color: elementColors[center.element] || t.text2, label: "自分" },
+        { el: west.element, val: west.value, color: elementColors[west.element] || t.text2, label: "名誉本能" },
+        { el: south.element, val: south.value, color: elementColors[south.element] || t.text2, label: "伝達本能" },
     ];
 
     // Grid layout: 3x3 (empty, north, empty, east, center, west, empty, south, empty)
@@ -727,9 +723,9 @@ export function HachimonSection({ data, dayGan }: { data: HachimonData; dayGan?:
                 {layout.map((item, i) =>
                     item ? (
                         <div key={i} style={{ background: `${item.color}10`, border: `1px solid ${item.color}20`, padding: "6px 2px", transition: "all 0.3s" }}>
-                            <div style={{ fontSize: 11, color: `${item.color}99`, fontFamily: fonts.serif }}>{item.el}</div>
-                            <div style={{ fontSize: 18, fontWeight: 600, color: item.color, fontFamily: fonts.serif }}>{item.val}</div>
-                            <div style={{ fontSize: 9, color: t.text4, fontFamily: fonts.mono, marginTop: 2 }}>{item.label}</div>
+                            <div style={{ fontSize: 13, color: `${item.color}99`, fontFamily: fonts.serif }}>{item.el}</div>
+                            <div style={{ fontSize: 24, fontWeight: 600, color: item.color, fontFamily: fonts.serif }}>{item.val}</div>
+                            <div style={{ fontSize: 11, color: t.text4, fontFamily: fonts.mono, marginTop: 2 }}>{item.label}</div>
                         </div>
                     ) : <div key={i} />
                 )}
@@ -758,24 +754,24 @@ export function SurihouSection({ data }: { data: SurihouData }) {
         <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 2, padding: 20, transition: "all 0.3s", boxShadow: t.shadowCard }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
                 <div style={{ fontFamily: fonts.serif, fontSize: 12, fontWeight: 600, color: t.text3, letterSpacing: 6 }}>数理法</div>
-                <span style={{ fontSize: 14, fontWeight: 600, color: t.text1, fontFamily: fonts.serif }}>合計 {data.総エネルギー}</span>
+                <span style={{ fontSize: 16, fontWeight: 600, color: t.text1, fontFamily: fonts.serif }}>合計 {data.総エネルギー}</span>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 3 }}>
                 {gogyo.map((g) => (
                     <div key={g.label} style={{ textAlign: "center" }}>
                         {/* 五行ヘッダー */}
-                        <div style={{ fontSize: 12, fontWeight: 600, color: g.color, fontFamily: fonts.serif, marginBottom: 4 }}>{g.label}</div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: g.color, fontFamily: fonts.serif, marginBottom: 4 }}>{g.label}</div>
                         {/* 陽(+) */}
                         <div style={{ marginBottom: 2 }}>
-                            <div style={{ fontSize: 11, color: t.text3, fontFamily: fonts.serif, marginBottom: 1 }}>{g.yang}</div>
-                            <div style={{ fontSize: 16, fontWeight: 600, color: t.text1, fontFamily: fonts.serif, background: t.inputBg, padding: "3px 0", transition: "all 0.3s" }}>
+                            <div style={{ fontSize: 12, color: t.text3, fontFamily: fonts.serif, marginBottom: 1 }}>{g.yang}</div>
+                            <div style={{ fontSize: 18, fontWeight: 600, color: t.text1, fontFamily: fonts.serif, background: t.inputBg, padding: "3px 0", transition: "all 0.3s" }}>
                                 {data.十干内訳[g.yang] || 0}
                             </div>
                         </div>
                         {/* 陰(-) */}
                         <div>
-                            <div style={{ fontSize: 11, color: t.text3, fontFamily: fonts.serif, marginBottom: 1 }}>{g.yin}</div>
-                            <div style={{ fontSize: 16, fontWeight: 600, color: t.text1, fontFamily: fonts.serif, background: t.inputBg, padding: "3px 0", transition: "all 0.3s" }}>
+                            <div style={{ fontSize: 12, color: t.text3, fontFamily: fonts.serif, marginBottom: 1 }}>{g.yin}</div>
+                            <div style={{ fontSize: 18, fontWeight: 600, color: t.text1, fontFamily: fonts.serif, background: t.inputBg, padding: "3px 0", transition: "all 0.3s" }}>
                                 {data.十干内訳[g.yin] || 0}
                             </div>
                         </div>
