@@ -5,9 +5,20 @@ on:
     - cron: '*/14 * * * *'  # Run every 14 minutes
   workflow_dispatch:        # Allow manual triggering
 
+permissions:
+  contents: write
+
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
       - name: Ping Cloud Run Backend
         run: curl -sf https://kantei-api-538317999249.us-central1.run.app/docs > /dev/null && echo "OK" || echo "FAIL"
+
+      - name: Keepalive Workflow
+        uses: gautamkrishnar/keepalive-workflow@v2
+        with:
+          use_api: false
