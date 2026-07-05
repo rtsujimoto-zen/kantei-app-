@@ -14,11 +14,28 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Ping Cloud Run Backend
         run: curl -sf https://kantei-api-538317999249.us-central1.run.app/docs > /dev/null && echo "OK" || echo "FAIL"
 
-      - name: Keepalive Workflow
-        uses: gautamkrishnar/keepalive-workflow@v2
-        with:
-          use_api: false
+      - name: Keepalive (Dummy Commit)
+        run: |
+          LAST_COMMIT_DATE=$(git log -1 --format=%ct)
+          CURRENT_DATE=$(date +%s)
+          DIFF_DAYS=$(( (CURRENT_DATE - LAST_COMMIT_DATE) / 86400 ))
+          echo "Last commit was $DIFF_DAYS days ago."
+          
+          if [ $DIFF_DAYS -ge 45 ]; then
+            echo "Action required: Creating dummy commit to keep workflow alive."
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            echo "Last keep-alive: $(date)" > .github/keepalive.txt
+            git add .github/keepalive.txt
+            git commit -m "ci: keep-alive dummy commit [skip ci]"
+            git push origin main
+          else
+            echo "No action required: Workflow remains active."
+          fi
+
